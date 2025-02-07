@@ -31,7 +31,7 @@ import axios from "axios";
 import { ref, onMounted } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import { useAuthStore } from "@/stores/auth";
-const authStore = useAuthStore;
+const authStore = useAuthStore();
 const router = useRouter();
 const route = useRoute();
 const user = ref(null);

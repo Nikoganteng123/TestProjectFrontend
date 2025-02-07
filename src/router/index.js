@@ -1,5 +1,5 @@
 import { createRouter, createWebHistory } from "vue-router";
-import ProductList from "@/components/ProductList.vue";
+import HomePage from "@/components/HomePage.vue";
 import ProductCreate from "@/components/ProductCreate.vue";
 import ProductDetails from "@/components/ProductDetails.vue";
 import ProductEdit from "@/components/ProductEdit.vue";
@@ -11,8 +11,9 @@ import UserList from "@/components/UserList.vue";
 
 import Login from "@/components/Login.vue";
 import { useAuthStore } from "@/stores/auth";
+import Register from "@/components/Register.vue";
 
-// Create a router instance with an array of route objects
+// Create a router 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
@@ -20,7 +21,7 @@ const router = createRouter({
     {
       path: "/",
       name: "home",
-      component: ProductList,
+      component: HomePage,
     },
     // Login route
     {
@@ -70,22 +71,28 @@ const router = createRouter({
       name: "useredit",
       component: UserEdit,
     },
+    {
+      path: "/register",
+      name: "register",
+      component: Register,
+    },
   ],
 });
+
+
 
 // Add global navigation guards to the router
 router.beforeEach((to, from, next) => {
   const authStore = useAuthStore();
-  
-  // Biarkan akses ke login dan register meskipun belum login
-  if (to.name === "login" || to.name === "register") {
-    next();
-  } else if (!authStore.isLoggedIn) {
-    // Jika belum login dan mencoba mengakses halaman lain, arahkan ke login
-    next({ name: "login" });
+  const publicPages = ["login", "register", "home"]; // Halaman yang boleh diakses tanpa login
+  const authRequired = !publicPages.includes(to.name); // Halaman lain butuh login
+
+  if (authRequired && !authStore.isLoggedIn) {
+    next({ name: "home" }); // Jika belum login, arahkan ke login
   } else {
-    next();
+    next(); // Jika sudah login atau halaman public, lanjutkan
   }
 });
+
 // Export the router instance
 export default router;

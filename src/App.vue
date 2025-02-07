@@ -1,42 +1,165 @@
 <template>
-  <!-- Navigation bar -->
-  <nav v-if="authStore.isLoggedIn" class="bg-gray-800 p-4 px-8 flex">
-    <!-- Home link -->
-    <RouterLink to="/" class="text-white hover:text-gray-200 transition-colors"
-      >Home</RouterLink
-    >
-    <!-- Users link -->
-    <RouterLink
-      to="/users"
-      class="ml-4 text-white hover:text-gray-200 transition-colors"
-      >Users</RouterLink
-    >
-    <!-- Logout button -->
-    <button
-      @click="logout"
-      class="ml-auto text-white hover:text-gray-200 transition-colors"
-    >
+  <!-- Navbar (tidak muncul di halaman login & register) -->
+  <nav v-if="!hideNavAndFooter" class="bg-white p-4 px-8 flex items-center shadow-lg">
+    <!-- Logo -->
+    <RouterLink to="/" class="text-logo text-lg font-thin flex items-center">
+      <img src="/src/assets/logoipbi.jpg" alt="Logo" class="h-10 w-auto mr-3">
+      <span class="hidden lg:inline">Ikatan Perangkai Bunga Indonesia</span> <!-- Teks disembunyikan di perangkat kecil -->
+    </RouterLink>
+
+    <!-- Hamburger Menu untuk perangkat kecil -->
+    <div class="ml-auto lg:hidden flex items-center">
+      <button @click="toggleMenu" class="text-3xl">
+        &#9776; <!-- Tiga garis -->
+      </button>
+    </div>
+
+    <!-- Menu Links (Dropdown untuk perangkat kecil) -->
+    <div class="ml-8 flex space-x-6 lg:flex hidden">
+      <RouterLink to="/" class="nav-link">Home</RouterLink>
+      <RouterLink to="/users" class="nav-link">Users</RouterLink>
+    </div>
+
+    <!-- Dropdown menu untuk perangkat kecil -->
+    <div v-if="menuOpen" class="lg:hidden absolute top-16 right-8 bg-white shadow-lg py-2 px-4 rounded">
+      <RouterLink to="/" class="block nav-link py-2">Home</RouterLink>
+      <RouterLink to="/users" class="block nav-link py-2">Users</RouterLink>
+      
+      <!-- Menampilkan Login/Register jika belum login, Logout jika sudah login -->
+      <RouterLink v-if="!authStore.isLoggedIn" to="/login" class="block nav-link py-2">Login</RouterLink>
+      <RouterLink v-if="!authStore.isLoggedIn" to="/register" class="block nav-link py-2">Register</RouterLink>
+      
+      <button v-if="authStore.isLoggedIn" @click="logout" class="block nav-link py-2">Logout</button>
+    </div>
+
+    <!-- Jika belum login, tampilkan Login/Register -->
+    <div v-if="!authStore.isLoggedIn" class="ml-auto flex space-x-4 lg:flex hidden">
+      <RouterLink to="/login" class="nav-link">Login</RouterLink>
+      <RouterLink to="/register" class="nav-link">Register</RouterLink>
+    </div>
+    
+    <!-- Jika sudah login, tampilkan Logout -->
+    <button v-else @click="logout" class="ml-auto nav-link lg:flex hidden">
       Logout
     </button>
   </nav>
-  <!-- Main content area -->
-  <div class="p-4">
-    <!-- Render the current route -->
+
+  <!-- Main content -->
+  <div class="bg-white">
     <RouterView />
   </div>
+
+  <!-- Footer (tidak muncul di halaman login & register) -->
+  <footer v-if="!hideNavAndFooter" class="bg-white text-black py-4 px-8 text-center bottom-0 left-0 w-full shadow-lg">
+    <p class="text-sm">&copy; 2025 Ikatan Perangkai Bunga Indonesia. All rights reserved.</p>
+    <div class="mt-2">
+      <a href="#" class="footer-link">Privacy Policy</a> |
+      <a href="#" class="footer-link">Terms of Service</a> |
+      <a href="#" class="footer-link">Contact</a>
+    </div>
+  </footer>
 </template>
 
 <script setup>
-// Import hooks from Vuex and Vue Router
 import { useAuthStore } from "@/stores/auth";
 import { useRouter, useRoute } from "vue-router";
-// Initialize objects
+import { computed, ref } from "vue";
+
 const authStore = useAuthStore();
 const router = useRouter();
-// Define logout method
+const route = useRoute();
+
+const hideNavAndFooter = computed(() => {
+  return route.path === "/login" || route.path === "/register";
+});
+
+const menuOpen = ref(false); // State untuk kontrol dropdown menu
+
+const toggleMenu = () => {
+  menuOpen.value = !menuOpen.value; // Toggle untuk buka/tutup dropdown
+};
+
 const logout = () => {
-  authStore.logout(); // Clear authentication state
-  router.push({ name: "login" }); // Redirect to login route
+  authStore.logout();
+  router.push({ name: "home" });
 };
 </script>
-<style></style>
+
+<style scoped>
+/* Gaya untuk link navigasi */
+.nav-link {
+  color: #178677;
+  position: relative;
+  padding: 0.5rem 1rem;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.nav-link::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 0;
+  height: 2px;
+  background: linear-gradient(to right, #28a745, #8b4513); /* Gradasi dari hijau ke coklat */
+  transition: all 0.2s ease;
+}
+
+.nav-link:hover::after {
+  width: 100%;
+}
+
+/* Gaya untuk footer link */
+.footer-link {
+  color: #a3a3a3;
+  transition: color 0.3s ease;
+}
+
+.footer-link:hover {
+  color: #e5e5e5;
+}
+
+/* Gaya untuk logo */
+.text-logo {
+  color: #178677;
+}
+
+/* Mengatur responsivitas */
+@media (max-width: 1024px) {
+  /* Menyembunyikan menu di perangkat kecil */
+  .lg\:hidden {
+    display: block;
+  }
+
+  /* Menyembunyikan menu utama di perangkat kecil */
+  .lg\:flex {
+    display: none;
+  }
+
+  /* Tampilan dropdown menu */
+  .lg\:hidden {
+    display: block;
+  }
+}
+
+/* Gaya untuk footer */
+footer {
+  background: linear-gradient(right, #ffffff, #f2f2f2); /* Gradasi dari putih ke abu-abu terang */
+  box-shadow: 0px -2px 10px rgba(0, 0, 0, 0.1); /* Shadow dengan efek ringan */
+}
+
+/* Tambahkan padding dan tekstur */
+footer p {
+  color: #333333;
+}
+
+footer a {
+  color: #007bff;
+  transition: color 0.3s ease;
+}
+
+footer a:hover {
+  color: #0056b3;
+}
+</style>

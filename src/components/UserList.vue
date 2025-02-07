@@ -31,7 +31,7 @@
 import { ref, onMounted } from "vue";
 import axios from "axios";
 import { useAuthStore } from "@/stores/auth";
-const authStore = useAuthStore;
+const authStore = useAuthStore();
 const users = ref([]);
 const getUsers = async () => {
   try {
