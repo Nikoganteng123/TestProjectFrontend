@@ -76,7 +76,12 @@ const router = createRouter({
 // Add global navigation guards to the router
 router.beforeEach((to, from, next) => {
   const authStore = useAuthStore();
-  if (to.name !== "login" && !authStore.isLoggedIn) {
+  
+  // Biarkan akses ke login dan register meskipun belum login
+  if (to.name === "login" || to.name === "register") {
+    next();
+  } else if (!authStore.isLoggedIn) {
+    // Jika belum login dan mencoba mengakses halaman lain, arahkan ke login
     next({ name: "login" });
   } else {
     next();
