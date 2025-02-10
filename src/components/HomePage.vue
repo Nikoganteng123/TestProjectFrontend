@@ -1,89 +1,82 @@
 <template>
-    <div class="bg-gray-50">
-      <!-- Full Screen Video Section -->
-      <div class="komponenpidio w-screen h-screen overflow-hidden relative">
-        <video
-          class="top-0 left-0 w-full h-full object-cover"
-          autoplay
-          loop
-          muted
-          playsinline
-        >
-          <source src="/src/assets/ipbibackground.mp4" type="video/mp4" />
-          Your browser does not support the video tag.
-        </video>
-      </div>
-  
-      <!-- Content Section -->
-      <div class="container mx-auto py-12 px-6">
-        <h1 class="text-4xl font-semibold text-center mt-8 text-gray-800">Selamat Datang di IPBI</h1>
-  
-        <!-- Product Grid -->
-        
-      </div>
+  <div class="relative">
+    <!-- Video Background -->
+    <div class="video-container">
+      <video autoplay loop muted playsinline>
+        <source src="/src/assets/videohomepage.mp4" type="video/mp4" />
+        Your browser does not support the video tag.
+      </video>
     </div>
-  </template>
-  
-  <script setup>
-  import axios from "axios";
-  import { ref, onMounted } from "vue";
-  
-  
-  
-  </script>
-  
-  <style scoped>
-  video {
-  width: 100vw;
-  height: 100vh;
-  object-fit: cover;
-  position: absolute;
+
+    <!-- Hero Section -->
+    <div class="hero-content">
+      <h1 class="text-8xl font-bold text-green- text-center">Selamat Datang di IPBI</h1>
+      <p class="text-3xl text-black mt-4 text-center">Komunitas Perangkai Bunga Indonesia</p>
+    </div>
+
+    <!-- Sections -->
+    <section class="content-section bg-white">
+      <div class="container mx-auto py-16 text-center">
+      <h2 class="text-3xl font-semibold">Tentang Kami</h2>
+      <p class="text-lg mt-4">
+        Ikatan Perangkai Bunga Indonesia (IPBI) adalah organisasi profesi yang menaungi para perangkai,
+        pecinta, pehobi, pengusaha, dan pegiat bunga di Indonesia sejak tahun 1988. Selain itu, kami juga
+        menawarkan hosting VPS termurah untuk mendukung kebutuhan digital komunitas Anda.
+      </p>
+      </div>
+    </section>
+
+    <section class="content-section bg-gray-100">
+  <div class="container mx-auto py-16 text-center">
+    <h2 class="text-3xl font-semibold">Ikuti Uji Kompetensi Kami</h2>
+    <p class="text-lg mt-4">Registrasi akun anda dan mulai ikut Uji Kompetensi kami!</p>
+    
+    <!-- Tombol Elegan -->
+    <RouterLink to="/users" class="nav-link mt-6 inline-block bg-green-600 text-white text-lg font-medium px-6 py-3 rounded-lg shadow-md transition duration-300 ease-in-out transform hover:bg-green-700 hover:shadow-lg hover:-translate-y-1">
+      Mulai Sekarang</RouterLink>
+  </div>
+</section>
+
+  </div>
+</template>
+
+<style scoped>
+/* Video Container */
+.video-container {
+  position: absolute; /* Agar video ikut naik saat scroll */
   top: 0;
   left: 0;
-  z-index: 1; /* Membuat video di belakang elemen lain */
-}
-
-.komponenpidio {
-  position: relative;
-  z-index: 0; /* Memastikan video muncul di belakang konten */
-}
-
-.navbar {
-  position: relative;
-  z-index: 100; /* Memastikan navbar muncul di atas video */
-}
-
-.dropdown-menu {
-  position: absolute;
-  z-index: 200; /* Dropdown lebih tinggi dari navbar */
-}
-
-.komponenpidio {
-  width: 100vw;
-  height: 100vh;
+  width: 100%;
+  height: 100vh; /* Tinggi video tetap memenuhi layar */
   overflow: hidden;
-  position: relative;
+  z-index: -1; /* Pastikan tetap di belakang elemen lain */
 }
 
-.komponenpidio video {
-  position: absolute;
-  top: 50%;
-  left: 50%;
+.video-container video {
   width: 100%;
   height: 100%;
-  object-fit: cover; /* Default: agar video memenuhi layar */
-  transform: translate(-50%, -50%);
-}
-
-/* Jika di HP, gunakan object-fit: contain agar video tidak terpotong */
-@media (max-width: 768px) {
-  .komponenpidio video {
-    object-fit: contain;
-  }
+  object-fit: cover;
+  filter: blur(10px); /* Efek blur pada video */
+  pointer-events: none; /* Cegah interaksi dengan video */
 }
 
 
+/* Hero Content */
+.hero-content {
+  position: relative;
+  z-index: 10;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 2rem;
+}
 
-
-  </style>
-  
+/* Sections */
+.content-section {
+  padding: 6rem 2rem;
+  text-align: center;
+}
+</style>
