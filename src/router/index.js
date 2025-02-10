@@ -7,7 +7,7 @@ import ProductEdit from "@/components/ProductEdit.vue";
 import UserCreate from "@/components/UserCreate.vue";
 import UserDetails from "@/components/UserDetails.vue";
 import UserEdit from "@/components/UserEdit.vue";
-import UserList from "@/components/UserList.vue";
+import Profile from "@/components/Profile.vue";
 
 import Login from "@/components/Login.vue";
 import { useAuthStore } from "@/stores/auth";
@@ -49,9 +49,9 @@ const router = createRouter({
     },
     // User list route
     {
-      path: "/users",
-      name: "userlist",
-      component: UserList,
+      path: "/Profile",
+      name: "profile",
+      component: Profile,
     },
     // Create user route
     {
