@@ -17,7 +17,7 @@
     <!-- Menu Links (Dropdown untuk perangkat kecil) -->
     <div class="ml-8 flex space-x-6 lg:flex hidden">
       <RouterLink to="/" class="nav-link">Home</RouterLink>
-      <RouterLink to="/users" class="nav-link">Users</RouterLink>
+      <RouterLink to="/Profile" class="nav-link">Profile</RouterLink>
     </div>
 
     <!-- Dropdown menu untuk perangkat kecil -->
@@ -27,7 +27,7 @@
       @click.stop
     >
       <RouterLink to="/" class="block dropdown-item">Home</RouterLink>
-      <RouterLink to="/users" class="block dropdown-item">Users</RouterLink>
+      <RouterLink to="/Profile" class="block dropdown-item">Profile</RouterLink>
 
       <!-- Menampilkan Login/Register jika belum login, Logout jika sudah login -->
       <RouterLink v-if="!authStore.isLoggedIn" to="/login" class="block dropdown-item">Login</RouterLink>
@@ -43,7 +43,7 @@
     </div>
 
     <!-- Jika sudah login, tampilkan Logout -->
-    <button v-else @click="logout" class="ml-auto nav-link lg:flex hidden">
+    <button v-else @click="logout" class="ml-auto flex space-x-4 lg:flex hidden">
       Logout
     </button>
   </nav>
