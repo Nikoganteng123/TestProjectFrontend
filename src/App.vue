@@ -17,7 +17,7 @@
     <!-- Menu Links (Dropdown untuk perangkat kecil) -->
     <div class="ml-8 flex space-x-6 lg:flex hidden">
       <RouterLink to="/" class="nav-link">Home</RouterLink>
-      <RouterLink to="/Profile" class="nav-link">Profile</RouterLink>
+      <RouterLink to="/users" class="nav-link">Profile</RouterLink>
     </div>
 
     <!-- Dropdown menu untuk perangkat kecil -->
@@ -27,7 +27,7 @@
       @click.stop
     >
       <RouterLink to="/" class="block dropdown-item">Home</RouterLink>
-      <RouterLink to="/Profile" class="block dropdown-item">Profile</RouterLink>
+      <RouterLink to="/users" class="block dropdown-item">Profile</RouterLink>
 
       <!-- Menampilkan Login/Register jika belum login, Logout jika sudah login -->
       <RouterLink v-if="!authStore.isLoggedIn" to="/login" class="block dropdown-item">Login</RouterLink>
@@ -193,7 +193,7 @@ const logout = () => {
 
 /* Gaya untuk footer */
 footer {
-  background: linear-gradient(to right, #ffffff, #f2f2f2); /* Gradasi dari putih ke abu-abu terang */
+  background: linear-gradient(to left, #ffffff, #0a4b0a); /* Gradasi dari putih ke abu-abu terang */
   box-shadow: 0px -2px 10px rgba(0, 0, 0, 0.1);
 }
 
