@@ -140,7 +140,7 @@ const errorMessage = ref(null);
 // Mengirim OTP ke Nomor HP
 async function requestOtp() {
   try {
-    const response = await axios.post("http://localhost:8000/api/otp/send", {
+    const response = await axios.post("http://10.4.8.60:8000/api/otp/send", {
       nomor: nomor.value, // Kirim nomor yang benar
     });
     alert(response.data.message);
@@ -156,7 +156,7 @@ async function requestOtp() {
 // Verifikasi OTP
 async function verifyOtp() {
   try {
-    const response = await axios.post("http://localhost:8000/api/otp/verify", {
+    const response = await axios.post("http://10.4.8.60:8000/api/otp/verify", {
       nomor: nomor.value, // Kirim nomor yang benar
       otp: kodeOtp.value, // Kirim kode OTP yang benar
     });
@@ -173,7 +173,7 @@ async function verifyOtp() {
 // Mendaftarkan Akun Setelah OTP Valid
 async function registerAccount() {
   try {
-    const response = await axios.post("http://localhost:8000/api/users", {
+    const response = await axios.post("http://10.4.8.60:8000/api/users", {
       name: nama.value,
       nomor: nomor.value, // Kirim nomor yang benar
       email: email.value,
