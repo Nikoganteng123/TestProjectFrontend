@@ -79,8 +79,8 @@ const router = createRouter({
       component: Register,
     },
     {
-      path: "/forgot",
-      name: "forgot",
+      path: "/forgot-password",
+      name: "forgot-password",
       component: ForgotPassword,
     },
     {
@@ -94,7 +94,7 @@ const router = createRouter({
 // Add global navigation guards to the router
 router.beforeEach((to, from, next) => {
   const authStore = useAuthStore();
-  const publicPages = ["login", "register", "home", "userlist", "forgot", "reset-password"]; // Halaman yang boleh diakses tanpa login
+  const publicPages = ["login", "register", "home", "userlist", "forgot-password", "reset-password"]; // Halaman yang boleh diakses tanpa login
   const authRequired = !publicPages.includes(to.name); // Halaman lain butuh login
 
   if (authRequired && !authStore.isLoggedIn) {

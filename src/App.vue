@@ -88,7 +88,7 @@ const router = useRouter();
 const route = useRoute();
 
 const hideNavAndFooter = computed(() => {
-  return route.path === "/login" || route.path === "/register" || route.path === "/forgot" || route.path === "/reset-password";
+  return route.path === "/login" || route.path === "/register" || route.path === "/forgot-password" || route.path === "/reset-password";
 });
 
 const menuOpen = ref(false); // State untuk kontrol dropdown menu

@@ -111,7 +111,7 @@ const goToHomePage = () => {
   router.push({ name: "home" });
 };
 const goToforgotPasswordPage = () => {
-  router.push({ name: "forgot" });
+  router.push({ name: "forgot-password" });
 };
 
 async function onSubmit() {
