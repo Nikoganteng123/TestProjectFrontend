@@ -17,25 +17,39 @@
     <!-- Sections -->
     <section class="content-section bg-white">
       <div class="container mx-auto py-16 text-center">
-      <h2 class="text-3xl font-semibold">Tentang Kami</h2>
-      <p class="text-lg mt-4">
-        Ikatan Perangkai Bunga Indonesia (IPBI) adalah organisasi profesi yang menaungi para perangkai,
-        pecinta, pehobi, pengusaha, dan pegiat bunga di Indonesia sejak tahun 1988. Selain itu, kami juga
-        menawarkan hosting VPS termurah untuk mendukung kebutuhan digital komunitas Anda.
-      </p>
+        <h2 class="text-3xl font-semibold">Tentang Kami</h2>
+        <p class="text-lg mt-4">
+          Ikatan Perangkai Bunga Indonesia (IPBI) adalah organisasi profesi yang menaungi para perangkai,
+          pecinta, pehobi, pengusaha, dan pegiat bunga di Indonesia sejak tahun 1988. Selain itu, kami juga
+          menawarkan hosting VPS termurah untuk mendukung kebutuhan digital komunitas Anda.
+        </p>
+      </div>
+    </section>
+
+    <!-- Tahun Berdiri IPBI Section -->
+    <section class="content-section bg-gray-200">
+      <div class="container mx-auto py-16 text-center">
+        <h2 class="text-3xl font-semibold text-green-900">Tahun Berdirinya IPBI</h2>
+        <div class="flex justify-center mt-6">
+          <span class="text-8xl font-bold text-green-900" id="yearCount">1988</span>
+        </div>
+        <p class="text-lg mt-4">
+          IPBI telah berdiri sejak tahun 1988, dan perjalanan kami terus berkembang setiap tahunnya.
+        </p>
       </div>
     </section>
 
     <section class="content-section bg-gray-100">
-  <div class="container mx-auto py-16 text-center">
-    <h2 class="text-3xl font-semibold">Ikuti Uji Kompetensi Kami</h2>
-    <p class="text-lg mt-4">Registrasi akun anda dan mulai ikut Uji Kompetensi kami!</p>
-    
-    <!-- Tombol Elegan -->
-    <RouterLink to="/users" class="nav-link mt-6 inline-block bg-green-600 text-white text-lg font-medium px-6 py-3 rounded-lg shadow-md transition duration-300 ease-in-out transform hover:bg-green-700 hover:shadow-lg hover:-translate-y-1">
-      Mulai Sekarang</RouterLink>
-  </div>
-</section>
+      <div class="container mx-auto py-16 text-center">
+        <h2 class="text-3xl font-semibold">Ikuti Uji Kompetensi Kami</h2>
+        <p class="text-lg mt-4">Registrasi akun anda dan mulai ikut Uji Kompetensi kami!</p>
+        
+        <!-- Tombol Elegan -->
+        <RouterLink to="/users" class="nav-link mt-6 inline-block bg-green-600 text-white text-lg font-medium px-6 py-3 rounded-lg shadow-md transition duration-300 ease-in-out transform hover:bg-green-700 hover:shadow-lg hover:-translate-y-1">
+          Mulai Sekarang
+        </RouterLink>
+      </div>
+    </section>
 
   </div>
 </template>
@@ -60,7 +74,6 @@
   pointer-events: none; /* Cegah interaksi dengan video */
 }
 
-
 /* Hero Content */
 .hero-content {
   position: relative;
@@ -79,4 +92,31 @@
   padding: 6rem 2rem;
   text-align: center;
 }
+
+/* Tahun Berdiri IPBI Section */
+#yearCount {
+  font-size: 8rem;
+  color: #1f4d2b;
+  font-weight: bold;
+}
 </style>
+
+<script>
+  // Mengambil tahun saat ini
+  const currentYear = new Date().getFullYear();
+  const startYear = 1988;
+  const yearElement = document.getElementById('yearCount');
+  
+  // Menampilkan angka tahun mundur perlahan
+  let year = currentYear;
+
+  const interval = setInterval(function () {
+    if (year > startYear) {
+      yearElement.textContent = year;
+      year--;
+    } else {
+      clearInterval(interval);
+      yearElement.textContent = startYear;
+    }
+  }, 100); // Set interval untuk transisi yang halus
+</script>

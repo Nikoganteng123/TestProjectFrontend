@@ -1,67 +1,81 @@
 <template>
-  <!-- Navbar (tidak muncul di halaman login & register) -->
-  <nav v-if="!hideNavAndFooter" class="bg-white p-4 px-8 flex items-center shadow-lg relative">
-    <!-- Logo -->
-    <RouterLink to="/" class="text-logo text-lg font-thin flex items-center">
-      <img src="/src/assets/logoipbi.jpg" alt="Logo" class="h-10 w-auto mr-3">
-      <span class="hidden lg:inline">Ikatan Perangkai Bunga Indonesia</span> <!-- Teks disembunyikan di perangkat kecil -->
-    </RouterLink>
+  <div id="app">
+    <!-- Navbar (tidak muncul di halaman login & register) -->
+    <nav v-if="!hideNavAndFooter" class="bg-white p-4 px-8 flex items-center shadow-lg relative">
+      <!-- Logo -->
+      <RouterLink to="/" class="text-logo text-lg font-thin flex items-center">
+        <img src="/src/assets/logoipbi.jpg" alt="Logo" class="h-10 w-auto mr-3">
+        <span class="hidden lg:inline">Ikatan Perangkai Bunga Indonesia</span> <!-- Teks disembunyikan di perangkat kecil -->
+      </RouterLink>
 
-    <!-- Hamburger Menu untuk perangkat kecil -->
-    <div class="ml-auto lg:hidden flex items-center">
-      <button @click.stop="toggleMenu" class="text-3xl focus:outline-none">
-        &#9776; <!-- Tiga garis -->
-      </button>
+      <!-- Hamburger Menu untuk perangkat kecil -->
+      <div class="ml-auto lg:hidden flex items-center">
+        <button @click.stop="toggleMenu" class="text-3xl focus:outline-none">
+          &#9776; <!-- Tiga garis -->
+        </button>
+      </div>
+
+      <!-- Menu Links (Dropdown untuk perangkat kecil) -->
+      <div class="ml-8 flex space-x-6 lg:flex hidden">
+        <RouterLink to="/" class="nav-link">Home</RouterLink>
+        <RouterLink to="/uji-kompetensi" class="nav-link">Uji Kompetensi</RouterLink> <!-- Uji Kompetensi link -->
+      </div>
+
+      <!-- Dropdown menu untuk perangkat kecil -->
+      <div 
+        v-if="menuOpen" 
+        class="dropdown lg:hidden absolute top-16 right-8 bg-white shadow-lg py-2 px-4 rounded-md z-50"
+        @click.stop
+      >
+        <RouterLink to="/" class="block dropdown-item">Home</RouterLink>
+        <RouterLink to="/uji-kompetensi" class="block dropdown-item">Uji Kompetensi</RouterLink>
+        <RouterLink to="/users" class="block dropdown-item flex items-center">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-700 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14c4.418 0 8-3.582 8-8s-3.582-8-8-8-8 3.582-8 8 3.582 8 8 8zM12 14c-4.418 0-8 3.582-8 8v2h16v-2c0-4.418-3.582-8-8-8z" />
+          </svg>
+          Profile
+        </RouterLink>
+        <!-- Menampilkan Login/Register jika belum login, Logout jika sudah login -->
+        <RouterLink v-if="!authStore.isLoggedIn" to="/login" class="block dropdown-item">Login</RouterLink>
+        <RouterLink v-if="!authStore.isLoggedIn" to="/register" class="block dropdown-item">Register</RouterLink>
+
+        <button v-if="authStore.isLoggedIn" @click="logout" class="block dropdown-item">Logout</button>
+      </div>
+
+      <!-- Jika belum login, tampilkan Login/Register -->
+      <div v-if="!authStore.isLoggedIn" class="ml-auto flex space-x-4 lg:flex hidden">
+        <RouterLink to="/login" class="nav-link">Login</RouterLink>
+        <RouterLink to="/register" class="nav-link">Register</RouterLink>
+      </div>
+
+      <!-- Jika sudah login, tampilkan Logout dan Profile di sebelahnya -->
+      <div v-else class="ml-auto flex items-center space-x-4 lg:flex hidden">
+        <!-- Ganti Profile dengan Ikon -->
+        <RouterLink to="/users" class="flex items-center">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-700" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14c4.418 0 8-3.582 8-8s-3.582-8-8-8-8 3.582-8 8 3.582 8 8 8zM12 14c-4.418 0-8 3.582-8 8v2h16v-2c0-4.418-3.582-8-8-8z" />
+          </svg>
+        </RouterLink>
+        
+        <button @click="logout" class="nav-link">Logout</button>
+      </div>
+    </nav>
+
+    <!-- Main content -->
+    <div class="">
+      <RouterView />
     </div>
 
-    <!-- Menu Links (Dropdown untuk perangkat kecil) -->
-    <div class="ml-8 flex space-x-6 lg:flex hidden">
-      <RouterLink to="/" class="nav-link">Home</RouterLink>
-      <RouterLink to="/users" class="nav-link">Profile</RouterLink>
-    </div>
-
-    <!-- Dropdown menu untuk perangkat kecil -->
-    <div 
-      v-if="menuOpen" 
-      class="dropdown lg:hidden absolute top-16 right-8 bg-white shadow-lg py-2 px-4 rounded-md z-50"
-      @click.stop
-    >
-      <RouterLink to="/" class="block dropdown-item">Home</RouterLink>
-      <RouterLink to="/users" class="block dropdown-item">Profile</RouterLink>
-
-      <!-- Menampilkan Login/Register jika belum login, Logout jika sudah login -->
-      <RouterLink v-if="!authStore.isLoggedIn" to="/login" class="block dropdown-item">Login</RouterLink>
-      <RouterLink v-if="!authStore.isLoggedIn" to="/register" class="block dropdown-item">Register</RouterLink>
-
-      <button v-if="authStore.isLoggedIn" @click="logout" class="block dropdown-item">Logout</button>
-    </div>
-
-    <!-- Jika belum login, tampilkan Login/Register -->
-    <div v-if="!authStore.isLoggedIn" class="ml-auto flex space-x-4 lg:flex hidden">
-      <RouterLink to="/login" class="nav-link">Login</RouterLink>
-      <RouterLink to="/register" class="nav-link">Register</RouterLink>
-    </div>
-
-    <!-- Jika sudah login, tampilkan Logout -->
-    <button v-else @click="logout" class="ml-auto flex space-x-4 lg:flex hidden">
-      Logout
-    </button>
-  </nav>
-
-  <!-- Main content -->
-  <div class="">
-    <RouterView />
+    <!-- Footer (tidak muncul di halaman login & register) -->
+    <footer v-if="!hideNavAndFooter" class="bg-white text-black py-4 px-8 text-center bottom-0 left-0 w-full shadow-lg">
+      <p class="text-sm">&copy; 2025 Ikatan Perangkai Bunga Indonesia. All rights reserved.</p>
+      <div class="mt-2">
+        <a href="#" class="footer-link">Privacy Policy</a> |
+        <a href="#" class="footer-link">Terms of Service</a> |
+        <a href="#" class="footer-link">Contact</a>
+      </div>
+    </footer>
   </div>
-
-  <!-- Footer (tidak muncul di halaman login & register) -->
-  <footer v-if="!hideNavAndFooter" class="bg-white text-black py-4 px-8 text-center bottom-0 left-0 w-full shadow-lg">
-    <p class="text-sm">&copy; 2025 Ikatan Perangkai Bunga Indonesia. All rights reserved.</p>
-    <div class="mt-2">
-      <a href="#" class="footer-link">Privacy Policy</a> |
-      <a href="#" class="footer-link">Terms of Service</a> |
-      <a href="#" class="footer-link">Contact</a>
-    </div>
-  </footer>
 </template>
 
 <script setup>
@@ -74,7 +88,7 @@ const router = useRouter();
 const route = useRoute();
 
 const hideNavAndFooter = computed(() => {
-  return route.path === "/login" || route.path === "/register";
+  return route.path === "/login" || route.path === "/register" || route.path === "/forgot" || route.path === "/reset-password";
 });
 
 const menuOpen = ref(false); // State untuk kontrol dropdown menu

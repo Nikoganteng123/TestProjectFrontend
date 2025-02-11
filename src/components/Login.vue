@@ -54,6 +54,7 @@
             />
           </div>
         </div>
+        
         <!-- Login button container -->
         <div>
           <button
@@ -75,6 +76,14 @@
           >
             Back to Home Page
           </button>
+          <!-- forgot Password -->
+          <button
+            @click="goToforgotPasswordPage"
+            type="button"  
+            class="group relative w-full flex justify-center py-2 px-4 mt-3 text-sm font-thin rounded-md text-blue-700 hover:text-blue-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+          >
+            forgot Password?
+          </button>
         </div>
       </form>
     </div>
@@ -86,12 +95,6 @@ import { ref } from "vue";
 import axios from "axios";
 import { useRouter, useRoute } from "vue-router";
 import { useAuthStore } from "@/stores/auth";
-const goToRegisterPage = () => {
-  router.push({ name: "register" });
-};
-const goToHomePage = () => {
-  router.push({ name: "home" });
-};
 
 const router = useRouter();
 const route = useRoute();
@@ -101,10 +104,20 @@ const email = ref("");
 const password = ref("");
 const errorMessage = ref(null);
 
+const goToRegisterPage = () => {
+  router.push({ name: "register" });
+};
+const goToHomePage = () => {
+  router.push({ name: "home" });
+};
+const goToforgotPasswordPage = () => {
+  router.push({ name: "forgot" });
+};
+
 async function onSubmit() {
   try {
-    await axios.get("http://10.4.8.60:8000/sanctum/csrf-cookie");
-    const response = await axios.post("http://10.4.8.60:8000/api/login", {
+    await axios.get("http://10.4.12.215:8000/sanctum/csrf-cookie");
+    const response = await axios.post("http://10.4.12.215:8000/api/login", {
       email: email.value,
       password: password.value,
     });
