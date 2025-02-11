@@ -61,8 +61,8 @@
       </div>
     </nav>
 
-    <!-- Main content -->
-    <div class="">
+    <!-- Main content wrapper, to push footer to the bottom -->
+    <div class="content-wrapper">
       <RouterView />
     </div>
 
@@ -119,6 +119,18 @@ const logout = () => {
 </script>
 
 <style scoped>
+/* Mengatur kontainer utama dengan Flexbox */
+#app {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh; /* Agar konten memenuhi seluruh tinggi layar */
+}
+
+/* Membuat konten utama tumbuh dan mengisi ruang yang tersisa */
+#app > .content-wrapper {
+  flex-grow: 1;
+}
+
 /* Gaya untuk link navigasi */
 .nav-link {
   color: #178677;
@@ -209,10 +221,8 @@ const logout = () => {
 footer {
   background: linear-gradient(to left, #ffffff, #0a4b0a); /* Gradasi dari putih ke abu-abu terang */
   box-shadow: 0px -2px 10px rgba(0, 0, 0, 0.1);
-}
-
-/* Tambahkan padding dan tekstur */
-footer p {
+  padding: 1rem;
+  text-align: center;
   color: #333333;
 }
 
