@@ -102,21 +102,5 @@
 </style>
 
 <script>
-  // Mengambil tahun saat ini
-  const currentYear = new Date().getFullYear();
-  const startYear = 1988;
-  const yearElement = document.getElementById('yearCount');
   
-  // Menampilkan angka tahun mundur perlahan
-  let year = currentYear;
-
-  const interval = setInterval(function () {
-    if (year > startYear) {
-      yearElement.textContent = year;
-      year--;
-    } else {
-      clearInterval(interval);
-      yearElement.textContent = startYear;
-    }
-  }, 100); // Set interval untuk transisi yang halus
 </script>
