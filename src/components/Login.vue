@@ -116,8 +116,8 @@ const goToforgotPasswordPage = () => {
 
 async function onSubmit() {
   try {
-    await axios.get("http://10.4.12.215:8000/sanctum/csrf-cookie");
-    const response = await axios.post("http://10.4.12.215:8000/api/login", {
+    await axios.get("http://localhost:8000/sanctum/csrf-cookie");
+    const response = await axios.post("http://localhost:8000/api/login", {
       email: email.value,
       password: password.value,
     });

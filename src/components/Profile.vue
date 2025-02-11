@@ -141,7 +141,7 @@ const isEditing = ref(false);
 
 const getUser = async () => {
   try {
-    const response = await axios.get("http://10.4.12.215:8000/api/users/", {
+    const response = await axios.get("http://localhost:8000/api/users/", {
       headers: {
         Authorization: `Bearer ${authStore.accessToken}`,
       },
@@ -154,7 +154,7 @@ const getUser = async () => {
 
 const getCertifications = async () => {
   try {
-    const response = await axios.get("http://10.4.12.215:8000/api/certifications/", {
+    const response = await axios.get("http://localhost:8000/api/certifications/", {
       headers: {
         Authorization: `Bearer ${authStore.accessToken}`,
       },
@@ -178,7 +178,7 @@ const updateProfile = async () => {
       formData.append("profile_picture", form.value.profile_picture);
     }
 
-    await axios.put("http://10.4.12.215:8000/api/users/", formData, {
+    await axios.put("http://localhost:8000/api/users/", formData, {
       headers: {
         Authorization: `Bearer ${authStore.accessToken}`,
         "Content-Type": "multipart/form-data",

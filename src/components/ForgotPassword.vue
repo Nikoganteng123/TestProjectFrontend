@@ -87,7 +87,7 @@ const sendResetLink = async () => {
   isLoading.value = true; // Set loading state to true
 
   try {
-    await axios.post("http://10.4.12.215:8000/api/password/email", {
+    await axios.post("http://localhost:8000/api/password/email", {
       email: email.value,
     });
     successMessage.value = "Password reset link has been sent to your email.";

@@ -54,7 +54,7 @@
     isLoading.value = true;
   
     try {
-      await axios.post("http://10.4.12.215:8000/api/password/reset", {
+      await axios.post("http://localhost:8000/api/password/reset", {
         email: email.value,
         password: password.value,
         password_confirmation: password_confirmation.value,
