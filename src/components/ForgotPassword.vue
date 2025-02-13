@@ -13,9 +13,9 @@
       </div>
       <form @submit.prevent="handleSubmit" class="mt-8 space-y-6">
         <div>
-          <label for="email-address" class="sr-only">Email address</label>
+          <label for="email" class="sr-only">Email Address</label>
           <input
-            id="email-address"
+            id="email"
             type="email"
             v-model="email"
             required
@@ -30,16 +30,8 @@
             class="w-full py-2 px-4 rounded-md text-white bg-green-700 hover:bg-green-800 focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
             :disabled="loading"
           >
-            {{ loading ? "Sending..." : "Send Reset Link" }}
+            {{ loading ? "Sending..." : "Send Reset Token" }}
           </button>
-        </div>
-        <div>
-          <router-link
-            to="/login"
-            class="w-full flex justify-center py-2 text-green-700 hover:text-green-800"
-          >
-            Back to Login
-          </router-link>
         </div>
       </form>
     </div>
@@ -65,6 +57,14 @@ export default {
         const response = await axios.post('/api/forgot-password', { email: this.email });
         this.message = response.data.message;
         this.status = true;
+
+        // Redirect directly to /reset-password with email in the query params
+        setTimeout(() => {
+          this.$router.push({
+            path: '/reset-password',
+            query: { email: this.email }
+          });
+        }, 2000);
       } catch (error) {
         this.message = error.response?.data?.message || 'An error occurred';
         this.status = false;

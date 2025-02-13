@@ -45,7 +45,7 @@
         <p class="text-lg mt-4">Registrasi akun anda dan mulai ikut Uji Kompetensi kami!</p>
         
         <!-- Tombol Elegan -->
-        <RouterLink to="/users" class="nav-link mt-6 inline-block bg-green-600 text-white text-lg font-medium px-6 py-3 rounded-lg shadow-md transition duration-300 ease-in-out transform hover:bg-green-700 hover:shadow-lg hover:-translate-y-1">
+        <RouterLink to="/uji-kompetensi" class="nav-link mt-6 inline-block bg-green-600 text-white text-lg font-medium px-6 py-3 rounded-lg shadow-md transition duration-300 ease-in-out transform hover:bg-green-700 hover:shadow-lg hover:-translate-y-1">
           Mulai Sekarang
         </RouterLink>
       </div>

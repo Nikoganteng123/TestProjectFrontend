@@ -82,11 +82,30 @@ const router = createRouter({
       path: "/forgot-password",
       name: "forgot-password",
       component: ForgotPassword,
+      beforeEnter: (to, from, next) => {
+        const authStore = useAuthStore();
+        if (authStore.isLoggedIn) {
+          next({ name: "home" }); // If already logged in, redirect to home page
+        } else {
+          next(); // Continue to forgot-password page
+        }
+      },
     },
     {
-      path: "/reset-password",
-      name: "reset-password",
-      component: ResetPassword,
+        path: "/reset-password",
+        name: "reset-password",
+        component: ResetPassword,
+        beforeEnter: (to, from, next) => {
+          const email = to.query.email;
+          
+          // Check if the email exists in query params (to ensure it comes from /forgot-password)
+          if (!email) {
+            alert("You must come from the Forgot Password page to reset your password.");
+            next({ name: "forgot-password" }); // Redirect to forgot-password if email is not provided
+          } else {
+            next(); // Proceed to reset-password page if email is present
+          }
+        },
     },
   ],
 });
@@ -94,17 +113,16 @@ const router = createRouter({
 // Add global navigation guards to the router
 router.beforeEach((to, from, next) => {
   const authStore = useAuthStore();
-  const publicPages = ["login", "register", "home", "userlist", "forgot-password", "reset-password"]; // Halaman yang boleh diakses tanpa login
-  const authRequired = !publicPages.includes(to.name); // Halaman lain butuh login
+  const publicPages = ["login", "register", "home", "forgot-password", "reset-password"]; // Public pages
+  const authRequired = !publicPages.includes(to.name); // Other pages require authentication
 
   if (authRequired && !authStore.isLoggedIn) {
-    // Tampilkan pop-up jika pengguna belum login
-    alert("Silakan login terlebih dahulu agar bisa mengakses halaman yang Anda pilih.");
-    next({ name: "login" }); // Arahkan ke halaman login
+    // If the user is not logged in and trying to access a protected page
+    alert("Please log in to access the page.");
+    next({ name: "login" }); // Redirect to login page
   } else {
-    next(); // Jika sudah login atau halaman public, lanjutkan
+    next(); // Allow navigation to the page
   }
 });
 
-// Export the router instance
 export default router;

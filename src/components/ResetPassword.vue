@@ -1,4 +1,3 @@
-// ResetPassword.vue
 <template>
   <div
     class="min-h-screen flex items-center justify-center bg-cover bg-center py-12 px-4 sm:px-6 lg:px-8"
@@ -13,16 +12,15 @@
         {{ message }}
       </div>
       <form @submit.prevent="handleSubmit" class="mt-8 space-y-6">
-        <input type="hidden" v-model="token" />
         <div>
-          <label for="email" class="sr-only">Email</label>
+          <label for="token" class="sr-only">Token</label>
           <input
-            id="email"
-            type="email"
-            v-model="email"
+            id="token"
+            type="text"
+            v-model="token"
             required
             class="w-full px-3 py-2 border border-gray-300 rounded-md text-gray-900 focus:ring-indigo-500 focus:border-indigo-500"
-            placeholder="Enter your email"
+            placeholder="Enter the token you received"
           />
         </div>
         <div>
@@ -66,18 +64,14 @@ import axios from 'axios';
 export default {
   data() {
     return {
+      email: this.$route.query.email || '',
       token: '',
-      email: '',
       password: '',
       password_confirmation: '',
       loading: false,
       message: '',
       status: false
     }
-  },
-  created() {
-    this.token = this.$route.query.token;
-    this.email = this.$route.query.email;
   },
   methods: {
     async handleSubmit() {
