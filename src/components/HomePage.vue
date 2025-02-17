@@ -10,8 +10,12 @@
 
     <!-- Hero Section -->
     <div class="hero-content">
-      <h1 class="text-8xl font-bold text-green- text-center">Selamat Datang di IPBI</h1>
-      <p class="text-3xl text-black mt-4 text-center">Komunitas Perangkai Bunga Indonesia</p>
+      <h1 class="hero-title text-center animate__animated animate__fadeIn animate__delay-1s">
+        Selamat Datang di IPBI
+      </h1>
+      <p class="text-3xl text-black mt-4 text-center animate__animated animate__fadeIn animate__delay-2s">
+        Komunitas Perangkai Bunga Indonesia
+      </p>
     </div>
 
     <!-- Sections -->
@@ -57,21 +61,21 @@
 <style scoped>
 /* Video Container */
 .video-container {
-  position: absolute; /* Agar video ikut naik saat scroll */
+  position: absolute;
   top: 0;
   left: 0;
   width: 100%;
-  height: 100vh; /* Tinggi video tetap memenuhi layar */
+  height: 100vh;
   overflow: hidden;
-  z-index: -1; /* Pastikan tetap di belakang elemen lain */
+  z-index: -1;
 }
 
 .video-container video {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  filter: blur(10px); /* Efek blur pada video */
-  pointer-events: none; /* Cegah interaksi dengan video */
+  filter: blur(10px); 
+  pointer-events: none;
 }
 
 /* Hero Content */
@@ -86,6 +90,34 @@
   text-align: center;
   padding: 2rem;
 }
+
+/* Hero Title Styling */
+.hero-title {
+  font-size: 10vw; /* Adjusting font size with viewport width */
+  font-weight: bold;
+  color: #2d6a4f;
+  text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.3);
+  transition: all 0.3s ease;
+}
+
+.hero-title:hover {
+  color: #1b5e20;
+}
+
+@media (max-width: 768px) {
+  .hero-title {
+    font-size: 12vw; /* Bigger font size on mobile devices */
+  }
+}
+
+@media (max-width: 480px) {
+  .hero-title {
+    font-size: 14vw; /* Even bigger on very small devices */
+  }
+}
+
+/* Animations */
+@import url('https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css');
 
 /* Sections */
 .content-section {

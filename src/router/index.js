@@ -127,7 +127,7 @@ const router = createRouter({
 // Add global navigation guards to the router
 router.beforeEach((to, from, next) => {
   const authStore = useAuthStore();
-  const publicPages = ["login", "register", "home", "forgot-password", "reset-password", "ujikompetensi", "soal-1"]; // Public pages
+  const publicPages = ["login", "register", "home", "forgot-password", "reset-password"]; // Public pages
   const authRequired = !publicPages.includes(to.name); // Other pages require authentication
 
   if (authRequired && !authStore.isLoggedIn) {
