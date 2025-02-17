@@ -1,40 +1,72 @@
-// Import the necessary libraries
 import { defineStore } from "pinia";
 import axios from "axios";
-// Define a new store called "useAuthStore"
+
 export const useAuthStore = defineStore({
-  // Assign an ID to the store
   id: "auth",
-  // Define the initial state of the store
   state: () => ({
-    accessToken: null, // Initially, the access token is null
+    accessToken: localStorage.getItem("accessToken") || null,
+    user: JSON.parse(localStorage.getItem("user")) || null,
   }),
-  // Define a getter to check if the user is logged in
   getters: {
     isLoggedIn() {
-      return this.accessToken !== null; // User is logged in if accessToken is not
-      null;
+      return this.accessToken !== null;
     },
   },
-  // Define actions to set, remove and logout the access token
   actions: {
     setAccessToken(token) {
-      this.accessToken = token; // Set the access token
+      this.accessToken = token;
+      localStorage.setItem("accessToken", token);
     },
     removeAccessToken() {
-      this.accessToken = null; // Remove the access token
+      this.accessToken = null;
+      localStorage.removeItem("accessToken");
+    },
+    setUser(user) {
+      this.user = user;
+      localStorage.setItem("user", JSON.stringify(user));
+    },
+    async fetchUserProfile() {
+      if (this.accessToken) {
+        try {
+          const response = await axios.get("http://localhost:8000/api/users", {
+            headers: {
+              Authorization: `Bearer ${this.accessToken}`,
+            },
+          });
+          
+          // Ambil email dari localStorage
+          const currentUserEmail = localStorage.getItem('email');
+          console.log("Current email:", currentUserEmail); // untuk debugging
+          
+          // Filter user berdasarkan email
+          const currentUser = response.data.data.find(
+            user => user.email === currentUserEmail
+          );
+          
+          console.log("Found user:", currentUser); // untuk debugging
+          
+          if (currentUser) {
+            this.setUser(currentUser);
+          }
+        } catch (error) {
+          console.error("Error fetching user profile:", error);
+        }
+      }
     },
     logout() {
       try {
-        // Send a post request to the logout endpoint
-        axios.post("http://localhost:8000/api/logout");
-        // Remove the access token
+        axios.post("http://localhost:8000/api/logout", null, {
+          headers: {
+            Authorization: `Bearer ${this.accessToken}`,
+          },
+        });
         this.removeAccessToken();
-        // Log a message indicating that the logout was successful
+        this.user = null;
+        localStorage.removeItem("user");
+        localStorage.removeItem("email"); // Tambahkan ini untuk membersihkan email
         console.log("Logout successful");
       } catch (error) {
-        // Log an error message if an error occurred during logout
-        console.error("An error occurred during logout:", error.message);
+        console.error("Error during logout:", error.message);
       }
     },
   },

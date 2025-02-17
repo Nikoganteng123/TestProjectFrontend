@@ -120,7 +120,7 @@ const goToLoginPage = () => {
 
 async function requestOtp() {
   try {
-    const response = await axios.post("http://10.2.2.182:8000/api/otp/send", {
+    const response = await axios.post("http://localhost:8000/api/otp/send", {
       nomor: nomor.value,
     });
     alert(response.data.message);
@@ -132,7 +132,7 @@ async function requestOtp() {
 
 async function verifyOtp() {
   try {
-    const response = await axios.post("http://10.2.2.182:8000/api/otp/verify", {
+    const response = await axios.post("http://localhost:8000/api/otp/verify", {
       nomor: nomor.value,
       otp: kodeOtp.value,
     });
@@ -145,7 +145,7 @@ async function verifyOtp() {
 
 async function registerAccount() {
   try {
-    const response = await axios.post("http://10.2.2.182:8000/api/users", {
+    const response = await axios.post("http://localhost:8000/api/users", {
       name: nama.value,
       nomor: nomor.value,
       email: email.value,

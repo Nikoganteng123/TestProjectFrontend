@@ -115,26 +115,24 @@ const goToforgotPasswordPage = () => {
 };
 
 async function onSubmit() {
+  errorMessage.value = null;
   try {
     await axios.get("http://localhost:8000/sanctum/csrf-cookie");
     const response = await axios.post("http://localhost:8000/api/login", {
       email: email.value,
       password: password.value,
     });
-    authStore.setAccessToken(response.data.access_token);
-    console.log("Login successful");
-    router.push({ name: "home" });
-  } catch (error) {
-    if (
-      error.response &&
-      error.response.status === 422 &&
-      error.response.data.errors &&
-      error.response.data.errors.email
-    ) {
-      errorMessage.value = error.response.data.errors.email[0];
+
+    if (response.data.access_token) {
+      authStore.setAccessToken(response.data.access_token);
+      localStorage.setItem('email', email.value); // Tambahkan ini
+      await authStore.fetchUserProfile();
+      router.push({ name: "home" });
     } else {
-      errorMessage.value = "An error occurred: " + error.message;
+      throw new Error("Invalid login response");
     }
+  } catch (error) {
+    errorMessage.value = error.response?.data?.message || "Login failed. Please try again.";
     console.error(errorMessage.value);
   }
 }

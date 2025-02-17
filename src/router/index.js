@@ -15,10 +15,19 @@ import Register from "@/components/Register.vue";
 import ForgotPassword from "@/components/ForgotPassword.vue";
 import ResetPassword from "@/components/ResetPassword.vue";
 
+import UjiKompetensi from "@/components/UjiKompetensi.vue";
+import soal1 from "@/components/soal1.vue";
+
 // Create a router
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
+    // Soal 1
+    {
+      path: "/soal-1",
+      name: "soal-1",
+      component: soal1,
+    },
     // Home route
     {
       path: "/",
@@ -54,6 +63,11 @@ const router = createRouter({
       path: "/users",
       name: "userlist",
       component: Profile,
+    },
+    {
+      path: "/uji-kompetensi",
+      name: "ujikompetensi",
+      component: UjiKompetensi,
     },
     // Create user route
     {
