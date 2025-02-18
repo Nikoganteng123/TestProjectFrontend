@@ -1,217 +1,182 @@
 <template>
-  <main class="app">
-    <h1>Quiz Poin</h1>
-    <div class="score">Total Poin: {{ totalPoints }}</div>
+  <div class="min-h-screen bg-gradient-to-t from-green-400 to-white py-12 px-4 sm:px-6 lg:px-8 transition-all">
+    <div class="max-w-md mx-auto bg-white rounded-3xl shadow-xl overflow-hidden transform transition-all duration-300 hover:scale-105">
+      <div class="p-8">
+        <div class="flex justify-between items-center mb-6">
+          <h1 class="text-3xl font-semibold text-gray-900">Your Education Level</h1>
+          <button
+            v-if="!isEditing"
+            @click="startEditing"
+            class="bg-green-600 text-white rounded-xl py-2 px-6 hover:bg-green-700 transition-all duration-300"
+          >
+            Edit Answer
+          </button>
+        </div>
 
-    <!-- Pop-up Panduan -->
-    <div v-if="showGuide" class="popup show">
-      <div class="popup-content">
-        <button class="close-btn" @click="showGuide = false">&times;</button>
-        <h2>Selamat Datang di Uji Kompetensi</h2>
-        <p>
-          Untuk mengikuti Uji Kompetensi, harap mengisi jawaban dengan jujur. Setiap jawaban memiliki poin yang menentukan level Anda.
-          Jika ada kolom unggah file PDF, unggah lebih dari satu untuk meningkatkan poin Anda.
-        </p>
+        <!-- Display Mode -->
+        <div v-if="!isEditing" class="space-y-6">
+          <div class="border-b pb-4">
+            <p class="text-sm text-gray-600">Education Level</p>
+            <p class="text-xl font-medium">{{ soal1Data?.tingkat_pendidikan }}</p>
+          </div>
+          <div class="border-b pb-4">
+            <p class="text-sm text-gray-600">Score</p>
+            <p class="text-xl font-medium">{{ soal1Data?.nilai }}</p>
+          </div>
+          <button
+            @click="showDeleteConfirm = true"
+            class="mt-6 w-full bg-red-500 text-white rounded-xl py-2 px-6 hover:bg-red-600 transition-colors duration-300"
+          >
+            Delete Answer
+          </button>
+        </div>
+
+        <!-- Edit Mode -->
+        <form v-else @submit.prevent="updateAnswer" class="space-y-4">
+          <div>
+            <label class="block text-sm text-gray-600">Education Level</label>
+            <select
+              v-model="editForm.tingkat_pendidikan"
+              class="mt-2 block w-full rounded-xl border-gray-300 shadow-lg focus:border-green-500 focus:ring-1 focus:ring-green-500 transition-all"
+              required
+            >
+              <option value="SMP-D3">SMP - D3 (3 points)</option>
+              <option value="S1">S1 (4 points)</option>
+              <option value="S2_atau_lebih">S2 or higher (5 points)</option>
+            </select>
+          </div>
+          <div class="flex space-x-4">
+            <button
+              type="submit"
+              class="flex-1 bg-green-600 text-white rounded-xl py-2 px-6 hover:bg-green-700 transition-all duration-300"
+            >
+              Save Changes
+            </button>
+            <button
+              type="button"
+              @click="cancelEditing"
+              class="flex-1 bg-gray-400 text-white rounded-xl py-2 px-6 hover:bg-gray-500 transition-all duration-300"
+            >
+              Cancel
+            </button>
+          </div>
+        </form>
+
+        <!-- Error Message -->
+        <div v-if="errorMessage" class="mt-4">
+          <p class="text-red-500 text-sm">{{ errorMessage }}</p>
+        </div>
+
+        <!-- Delete Confirmation Modal -->
+        <div v-if="showDeleteConfirm" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center transition-all">
+          <div class="bg-white p-6 rounded-3xl max-w-sm mx-4 transform transition-all duration-300 scale-110 hover:scale-100">
+            <h3 class="text-lg font-medium mb-4 text-gray-800">Delete Answer</h3>
+            <p class="mb-4 text-gray-600">Are you sure you want to delete your answer? This action cannot be undone.</p>
+            <div class="flex space-x-4">
+              <button
+                @click="deleteAnswer"
+                class="flex-1 bg-red-500 text-white rounded-xl py-2 hover:bg-red-600 transition-all duration-300"
+              >
+                Yes, Delete
+              </button>
+              <button
+                @click="showDeleteConfirm = false"
+                class="flex-1 bg-gray-300 text-gray-700 rounded-xl py-2 hover:bg-gray-400 transition-all duration-300"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
-
-    <!-- Soal yang ditampilkan berdasarkan soal aktif -->
-    <div class="question-container">
-      <h2>{{ questions[activeQuestion].question }}</h2>
-      <div v-if="questions[activeQuestion].type === 'radio'">
-        <label v-for="(option, index) in questions[activeQuestion].options" :key="index" class="radio-option">
-          <input type="radio" :name="'question-' + activeQuestion" :value="index" v-model="questions[activeQuestion].selected" />
-          {{ option.text }} ({{ option.points }} poin)
-        </label>
-      </div>
-    </div>
-
-    <!-- Tombol Aksi -->
-    <div class="action-buttons">
-      <button @click="saveAnswers">Simpan Jawaban</button>
-      <button @click="clearAnswers">Hapus Jawaban</button>
-    </div>
-
-    <!-- Navigasi Soal -->
-    <div class="question-navigation">
-      <h3>Pilih Soal:</h3>
-      <div class="question-buttons">
-        <button v-for="(question, index) in questions" :key="question.id" :class="{'active': activeQuestion === index}" @click="activeQuestion = index">
-          {{ index + 1 }}
-        </button>
-      </div>
-    </div>
-  </main>
+  </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue';
+import { ref, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
+import { useAuthStore } from '@/stores/auth' // Jika menggunakan Pinia atau Vuex
+import axios from 'axios'
 
-const questions = ref([
-  { id: 1, question: 'Apa pendidikan terakhir Anda?', type: 'radio', options: [
-      { text: 'SMP - D3', points: 3 },
-      { text: 'S1', points: 4 },
-      { text: 'S2 atau lebih', points: 5 }
-    ], selected: null },
-  { id: 2, question: 'Apakah Anda memiliki Sertifikat Guru?', type: 'radio', options: [
-      { text: 'Ya', points: 10 },
-      { text: 'Tidak', points: 0 }
-    ], selected: null }
-]);
+const router = useRouter()
+const authStore = useAuthStore()
+const soal1Data = ref(null)
+const isEditing = ref(false)
+const showDeleteConfirm = ref(false)
+const errorMessage = ref('')
 
-const activeQuestion = ref(0);
-const totalPoints = computed(() => questions.value.reduce((sum, q) => q.selected !== null ? sum + q.options[q.selected].points : sum, 0));
-const showGuide = ref(true);
+const editForm = ref({
+  tingkat_pendidikan: ''
+})
 
-const saveAnswers = () => alert('Jawaban disimpan!');
-const clearAnswers = () => questions.value.forEach(q => q.selected = null);
+onMounted(async () => {
+  await getSoal1Data()
+})
+
+const getSoal1Data = async () => {
+  try {
+    const response = await axios.get('http://localhost:8000/api/soal1', {
+      headers: {
+        Authorization: `Bearer ${authStore.accessToken}` // Ambil token Bearer dari store
+      }
+    })
+    soal1Data.value = response.data
+    editForm.value.tingkat_pendidikan = soal1Data.value?.tingkat_pendidikan || ''
+  } catch (error) {
+    errorMessage.value = 'Failed to load data'
+  }
+}
+
+const startEditing = () => {
+  isEditing.value = true
+  editForm.value.tingkat_pendidikan = soal1Data.value?.tingkat_pendidikan || ''
+}
+
+const cancelEditing = () => {
+  isEditing.value = false
+  errorMessage.value = ''
+}
+
+const updateAnswer = async () => {
+  try {
+    const response = await axios.put(
+      'http://localhost:8000/api/soal1',
+      { tingkat_pendidikan: editForm.value.tingkat_pendidikan },
+      {
+        headers: {
+          Authorization: `Bearer ${authStore.accessToken}`
+        }
+      }
+    )
+    soal1Data.value = response.data
+    isEditing.value = false
+    errorMessage.value = ''
+  } catch (error) {
+    errorMessage.value = error.response?.data?.message || 'Failed to update answer'
+  }
+}
+
+const deleteAnswer = async () => {
+  try {
+    await axios.delete('http://localhost:8000/api/soal1', {
+      headers: {
+        Authorization: `Bearer ${authStore.accessToken}`
+      }
+    })
+    soal1Data.value = null
+    showDeleteConfirm.value = false
+    errorMessage.value = ''
+  } catch (error) {
+    errorMessage.value = error.response?.data?.message || 'Failed to delete answer'
+    showDeleteConfirm.value = false
+  }
+}
 </script>
 
 <style scoped>
-/* Style Umum */
-.app {
-  font-family: Arial, sans-serif;
-  padding: 20px;
-  max-width: 800px;
-  margin: auto;
-  background: #fff;
-  border-radius: 10px;
-  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
-}
-
-/* Skor */
-.score {
-  font-size: 1.5rem;
-  font-weight: bold;
-  margin-bottom: 20px;
-  text-align: center;
-  color: #2c3e50;
-}
-
-/* Soal */
-.question-container {
-  border: 2px solid #2c3e50;
-  padding: 20px;
-  border-radius: 10px;
-  margin-bottom: 20px;
-  background: #f8f9fa;
-  transition: all 0.3s ease-in-out;
-}
-
-h2 {
-  font-size: 1.3rem;
-  margin-bottom: 10px;
-  color: #2c3e50;
-}
-
-.radio-option {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 10px;
-}
-
-input[type="radio"] {
-  accent-color: #2ecc71;
-}
-
-/* Tombol Aksi */
-.action-buttons {
-  display: flex;
-  justify-content: space-between;
-  margin-top: 20px;
-}
-
-.action-buttons button {
-  background-color: #3498db;
-  color: white;
-  padding: 10px 15px;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  transition: all 0.2s ease-in-out;
-}
-
-.action-buttons button:hover {
-  background-color: #2980b9;
-}
-
-.action-buttons button:disabled {
-  background-color: #bdc3c7;
-  cursor: not-allowed;
-}
-
-/* Navigasi Soal */
-.question-navigation {
-  margin-top: 20px;
-  text-align: center;
-}
-
-.question-buttons {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  justify-content: center;
-}
-
-.question-buttons button {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  background-color: #ddd;
-  color: #2c3e50;
-  font-weight: bold;
-  transition: all 0.2s ease-in-out;
-}
-
-.question-buttons button.active {
-  background-color: #2ecc71;
-  color: white;
-}
-
-.question-buttons button:hover {
-  background-color: #27ae60;
-}
-
-/* Pop-up Window */
-.popup {
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%) scale(0.95);
-  background: white;
-  padding: 20px;
-  border-radius: 10px;
-  box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.2);
-  width: 90%;
-  max-width: 500px;
-  transition: all 0.3s ease-in-out;
-}
-
-/* Animasi muncul */
-.popup.show {
-  transform: translate(-50%, -50%) scale(1);
-}
-
-/* Tombol Close */
-.popup .close-btn {
-  position: absolute;
-  top: 10px;
-  right: 15px;
-  background: #2ecc71;
-  color: white;
-  font-size: 14px;
-  width: 25px;
-  height: 25px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: background 0.2s ease-in-out;
-}
-
-.popup .close-btn:hover {
-  background: #27ae60;
+/* Add your custom styles here, similar to the profile.vue styles */
+.bg-gradient-to-t {
+  background: linear-gradient(to top, #66bb6a, #ffffff);
 }
 </style>
