@@ -17,6 +17,7 @@ import ResetPassword from "@/components/ResetPassword.vue";
 
 import UjiKompetensi from "@/components/UjiKompetensi.vue";
 import soal1 from "@/components/soal1.vue";
+import soal2 from "@/components/Soal2.vue";
 
 // Create a router
 const router = createRouter({
@@ -27,6 +28,12 @@ const router = createRouter({
       path: "/soal-1",
       name: "soal-1",
       component: soal1,
+    },
+    // Soal 2
+    {
+      path: "/soal-2",
+      name: "soal-2",
+      component: soal2,
     },
     // Home route
     {

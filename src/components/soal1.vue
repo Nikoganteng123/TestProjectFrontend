@@ -1,104 +1,72 @@
 <template>
-  <div class="min-h-screen bg-gradient-to-t from-green-400 to-white py-12 px-4 sm:px-6 lg:px-8 transition-all">
-    <div class="max-w-md mx-auto bg-white rounded-3xl shadow-xl overflow-hidden transform transition-all duration-300 hover:scale-105">
-      <div class="p-8">
-        <h1 class="text-3xl font-semibold text-gray-900 mb-6">1. Apa pendidikan formal terakhir Anda?</h1>
+  <div class="min-h-screen bg-gradient-to-t from-green-400 to-white py-12 px-6 sm:px-8 lg:px-12">
+    <div class="max-w-2xl mx-auto bg-white rounded-xl shadow-lg overflow-hidden">
+      <div class="p-8 space-y-6">
+        <h1 class="text-3xl font-bold text-gray-900 mb-6">Soal 1: Pendidikan Formal Terakhir Anda</h1>
 
-        <!-- Pilihan Jawaban -->
-        <div class="space-y-4 mb-6">
-          <div>
-            <input
-              type="radio"
-              id="smp-d3"
-              v-model="answerForm.tingkat_pendidikan"
-              value="SMP-D3"
-              class="mr-2"
-              required
-            />
-            <label for="smp-d3" class="text-lg">SMP - D3</label>
-          </div>
-          <div>
-            <input
-              type="radio"
-              id="s1"
-              v-model="answerForm.tingkat_pendidikan"
-              value="S1"
-              class="mr-2"
-              required
-            />
-            <label for="s1" class="text-lg">S1</label>
-          </div>
-          <div>
-            <input
-              type="radio"
-              id="s2"
-              v-model="answerForm.tingkat_pendidikan"
-              value="S2_atau_lebih"
-              class="mr-2"
-              required
-            />
-            <label for="s2" class="text-lg">S2 / di atasnya</label>
-          </div>
-        </div>
-
-        <!-- Button untuk menyimpan atau memperbarui jawaban -->
-        <div class="flex space-x-4">
-          <button
-            v-if="!soal1Data"
-            @click="saveAnswer"
-            class="flex-1 bg-green-600 text-white rounded-xl py-2 px-6 hover:bg-green-700 transition-all duration-300"
-          >
-            Simpan Jawaban
-          </button>
-          <button
-            v-if="soal1Data"
-            @click="updateAnswer"
-            class="flex-1 bg-green-600 text-white rounded-xl py-2 px-6 hover:bg-green-700 transition-all duration-300"
-          >
-            Ubah Jawaban
-          </button>
-          
-          <!-- Hapus Jawaban -->
-          <button
-            v-if="soal1Data"
-            @click="showDeleteConfirm = true"
-            class="flex-1 bg-red-500 text-white rounded-xl py-2 px-6 hover:bg-red-600 transition-all duration-300"
-          >
-            Hapus Jawaban
-          </button>
-        </div>
-
-        <!-- Konfirmasi Hapus Jawaban -->
-        <div v-if="showDeleteConfirm" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center transition-all">
-          <div class="bg-white p-6 rounded-3xl max-w-sm mx-4 transform transition-all duration-300 scale-110 hover:scale-100">
-            <h3 class="text-lg font-medium mb-4 text-gray-800">Hapus Jawaban</h3>
-            <p class="mb-4 text-gray-600">Apakah Anda yakin ingin menghapus jawaban Anda? Tindakan ini tidak dapat dibatalkan.</p>
-            <div class="flex space-x-4">
-              <button
-                @click="deleteAnswer"
-                class="flex-1 bg-red-500 text-white rounded-xl py-2 hover:bg-red-600 transition-all duration-300"
-              >
-                Ya, Hapus
-              </button>
-              <button
-                @click="showDeleteConfirm = false"
-                class="flex-1 bg-gray-300 text-gray-700 rounded-xl py-2 hover:bg-gray-400 transition-all duration-300"
-              >
-                Batal
-              </button>
+        <form @submit.prevent="submitAnswer" class="space-y-4">
+          <div class="flex flex-col">
+            <label class="text-lg font-medium text-gray-800">Pilih pendidikan terakhir Anda</label>
+            <!-- Radio buttons untuk pilihan jawaban -->
+            <div class="space-y-3 mt-4">
+              <div class="flex items-center">
+                <input
+                  type="radio"
+                  id="smp-d3"
+                  value="SMP-D3"
+                  v-model="selectedAnswer"
+                  class="form-radio h-5 w-5"
+                />
+                <label for="smp-d3" class="ml-2 text-sm" :class="{ 'text-green-600': isAnswerSaved && selectedAnswer === 'SMP-D3' }">SMP - D3 (3 poin)</label>
+              </div>
+              <div class="flex items-center">
+                <input
+                  type="radio"
+                  id="s1"
+                  value="S1"
+                  v-model="selectedAnswer"
+                  class="form-radio h-5 w-5"
+                />
+                <label for="s1" class="ml-2 text-sm" :class="{ 'text-green-600': isAnswerSaved && selectedAnswer === 'S1' }">S1 (4 poin)</label>
+              </div>
+              <div class="flex items-center">
+                <input
+                  type="radio"
+                  id="s2_atau_lebih"
+                  value="S2_atau_lebih"
+                  v-model="selectedAnswer"
+                  class="form-radio h-5 w-5"
+                />
+                <label for="s2_atau_lebih" class="ml-2 text-sm" :class="{ 'text-green-600': isAnswerSaved && selectedAnswer === 'S2_atau_lebih' }">S2 atau lebih (5 poin)</label>
+              </div>
             </div>
           </div>
-        </div>
-      </div>
 
-      <!-- Tombol Next ke soal-2 -->
-      <div class="text-center mt-6">
-        <router-link
-          to="/soal-2"
-          class="bg-blue-600 text-white rounded-xl py-2 px-6 hover:bg-blue-700 transition-all duration-300"
-        >
-          Next Soal
-        </router-link>
+          <!-- Buttons -->
+          <div class="flex justify-between items-center mt-6">
+            <button
+              type="submit"
+              class="bg-green-600 text-white rounded-xl py-3 px-6 hover:bg-green-700 transition-all duration-300"
+            >
+              {{ isEditMode ? 'Ubah Jawaban' : 'Simpan Jawaban' }}
+            </button>
+            <!-- Tombol Hapus Jawaban hanya tampil jika ada jawaban -->
+            <button
+              v-if="selectedAnswer"
+              type="button"
+              @click="deleteAnswer"
+              class="bg-red-500 text-white rounded-xl py-3 px-6 hover:bg-red-600 transition-all duration-300"
+            >
+              Hapus Jawaban
+            </button>
+            <router-link
+              to="/soal-2"
+              class="bg-blue-600 text-white rounded-xl py-3 px-6 hover:bg-blue-700 transition-all duration-300"
+            >
+              Next
+            </router-link>
+          </div>
+        </form>
       </div>
     </div>
   </div>
@@ -106,61 +74,56 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
-import { useAuthStore } from '@/stores/auth' // Jika menggunakan Pinia atau Vuex
 import axios from 'axios'
+import { useAuthStore } from '@/stores/auth'
+import { useRouter } from 'vue-router'
 
 const router = useRouter()
 const authStore = useAuthStore()
-const soal1Data = ref(null)
-const answerForm = ref({ tingkat_pendidikan: '' })
-const showDeleteConfirm = ref(false)
+
+const selectedAnswer = ref('')
+const isEditMode = ref(false)
+const isAnswerSaved = ref(false) // Flag untuk mengecek apakah jawaban sudah disimpan
 
 onMounted(async () => {
-  await getSoal1Data()
+  await fetchAnswer()
 })
 
-const getSoal1Data = async () => {
+const fetchAnswer = async () => {
   try {
     const response = await axios.get('http://localhost:8000/api/soal1', {
       headers: {
         Authorization: `Bearer ${authStore.accessToken}`
       }
     })
-    soal1Data.value = response.data
-    answerForm.value.tingkat_pendidikan = soal1Data.value?.tingkat_pendidikan || ''
+    if (response.data) {
+      selectedAnswer.value = response.data.tingkat_pendidikan
+      isAnswerSaved.value = true // Tanda bahwa jawaban sudah disimpan
+      isEditMode.value = true
+    }
   } catch (error) {
-    console.error('Failed to load data')
+    console.error(error)
   }
 }
 
-const saveAnswer = async () => {
+const submitAnswer = async () => {
   try {
-    const response = await axios.post('http://localhost:8000/api/soal1', {
-      tingkat_pendidikan: answerForm.value.tingkat_pendidikan
-    }, {
-      headers: {
-        Authorization: `Bearer ${authStore.accessToken}`
-      }
-    })
-    soal1Data.value = response.data
+    const response = isEditMode.value
+      ? await axios.put(
+          'http://localhost:8000/api/soal1',
+          { tingkat_pendidikan: selectedAnswer.value },
+          { headers: { Authorization: `Bearer ${authStore.accessToken}` } }
+        )
+      : await axios.post(
+          'http://localhost:8000/api/soal1',
+          { tingkat_pendidikan: selectedAnswer.value },
+          { headers: { Authorization: `Bearer ${authStore.accessToken}` } }
+        )
+    console.log('Answer saved successfully:', response.data)
+    isAnswerSaved.value = true
+    isEditMode.value = true
   } catch (error) {
-    console.error('Failed to save answer')
-  }
-}
-
-const updateAnswer = async () => {
-  try {
-    const response = await axios.put('http://localhost:8000/api/soal1', {
-      tingkat_pendidikan: answerForm.value.tingkat_pendidikan
-    }, {
-      headers: {
-        Authorization: `Bearer ${authStore.accessToken}`
-      }
-    })
-    soal1Data.value = response.data
-  } catch (error) {
-    console.error('Failed to update answer')
+    console.error('Failed to save answer', error)
   }
 }
 
@@ -171,16 +134,21 @@ const deleteAnswer = async () => {
         Authorization: `Bearer ${authStore.accessToken}`
       }
     })
-    soal1Data.value = null
-    showDeleteConfirm.value = false
+    selectedAnswer.value = ''  // Mengosongkan pilihan radio setelah dihapus
+    isAnswerSaved.value = false // Mengubah status jawaban menjadi belum disimpan
+    isEditMode.value = false
+    console.log('Answer deleted successfully')
   } catch (error) {
-    console.error('Failed to delete answer')
+    console.error('Failed to delete answer', error)
   }
 }
 </script>
 
 <style scoped>
-/* Add your custom styles here */
+/* Styling untuk radio buttons */
+.form-radio {
+  accent-color: #34d399; /* warna hijau */
+}
 .bg-gradient-to-t {
   background: linear-gradient(to top, #66bb6a, #ffffff);
 }
