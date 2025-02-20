@@ -14,7 +14,7 @@
         Selamat Datang di IPBI
       </h1>
       <p class="text-3xl text-black mt-4 text-center animate__animated animate__fadeIn animate__delay-2s">
-        Komunitas Perangkai Bunga Indonesia
+        Ikatan Perangkai Bunga Indonesia
       </p>
     </div>
 
