@@ -76,16 +76,37 @@
               </router-link>
             </div>
           </form>
+          <!-- Question Navigation Bar -->
+<div class="mt-8 pt-6 border-t border-gray-200">
+  <h3 class="text-lg font-medium text-gray-800 mb-4">Navigasi Soal</h3>
+  <div class="flex flex-wrap gap-2">
+    <router-link
+      v-for="n in 17" 
+      :key="n"
+      :to="`/soal-${n}`"
+      class="w-10 h-10 flex items-center justify-center rounded-lg text-sm font-medium transition-all duration-200"
+      :class="[
+        currentQuestionNumber === n 
+          ? 'bg-green-600 text-white' 
+          : 'bg-gray-200 hover:bg-green-500 hover:text-white text-gray-700'
+      ]"
+    >
+      {{ n }}
+    </router-link>
+  </div>
+</div>
         </div>
       </div>
     </div>
   </template>
   
   <script setup>
-  import { ref, onMounted, reactive } from 'vue';
+  import { ref, onMounted, reactive, computed} from 'vue';
   import axios from 'axios';
   import { useAuthStore } from '@/stores/auth';
-  
+  import { useRoute } from 'vue-router'
+
+  const route = useRoute()
   const authStore = useAuthStore();
   const hasExistingData = ref(false);
   
@@ -106,10 +127,18 @@
     bahasa_lain3: '',
     bahasa_lain4: ''
   });
+
+  // Extract current question number from route
+const currentQuestionNumber = computed(() => {
+  const match = route.path.match(/\/soal-(\d+)/)
+  return match ? parseInt(match[1]) : 1
+})
   
   onMounted(async () => {
     await fetchAnswer();
   });
+
+
   
   const fetchAnswer = async () => {
     try {
@@ -193,7 +222,16 @@
   </script>
   
   <style scoped>
+  /* Styling untuk radio buttons */
+  .form-radio {
+    accent-color: #34d399; /* warna hijau */
+  }
   .bg-gradient-to-t {
     background: linear-gradient(to top, #66bb6a, #ffffff);
+  }
+  
+  /* Button hover effects */
+  button:hover, a.router-link:hover {
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
   }
   </style>

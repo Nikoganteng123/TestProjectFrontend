@@ -199,6 +199,12 @@
     console.table(reverseFieldMapping);
   };
   
+  // Extract current question number from route
+const currentQuestionNumber = computed(() => {
+  const match = route.path.match(/\/soal-(\d+)/)
+  return match ? parseInt(match[1]) : 1
+})
+
   onMounted(async () => {
     logFieldMappings(); // Log semua field mappings ketika komponen di-mount
     await fetchAnswer();
