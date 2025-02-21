@@ -122,11 +122,6 @@
               </div>
             </div>
   
-            <!-- Total Nilai -->
-            <div v-if="totalNilai > 0" class="mt-6 p-4 bg-green-50 rounded-lg border border-green-200">
-              <h3 class="text-lg font-medium text-green-700">Total Nilai: {{ totalNilai }}</h3>
-            </div>
-  
             <div class="flex justify-between items-center mt-6">
               <router-link to="/soal-3" 
                 class="bg-gray-500 text-white rounded-xl py-3 px-6 hover:bg-gray-600 transition-all duration-300">
