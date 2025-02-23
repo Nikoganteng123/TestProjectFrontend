@@ -140,6 +140,7 @@ const logout = () => {
   z-index: 1000;
   padding: 1rem 0;
   background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px); /* Modern glass effect */
 }
 
 .logo-link {
@@ -209,31 +210,82 @@ const logout = () => {
   color: #dc2626;
 }
 
+/* Hamburger Button */
+.hamburger-icon {
+  display: inline-block;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  font-size: 1.75rem;
+  color: #2d6a4f;
+}
+
+.hamburger-icon:hover {
+  transform: rotate(90deg) scale(1.1);
+  color: #34d399;
+}
+
 /* Dropdown */
 .dropdown {
   position: absolute;
   top: 100%;
   right: 1.5rem;
-  background: white;
+  background: rgba(255, 255, 255, 0.95);
   border-radius: 1rem;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 15px 35px rgba(45, 106, 79, 0.15);
   padding: 1rem;
-  width: 200px;
+  width: 220px;
   z-index: 200;
+  backdrop-filter: blur(8px); /* Glass effect */
+  transform-origin: top right;
+  animation: slideIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Custom Slide In Animation */
+@keyframes slideIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.9) translateY(-10px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
 }
 
 .dropdown-item {
-  display: block;
+  display: flex;
+  align-items: center;
   padding: 0.75rem 1rem;
   color: #2d6a4f;
   font-weight: 500;
   border-radius: 0.5rem;
-  transition: all 0.3s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+  margin: 0.25rem 0;
+}
+
+/* Modern Hover Effect */
+.dropdown-item::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(120deg, transparent, rgba(52, 211, 153, 0.2), transparent);
+  transition: all 0.5s ease;
+  z-index: -1;
+}
+
+.dropdown-item:hover::before {
+  left: 100%;
 }
 
 .dropdown-item:hover {
-  background: #f0fdf4;
+  transform: translateX(8px);
   color: #34d399;
+  background: rgba(240, 253, 244, 0.5);
+  box-shadow: 0 4px 15px rgba(52, 211, 153, 0.2);
 }
 
 .dropdown-item.logout {
@@ -241,8 +293,9 @@ const logout = () => {
 }
 
 .dropdown-item.logout:hover {
-  background: #fef2f2;
   color: #dc2626;
+  background: rgba(254, 242, 242, 0.5);
+  box-shadow: 0 4px 15px rgba(239, 68, 68, 0.2);
 }
 
 /* Footer */
@@ -278,13 +331,22 @@ const logout = () => {
   width: 100%;
 }
 
-/* Animations */
-@import url('https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css');
+/* Enhanced Animations */
+.animate__animated.animate__fadeInDown {
+  --animate-duration: 0.4s;
+}
 
 /* Responsive */
 @media (max-width: 1024px) {
   .logo-text {
     display: none;
+  }
+}
+
+@media (max-width: 768px) {
+  .dropdown {
+    width: 200px;
+    right: 1rem;
   }
 }
 </style>

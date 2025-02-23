@@ -5,8 +5,9 @@
     <div class="flower-2"></div>
     <div class="flower-3"></div>
 
-    <div class="max-w-3xl mx-auto py-16 px-4 sm:px-6 lg:px-8 relative z-10">
-      <div class="bg-white rounded-3xl shadow-2xl overflow-hidden transition-all duration-300 hover:shadow-3xl">
+    <!-- Main Content with top padding to account for fixed navbar -->
+    <div class="max-w-3xl mx-auto pt-24 pb-16 px-4 sm:px-6 lg:px-8 relative z-10 flex items-center justify-center min-h-[calc(100vh-6rem)]">
+      <div class="bg-white rounded-3xl shadow-2xl overflow-hidden transition-all duration-300 hover:shadow-3xl w-full">
         <!-- Header -->
         <div class="bg-gradient-to-r from-emerald-600 to-teal-500 px-8 py-6">
           <div class="flex items-center justify-between">
