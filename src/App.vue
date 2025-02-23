@@ -1,73 +1,82 @@
 <template>
   <div id="app">
-    <!-- Navbar (tidak muncul di halaman login & register) -->
-    <nav v-if="!hideNavAndFooter" class="bg-white p-4 px-8 flex items-center shadow-lg relative transition-all duration-500 ease-in-out">
-      <!-- Logo -->
-      <RouterLink to="/" class="text-logo text-lg font-thin flex items-center transition-all duration-300 ease-in-out transform hover:scale-105">
-        <img src="/src/assets/logoipbi.jpg" alt="Logo" class="h-10 w-auto mr-3">
-        <span class="hidden lg:inline">Ikatan Perangkai Bunga Indonesia</span> <!-- Teks disembunyikan di perangkat kecil -->
-      </RouterLink>
+    <!-- Navbar -->
+    <nav 
+      v-if="!hideNavAndFooter" 
+      class="navbar bg-white shadow-lg transition-all duration-500 ease-in-out"
+    >
+      <div class="container mx-auto px-6 flex items-center justify-between">
+        <!-- Logo -->
+        <RouterLink 
+          to="/" 
+          class="logo-link flex items-center transition-all duration-300 ease-in-out hover:scale-105"
+        >
+          <img src="/src/assets/logoipbi.jpg" alt="Logo" class="h-12 w-auto">
+          <span class="logo-text hidden lg:inline">Ikatan Perangkai Bunga Indonesia</span>
+        </RouterLink>
 
-      <!-- Hamburger Menu untuk perangkat kecil -->
-      <div class="ml-auto lg:hidden flex items-center">
-        <button @click.stop="toggleMenu" class="text-3xl focus:outline-none hover:text-green-600 transition-all duration-300">
-          &#9776; <!-- Tiga garis -->
+        <!-- Hamburger Menu -->
+        <button 
+          @click.stop="toggleMenu" 
+          class="lg:hidden text-3xl focus:outline-none transition-all duration-300 hover:text-emerald-600"
+        >
+          <span class="hamburger-icon">☰</span>
         </button>
+
+        <!-- Desktop Menu -->
+        <div class="hidden lg:flex items-center space-x-8">
+          <RouterLink to="/" class="nav-link">Home</RouterLink>
+          <RouterLink to="/uji-kompetensi" class="nav-link">Uji Kompetensi</RouterLink>
+          
+          <!-- Auth Links -->
+          <template v-if="!authStore.isLoggedIn">
+            <RouterLink to="/login" class="nav-link">Login</RouterLink>
+            <RouterLink to="/register" class="auth-button">Register</RouterLink>
+          </template>
+          <template v-else>
+            <RouterLink to="/users" class="nav-link">Profile</RouterLink>
+            <button @click="logout" class="auth-button logout">Logout</button>
+          </template>
+        </div>
       </div>
 
-      <!-- Menu Links (Dropdown untuk perangkat kecil) -->
-      <div class="ml-8 flex space-x-6 lg:flex hidden">
-        <RouterLink to="/" class="nav-link transition-all duration-300 ease-in-out transform hover:scale-105">Home</RouterLink>
-        <RouterLink to="/uji-kompetensi" class="nav-link transition-all duration-300 ease-in-out transform hover:scale-105">Uji Kompetensi</RouterLink>
-      </div>
-
-      <!-- Dropdown menu untuk perangkat kecil -->
+      <!-- Mobile Dropdown -->
       <div 
         v-if="menuOpen" 
-        class="dropdown lg:hidden absolute top-16 right-8 bg-white shadow-lg py-2 px-4 rounded-md z-50"
-        @click.stop
+        class="dropdown lg:hidden animate__animated animate__fadeInDown animate__faster"
       >
-        <RouterLink to="/" class="block dropdown-item transition-all duration-300 ease-in-out hover:bg-green-100">Home</RouterLink>
-        <RouterLink to="/uji-kompetensi" class="block dropdown-item transition-all duration-300 ease-in-out hover:bg-green-100">Uji Kompetensi</RouterLink>
-        <RouterLink to="/users" class="block dropdown-item flex items-center transition-all duration-300 ease-in-out hover:bg-green-100">
-          Profile
-        </RouterLink>
-        <!-- Menampilkan Login/Register jika belum login, Logout jika sudah login -->
-        <RouterLink v-if="!authStore.isLoggedIn" to="/login" class="block dropdown-item transition-all duration-300 ease-in-out hover:bg-green-100">Login</RouterLink>
-        <RouterLink v-if="!authStore.isLoggedIn" to="/register" class="block dropdown-item transition-all duration-300 ease-in-out hover:bg-green-100">Register</RouterLink>
-
-        <button v-if="authStore.isLoggedIn" @click="logout" class="block dropdown-item transition-all duration-300 ease-in-out hover:bg-green-100">Logout</button>
-      </div>
-
-      <!-- Jika belum login, tampilkan Login/Register -->
-      <div v-if="!authStore.isLoggedIn" class="ml-auto flex space-x-4 lg:flex hidden">
-        <RouterLink to="/login" class="nav-link transition-all duration-300 ease-in-out transform hover:scale-105">Login</RouterLink>
-        <RouterLink to="/register" class="nav-link transition-all duration-300 ease-in-out transform hover:scale-105">Register</RouterLink>
-      </div>
-
-      <!-- Jika sudah login, tampilkan Logout dan Profile di sebelahnya -->
-      <div v-else class="ml-auto flex items-center space-x-4 lg:flex hidden">
-        <button @click="logout" class="nav-link transition-all duration-300 ease-in-out transform hover:scale-105">Logout</button>
+        <RouterLink to="/" class="dropdown-item" @click="toggleMenu">Home</RouterLink>
+        <RouterLink to="/uji-kompetensi" class="dropdown-item" @click="toggleMenu">Uji Kompetensi</RouterLink>
+        <RouterLink to="/users" class="dropdown-item" v-if="authStore.isLoggedIn" @click="toggleMenu">Profile</RouterLink>
+        <RouterLink to="/login" class="dropdown-item" v-if="!authStore.isLoggedIn" @click="toggleMenu">Login</RouterLink>
+        <RouterLink to="/register" class="dropdown-item" v-if="!authStore.isLoggedIn" @click="toggleMenu">Register</RouterLink>
+        <button v-if="authStore.isLoggedIn" @click="logout" class="dropdown-item logout">Logout</button>
       </div>
     </nav>
 
-    <!-- Main content wrapper, to push footer to the bottom -->
+    <!-- Main Content -->
     <div class="content-wrapper">
       <RouterView />
     </div>
 
-    <!-- Footer (tidak muncul di halaman login & register) -->
-    <footer v-if="!hideNavAndFooter" class="bg-white text-white py-4 px-8 text-center bottom-0 left-0 w-full shadow-lg transition-all duration-500 ease-in-out transform hover:scale-105">
-      <p class="text-sm">&copy; 2025 Ikatan Perangkai Bunga Indonesia. All rights reserved.</p>
-      <div class="mt-2">
-        <a href="#" class="footer-link transition-all duration-300 ease-in-out transform hover:scale-105">Privacy Policy</a> |
-        <a href="#" class="footer-link transition-all duration-300 ease-in-out transform hover:scale-105">Terms of Service</a> |
-        <a href="#" class="footer-link transition-all duration-300 ease-in-out transform hover:scale-105">Contact</a>
+    <!-- Footer -->
+    <footer 
+      v-if="!hideNavAndFooter" 
+      class="footer bg-gradient-to-r from-emerald-900 to-teal-800 text-white shadow-lg transition-all duration-500 ease-in-out"
+    >
+      <div class="container mx-auto px-6 py-8">
+        <div class="flex flex-col md:flex-row justify-between items-center">
+          <p class="text-sm mb-4 md:mb-0">© 2025 Ikatan Perangkai Bunga Indonesia. All rights reserved.</p>
+          <div class="flex space-x-6">
+            <a href="#" class="footer-link">Privacy Policy</a>
+            <a href="#" class="footer-link">Terms of Service</a>
+            <a href="#" class="footer-link">Contact</a>
+          </div>
+        </div>
       </div>
     </footer>
   </div>
 </template>
-
 
 <script setup>
 import { useAuthStore } from "@/stores/auth";
@@ -79,18 +88,18 @@ const router = useRouter();
 const route = useRoute();
 
 const hideNavAndFooter = computed(() => {
-  return route.path === "/login" || route.path === "/register" || route.path === "/forgot-password" || route.path === "/reset-password";
+  return route.path === "/login" || route.path === "/register" || 
+         route.path === "/forgot-password" || route.path === "/reset-password";
 });
 
-const menuOpen = ref(false); // State untuk kontrol dropdown menu
+const menuOpen = ref(false);
 
 const toggleMenu = () => {
   menuOpen.value = !menuOpen.value;
 };
 
-// Tutup dropdown jika user mengklik di luar area menu
 const closeMenu = (event) => {
-  if (!event.target.closest(".dropdown") && !event.target.closest("button")) {
+  if (!event.target.closest(".dropdown") && !event.target.closest(".hamburger-icon")) {
     menuOpen.value = false;
   }
 };
@@ -106,123 +115,176 @@ onUnmounted(() => {
 const logout = () => {
   authStore.logout();
   router.push({ name: "home" });
+  menuOpen.value = false;
 };
 </script>
 
 <style scoped>
-/* Mengatur kontainer utama dengan Flexbox */
+/* App Container */
 #app {
   display: flex;
   flex-direction: column;
-  min-height: 100vh; /* Agar konten memenuhi seluruh tinggi layar */
+  min-height: 100vh;
 }
 
-/* Membuat konten utama tumbuh dan mengisi ruang yang tersisa */
-#app > .content-wrapper {
+.content-wrapper {
   flex-grow: 1;
 }
 
-/* Gaya untuk link navigasi */
+/* Navbar */
+.navbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 1000;
+  padding: 1rem 0;
+  background: rgba(255, 255, 255, 0.95);
+}
+
+.logo-link {
+  display: flex;
+  align-items: center;
+}
+
+.logo-text {
+  color: #2d6a4f;
+  font-weight: 600;
+  font-size: 1.25rem;
+  margin-left: 1rem;
+}
+
 .nav-link {
-  color: #178677;
-  position: relative;
-  padding: 0.5rem 1rem;
+  color: #2d6a4f;
   font-weight: 500;
+  font-size: 1.1rem;
+  position: relative;
+  padding-bottom: 0.25rem;
   transition: all 0.3s ease;
 }
 
 .nav-link::after {
-  content: "";
+  content: '';
   position: absolute;
-  left: 0;
   bottom: 0;
+  left: 50%;
   width: 0;
   height: 2px;
-  background: linear-gradient(to right, #28a745, #8b4513); /* Gradasi dari hijau ke coklat */
-  transition: all 0.2s ease;
+  background: #34d399;
+  transition: all 0.3s ease;
+  transform: translateX(-50%);
+}
+
+.nav-link:hover {
+  color: #34d399;
 }
 
 .nav-link:hover::after {
   width: 100%;
 }
 
-/* Gaya untuk dropdown menu */
-.dropdown {
-  position: absolute;
-  top: 60px;
-  right: 20px;
-  background: white;
-  color: black;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  border-radius: 8px;
-  padding: 10px;
-  z-index: 200; /* Pastikan di atas elemen lain */
-  display: flex;
-  flex-direction: column;
-  width: 150px;
+.auth-button {
+  padding: 0.5rem 1.5rem;
+  border-radius: 9999px;
+  font-weight: 500;
+  transition: all 0.3s ease;
 }
 
-/* Link di dalam dropdown */
+.auth-button:not(.logout) {
+  background: linear-gradient(135deg, #2d6a4f, #34d399);
+  color: white;
+}
+
+.auth-button:not(.logout):hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(45, 106, 79, 0.2);
+}
+
+.logout {
+  background: none;
+  color: #ef4444;
+}
+
+.logout:hover {
+  color: #dc2626;
+}
+
+/* Dropdown */
+.dropdown {
+  position: absolute;
+  top: 100%;
+  right: 1.5rem;
+  background: white;
+  border-radius: 1rem;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  padding: 1rem;
+  width: 200px;
+  z-index: 200;
+}
+
 .dropdown-item {
-  color: black;
-  padding: 10px;
-  text-align: center;
-  transition: background 0.3s ease;
-  cursor: pointer;
+  display: block;
+  padding: 0.75rem 1rem;
+  color: #2d6a4f;
+  font-weight: 500;
+  border-radius: 0.5rem;
+  transition: all 0.3s ease;
 }
 
 .dropdown-item:hover {
-  background: rgba(0, 0, 0, 0.1);
+  background: #f0fdf4;
+  color: #34d399;
 }
 
-/* Gaya untuk footer link */
+.dropdown-item.logout {
+  color: #ef4444;
+}
+
+.dropdown-item.logout:hover {
+  background: #fef2f2;
+  color: #dc2626;
+}
+
+/* Footer */
+.footer {
+  background: linear-gradient(135deg, #1f4d2b, #2d6a4f);
+}
+
 .footer-link {
-  color: #a3a3a3;
-  transition: color 0.3s ease;
+  color: #d4f4dd;
+  font-size: 0.9rem;
+  position: relative;
+  padding-bottom: 0.25rem;
+  transition: all 0.3s ease;
+}
+
+.footer-link::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  width: 0;
+  height: 1px;
+  background: #34d399;
+  transition: all 0.3s ease;
+  transform: translateX(-50%);
 }
 
 .footer-link:hover {
-  color: #e5e5e5;
+  color: #34d399;
 }
 
-/* Gaya untuk logo */
-.text-logo {
-  color: #178677;
+.footer-link:hover::after {
+  width: 100%;
 }
 
-/* Mengatur responsivitas */
+/* Animations */
+@import url('https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css');
+
+/* Responsive */
 @media (max-width: 1024px) {
-  /* Menyembunyikan menu di perangkat kecil */
-  .lg\:hidden {
-    display: block;
-  }
-
-  /* Menyembunyikan menu utama di perangkat kecil */
-  .lg\:flex {
+  .logo-text {
     display: none;
   }
-
-  /* Tampilan dropdown menu */
-  .lg\:hidden {
-    display: block;
-  }
-}
-
-/* Gaya untuk footer */
-footer {
-  background-color: #0a4b0a; /* Ganti dengan warna hijau solid */
-  box-shadow: 0px -2px 10px rgba(0, 0, 0, 0.1);
-  padding: 1rem;
-  text-align: center;
-  color: #ffffff;
-}
-
-footer a {
-  color: #007bff;
-  transition: color 0.3s ease;
-}
-
-footer a:hover {
-  color: #0056b3;
 }
 </style>

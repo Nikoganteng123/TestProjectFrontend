@@ -1,98 +1,131 @@
 <template>
-  <div class="min-h-screen bg-gradient-to-t from-green-400 to-white py-12 px-4 sm:px-6 lg:px-8 transition-all">
-    <div class="max-w-md mx-auto bg-white rounded-3xl shadow-xl overflow-hidden transform transition-all duration-300 hover:scale-105">
-      <div class="p-8">
-        <div class="flex justify-between items-center mb-6">
-          <h1 class="text-3xl font-semibold text-gray-900">Your Profile</h1>
-          <button
-            v-if="!isEditing"
-            @click="startEditing"
-            class="bg-green-600 text-white rounded-xl py-2 px-6 hover:bg-green-700 transition-all duration-300"
-          >
-            Edit Profile
-          </button>
-        </div>
+  <div class="min-h-screen bg-gradient-to-br from-emerald-50 to-teal-100 relative overflow-hidden">
+    <!-- Decorative Elements -->
+    <div class="flower-1"></div>
+    <div class="flower-2"></div>
+    <div class="flower-3"></div>
 
-        <!-- Display Mode -->
-        <div v-if="!isEditing" class="space-y-6">
-          <div class="border-b pb-4">
-            <p class="text-sm text-gray-600">Name</p>
-            <p class="text-xl font-medium">{{ user?.name }}</p>
-          </div>
-          <div class="border-b pb-4">
-            <p class="text-sm text-gray-600">Email</p>
-            <p class="text-xl font-medium">{{ user?.email }}</p>
-          </div>
-          <button
-            @click="showDeleteConfirm = true"
-            class="mt-6 w-full bg-red-500 text-white rounded-xl py-2 px-6 hover:bg-red-600 transition-colors duration-300"
-          >
-            Delete Account
-          </button>
-        </div>
-
-        <!-- Edit Mode -->
-        <form v-else @submit.prevent="updateProfile" class="space-y-4">
-          <div>
-            <label class="block text-sm text-gray-600">Name</label>
-            <input
-              type="text"
-              v-model="editForm.name"
-              class="mt-2 block w-full rounded-xl border-gray-300 shadow-lg focus:border-green-500 focus:ring-1 focus:ring-green-500 transition-all"
-              required
-            />
-          </div>
-          <div>
-            <label class="block text-sm text-gray-600">Email</label>
-            <input
-              type="email"
-              v-model="editForm.email"
-              class="mt-2 block w-full rounded-xl border-gray-300 shadow-lg focus:border-green-500 focus:ring-1 focus:ring-green-500 transition-all"
-              required
-            />
-          </div>
-          <div class="flex space-x-4">
+    <div class="max-w-3xl mx-auto py-16 px-4 sm:px-6 lg:px-8 relative z-10">
+      <div class="bg-white rounded-3xl shadow-2xl overflow-hidden transition-all duration-300 hover:shadow-3xl">
+        <!-- Header -->
+        <div class="bg-gradient-to-r from-emerald-600 to-teal-500 px-8 py-6">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center space-x-4">
+              <div class="bg-white/20 p-3 rounded-full transition-all duration-300 hover:bg-white/30">
+                <span class="text-2xl text-white">👤</span>
+              </div>
+              <h1 class="text-3xl font-bold text-white tracking-tight">Profile Settings</h1>
+            </div>
             <button
-              type="submit"
-              class="flex-1 bg-green-600 text-white rounded-xl py-2 px-6 hover:bg-green-700 transition-all duration-300"
+              v-if="!isEditing"
+              @click="startEditing"
+              class="flex items-center space-x-2 bg-white/20 text-white px-5 py-2 rounded-full hover:bg-white/30 transition-all duration-300"
             >
-              Save Changes
-            </button>
-            <button
-              type="button"
-              @click="cancelEditing"
-              class="flex-1 bg-gray-400 text-white rounded-xl py-2 px-6 hover:bg-gray-500 transition-all duration-300"
-            >
-              Cancel
+              <span class="text-lg">✏️</span>
+              <span class="font-medium">Edit Profile</span>
             </button>
           </div>
-        </form>
-
-        <!-- Error Message -->
-        <div v-if="errorMessage" class="mt-4">
-          <p class="text-red-500 text-sm">{{ errorMessage }}</p>
         </div>
 
-        <!-- Delete Confirmation Modal -->
-        <div v-if="showDeleteConfirm" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center transition-all">
-          <div class="bg-white p-6 rounded-3xl max-w-sm mx-4 transform transition-all duration-300 scale-110 hover:scale-100">
-            <h3 class="text-lg font-medium mb-4 text-gray-800">Delete Account</h3>
-            <p class="mb-4 text-gray-600">Are you sure you want to delete your account? This action cannot be undone.</p>
+        <div class="p-8">
+          <!-- Display Mode -->
+          <div v-if="!isEditing" class="space-y-8">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div class="bg-emerald-50 p-6 rounded-2xl transition-all duration-300 hover:bg-emerald-100 hover:shadow-lg">
+                <p class="text-sm font-semibold text-emerald-700 uppercase tracking-wide">Name</p>
+                <p class="mt-2 text-xl font-medium text-gray-900">{{ user?.name }}</p>
+              </div>
+              <div class="bg-emerald-50 p-6 rounded-2xl transition-all duration-300 hover:bg-emerald-100 hover:shadow-lg">
+                <p class="text-sm font-semibold text-emerald-700 uppercase tracking-wide">Email</p>
+                <p class="mt-2 text-xl font-medium text-gray-900">{{ user?.email }}</p>
+              </div>
+            </div>
+            <div class="pt-6 border-t border-emerald-100">
+              <button
+                @click="showDeleteConfirm = true"
+                class="text-red-600 font-semibold hover:text-red-700 transition-all duration-300 hover:underline"
+              >
+                Delete Account
+              </button>
+            </div>
+          </div>
+
+          <!-- Edit Mode -->
+          <form v-else @submit.prevent="updateProfile" class="space-y-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <label class="block text-sm font-semibold text-emerald-700 uppercase tracking-wide">Name</label>
+                <input
+                  type="text"
+                  v-model="editForm.name"
+                  class="mt-2 block w-full rounded-lg border border-emerald-200 p-3 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all duration-300"
+                  required
+                />
+              </div>
+              <div>
+                <label class="block text-sm font-semibold text-emerald-700 uppercase tracking-wide">Email</label>
+                <input
+                  type="email"
+                  v-model="editForm.email"
+                  class="mt-2 block w-full rounded-lg border border-emerald-200 p-3 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all duration-300"
+                  required
+                />
+              </div>
+            </div>
+
             <div class="flex space-x-4">
               <button
-                @click="deleteAccount"
-                class="flex-1 bg-red-500 text-white rounded-xl py-2 hover:bg-red-600 transition-all duration-300"
+                type="submit"
+                class="flex-1 bg-emerald-600 text-white px-6 py-3 rounded-full hover:bg-emerald-700 transition-all duration-300 hover:shadow-md"
               >
-                Yes, Delete
+                Save Changes
               </button>
               <button
-                @click="showDeleteConfirm = false"
-                class="flex-1 bg-gray-300 text-gray-700 rounded-xl py-2 hover:bg-gray-400 transition-all duration-300"
+                type="button"
+                @click="cancelEditing"
+                class="flex-1 bg-gray-100 text-gray-700 px-6 py-3 rounded-full hover:bg-gray-200 transition-all duration-300 hover:shadow-md"
               >
                 Cancel
               </button>
             </div>
+          </form>
+
+          <!-- Error Message -->
+          <div v-if="errorMessage" class="mt-6 p-4 bg-red-50 rounded-lg">
+            <p class="text-sm font-medium text-red-600">{{ errorMessage }}</p>
           </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div v-if="showDeleteConfirm" class="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
+      <div class="bg-white rounded-3xl max-w-md mx-4 p-8 shadow-2xl">
+        <div class="flex items-center justify-between mb-6">
+          <h3 class="text-2xl font-bold text-gray-900">Confirm Deletion</h3>
+          <button
+            @click="showDeleteConfirm = false"
+            class="text-gray-500 hover:text-gray-700 transition-all duration-300"
+          >
+            ❌
+          </button>
+        </div>
+        <p class="text-gray-600 mb-8 leading-relaxed">
+          Are you sure you want to delete your account? This action is permanent and cannot be reversed.
+        </p>
+        <div class="flex space-x-4">
+          <button
+            @click="deleteAccount"
+            class="flex-1 bg-red-600 text-white px-6 py-3 rounded-full hover:bg-red-700 transition-all duration-300"
+          >
+            Delete Account
+          </button>
+          <button
+            @click="showDeleteConfirm = false"
+            class="flex-1 bg-gray-100 text-gray-700 px-6 py-3 rounded-full hover:bg-gray-200 transition-all duration-300"
+          >
+            Cancel
+          </button>
         </div>
       </div>
     </div>
@@ -177,26 +210,42 @@ const deleteAccount = async () => {
 </script>
 
 <style scoped>
-/* Smooth background animation */
-.bg-gradient-to-t {
-  background: linear-gradient(to top, #66bb6a, #ffffff);
+/* Decorative Flowers */
+.flower-1, .flower-2, .flower-3 {
+  @apply absolute w-72 h-72 rounded-full opacity-10;
+  background: radial-gradient(circle, #34d399 0%, transparent 70%);
 }
 
-/* Animations on buttons, inputs, and forms */
-button, input {
+.flower-1 {
+  top: -4rem;
+  right: 15%;
+  animation: float 7s ease-in-out infinite;
+}
+
+.flower-2 {
+  bottom: 15%;
+  left: -4rem;
+  animation: float 8s ease-in-out infinite 1s;
+}
+
+.flower-3 {
+  bottom: -4rem;
+  right: 25%;
+  animation: float 9s ease-in-out infinite 2s;
+}
+
+/* Animations */
+@keyframes float {
+  0%, 100% { transform: translateY(0) scale(1); }
+  50% { transform: translateY(-25px) scale(1.05); }
+}
+
+/* Shadow enhancement */
+.shadow-3xl {
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+}
+
+.transition-all {
   transition: all 0.3s ease-in-out;
-}
-
-button:hover {
-  transform: scale(1.05);
-}
-
-input:focus {
-  border-color: #64b5f6;
-  box-shadow: 0 0 10px rgba(0, 123, 255, 0.5);
-}
-
-h1 {
-  font-family: 'Poppins', sans-serif;
 }
 </style>

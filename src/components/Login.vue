@@ -1,88 +1,80 @@
 <template>
-  <!-- Main wrapper div to create a full height layout with flexbox for centering the content -->
-  <div
-    class="min-h-screen flex items-center justify-center bg-cover bg-center py-12 px-4 sm:px-6 lg:px-8"
-    style="background-image: url('src/assets/loginbackground.jpg')"
-  >
-    <!-- Form container with a fixed width and spaced children -->
-    <div
-      class="max-w-md w-full space-y-8 bg-white bg-opacity-80 p-8 rounded-xl shadow-lg"
-    >
-      <!-- Logo and title -->
-      <div class="flex items-center justify-center mb-6">
-        <!-- SVG icon for the logo -->
-        <img src="/src/assets/logoipbi.jpg" alt="Logo" class="h-12 w-auto" />
-        <!-- Title text -->
-        <h2 class="text-2xl font-bold text-center">
-          Ikatan Perangkai Bunga Indonesia
-        </h2>
+  <div class="min-h-screen flex items-center justify-center bg-cover bg-center py-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden">
+    <!-- Background Image -->
+    <div class="absolute inset-0 bg-cover bg-center z-0" style="background-image: url('src/assets/loginbackground.jpg')"></div>
+    <!-- Decorative Elements -->
+    <div class="flower-1"></div>
+    <div class="flower-2"></div>
+    <div class="flower-3"></div>
+
+    <!-- Form Container -->
+    <div class="max-w-md w-full bg-white rounded-3xl shadow-2xl p-8 relative z-10 transition-all duration-300 hover:shadow-3xl">
+      <!-- Logo and Title -->
+      <div class="flex items-center justify-center mb-8 animate__animated animate__fadeIn animate__delay-1s">
+        <img src="/src/assets/logoipbi.jpg" alt="Logo" class="h-14 w-auto transition-all duration-300 hover:scale-105" />
+        <h2 class="text-3xl font-bold text-emerald-700 ml-4">IPBI Login</h2>
       </div>
-      <!-- Error message container -->
-      <div v-if="errorMessage">
-        <p class="bg-red-100 text-red-700 rounded-lg p-4">{{ errorMessage }}</p>
+
+      <!-- Error Message -->
+      <div v-if="errorMessage" class="mb-6 p-4 bg-red-50 rounded-lg animate__animated animate__shakeX">
+        <p class="text-sm font-medium text-red-600">{{ errorMessage }}</p>
       </div>
-      <!-- Login form with onSubmit event handler -->
-      <form class="mt-8 space-y-6" @submit.prevent="onSubmit">
-        <!-- Hidden input for remember -->
-        <input type="hidden" name="remember" value="true" />
-        <!-- Input fields container -->
-        <div class="rounded-md shadow-sm -space-y-px">
-          <!-- Email input field -->
-          <div>
-            <label for="email-address" class="sr-only">Email address</label>
-            <input
-              id="email-address"
-              name="email"
-              type="email"
-              v-model="email"
-              required
-              class="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-              placeholder="Email address"
-            />
-          </div>
-          <!-- Password input field -->
-          <div>
-            <label for="password" class="sr-only">Password</label>
-            <input
-              id="password"
-              name="password"
-              type="password"
-              v-model="password"
-              required
-              class="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-blue-500 focus:border-500 focus:z-10 sm:text-sm"
-              placeholder="Password"
-            />
-          </div>
+
+      <!-- Login Form -->
+      <form @submit.prevent="onSubmit" class="space-y-6 animate__animated animate__fadeInUp animate__delay-2s">
+        <!-- Email Input -->
+        <div class="group">
+          <label for="email-address" class="block text-sm font-semibold text-emerald-700 uppercase tracking-wide">Email</label>
+          <input
+            id="email-address"
+            name="email"
+            type="email"
+            v-model="email"
+            required
+            class="mt-2 block w-full rounded-lg border border-emerald-200 p-3 text-gray-900 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all duration-300 group-hover:border-emerald-300"
+            placeholder="Enter your email"
+          />
         </div>
-        
-        <!-- Login button container -->
-        <div>
+
+        <!-- Password Input -->
+        <div class="group">
+          <label for="password" class="block text-sm font-semibold text-emerald-700 uppercase tracking-wide">Password</label>
+          <input
+            id="password"
+            name="password"
+            type="password"
+            v-model="password"
+            required
+            class="mt-2 block w-full rounded-lg border border-emerald-200 p-3 text-gray-900 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all duration-300 group-hover:border-emerald-300"
+            placeholder="Enter your password"
+          />
+        </div>
+
+        <!-- Buttons -->
+        <div class="space-y-4">
           <button
             type="submit"
-            class="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-green-700 hover:bg-green-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+            class="w-full bg-emerald-600 text-white py-3 px-6 rounded-full font-semibold hover:bg-emerald-700 transition-all duration-300 hover:shadow-md hover:scale-[1.02]"
           >
             Login
           </button>
-          <!-- Tombol Register -->
           <button
             @click="goToRegisterPage"
-            class="group relative w-full flex justify-center py-2 px-4 mt-3 border border-transparent text-sm font-medium rounded-md text-white bg-green-700 hover:bg-green-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+            class="w-full bg-teal-500 text-white py-3 px-6 rounded-full font-semibold hover:bg-teal-600 transition-all duration-300 hover:shadow-md hover:scale-[1.02]"
           >
             Register
           </button>
           <button
             @click="goToHomePage"
-            class="group relative w-full flex justify-center py-2 px-4 mt-3 text-sm font-thin rounded-md text-green-700 hover:text-green-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+            class="w-full text-emerald-700 py-3 px-6 rounded-full font-medium hover:text-emerald-800 hover:bg-emerald-50 transition-all duration-300"
           >
-            Back to Home Page
+            Back to Home
           </button>
-          <!-- forgot Password -->
           <button
             @click="goToforgotPasswordPage"
-            type="button"  
-            class="group relative w-full flex justify-center py-2 px-4 mt-3 text-sm font-thin rounded-md text-blue-700 hover:text-blue-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+            class="w-full text-blue-600 py-3 px-6 rounded-full font-medium hover:text-blue-700 hover:bg-blue-50 transition-all duration-300"
           >
-            forgot Password?
+            Forgot Password?
           </button>
         </div>
       </form>
@@ -125,7 +117,7 @@ async function onSubmit() {
 
     if (response.data.access_token) {
       authStore.setAccessToken(response.data.access_token);
-      localStorage.setItem('email', email.value); // Tambahkan ini
+      localStorage.setItem('email', email.value);
       await authStore.fetchUserProfile();
       router.push({ name: "home" });
     } else {
@@ -139,20 +131,46 @@ async function onSubmit() {
 </script>
 
 <style scoped>
-/* Styles */
-.bg-cover {
-  background-size: cover;
+/* Decorative Flowers */
+.flower-1, .flower-2, .flower-3 {
+  @apply absolute w-72 h-72 rounded-full opacity-10;
+  background: radial-gradient(circle, #34d399 0%, transparent 70%);
 }
 
-.bg-center {
-  background-position: center;
+.flower-1 {
+  top: -4rem;
+  right: 15%;
+  animation: float 7s ease-in-out infinite;
 }
 
-.bg-opacity-80 {
-  background-color: rgba(255, 255, 255, 0.8);
+.flower-2 {
+  bottom: 15%;
+  left: -4rem;
+  animation: float 8s ease-in-out infinite 1s;
 }
 
-h2 {
-  color: #178677;
+.flower-3 {
+  bottom: -4rem;
+  right: 25%;
+  animation: float 9s ease-in-out infinite 2s;
 }
+
+/* Animations */
+@keyframes float {
+  0%, 100% { transform: translateY(0) scale(1); }
+  50% { transform: translateY(-25px) scale(1.05); }
+}
+
+/* Shadow Enhancement */
+.shadow-3xl {
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+}
+
+/* Transitions */
+.transition-all {
+  transition: all 0.3s ease-in-out;
+}
+
+/* Animations Import */
+@import url('https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css');
 </style>

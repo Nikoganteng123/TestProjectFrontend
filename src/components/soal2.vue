@@ -53,7 +53,7 @@
               <button type="button" @click="deleteAllFiles"
                 v-if="Object.keys(savedFiles).length > 0"
                 class="bg-red-600 text-white rounded-xl py-3 px-6 hover:bg-red-700 transition-all duration-300">
-                Hapus Semua File
+                Hapus
               </button>
             </div>
 

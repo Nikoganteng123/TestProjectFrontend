@@ -52,29 +52,30 @@
               </div>
             </div>
   
-            <div class="flex justify-between items-center mt-6">
-              <router-link to="/soal-2"
-                class="bg-gray-500 text-white rounded-xl py-3 px-6 hover:bg-gray-600 transition-all duration-300">
-                Previous
-              </router-link>
-  
-              <div class="flex gap-3">
-                <button type="submit"
-                  class="bg-green-600 text-white rounded-xl py-3 px-6 hover:bg-green-700 transition-all duration-300">
-                  {{ hasExistingData ? 'Update Jawaban' : 'Simpan Jawaban' }}
-                </button>
-  
-                <button type="button" @click="deleteAnswer"
-                  class="bg-red-600 text-white rounded-xl py-3 px-6 hover:bg-red-700 transition-all duration-300">
-                  Hapus Jawaban
-                </button>
-              </div>
-  
-              <router-link to="/soal-4"
-                class="bg-blue-600 text-white rounded-xl py-3 px-6 hover:bg-blue-700 transition-all duration-300">
-                Next
-              </router-link>
-            </div>
+            <div class="flex flex-wrap justify-center sm:justify-between items-center mt-6 gap-4">
+  <router-link to="/soal-2"
+    class="bg-gray-500 text-white rounded-xl py-3 px-6 hover:bg-gray-600 transition-all duration-300">
+    Previous
+  </router-link>
+
+  <div class="flex flex-wrap gap-4 justify-center">
+    <button type="submit"
+      class="bg-green-600 text-white rounded-xl py-3 px-6 hover:bg-green-700 transition-all duration-300">
+      {{ hasExistingData ? 'Update' : 'Simpan' }}
+    </button>
+
+    <button type="button" @click="deleteAnswer"
+      class="bg-red-600 text-white rounded-xl py-3 px-6 hover:bg-red-700 transition-all duration-300">
+      Hapus
+    </button>
+  </div>
+
+  <router-link to="/soal-4"
+    class="bg-blue-600 text-white rounded-xl py-3 px-6 hover:bg-blue-700 transition-all duration-300">
+    Next
+  </router-link>
+</div>
+
           </form>
           <!-- Question Navigation Bar -->
 <div class="mt-8 pt-6 border-t border-gray-200">

@@ -48,7 +48,7 @@
               type="submit"
               class="bg-green-600 text-white rounded-xl py-3 px-6 hover:bg-green-700 transition-all duration-300"
             >
-              {{ isEditMode ? 'Ubah Jawaban' : 'Simpan Jawaban' }}
+              {{ isEditMode ? 'Ubah' : 'Simpan' }}
             </button>
             <!-- Tombol Hapus Jawaban hanya tampil jika ada jawaban -->
             <button
@@ -57,7 +57,7 @@
               @click="deleteAnswer"
               class="bg-red-500 text-white rounded-xl py-3 px-6 hover:bg-red-600 transition-all duration-300"
             >
-              Hapus Jawaban
+              Hapus
             </button>
             <router-link
               to="/soal-2"

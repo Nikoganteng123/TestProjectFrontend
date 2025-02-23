@@ -138,7 +138,7 @@
                 <button type="button" @click="deleteAllFiles"
                   v-if="Object.keys(savedFiles).length > 0"
                   class="bg-red-600 text-white rounded-xl py-3 px-6 hover:bg-red-700 transition-all duration-300">
-                  Hapus Semua File
+                  Hapus
                 </button>
               </div>
   
@@ -148,20 +148,43 @@
               </router-link>
             </div>
           </form>
+
+          <!-- Question Navigation Bar -->
+<div class="mt-8 pt-6 border-t border-gray-200">
+  <h3 class="text-lg font-medium text-gray-800 mb-4">Navigasi Soal</h3>
+  <div class="flex flex-wrap gap-2">
+    <router-link
+      v-for="n in 17" 
+      :key="n"
+      :to="`/soal-${n}`"
+      class="w-10 h-10 flex items-center justify-center rounded-lg text-sm font-medium transition-all duration-200"
+      :class="[
+        currentQuestionNumber === n 
+          ? 'bg-green-600 text-white' 
+          : 'bg-gray-200 hover:bg-green-500 hover:text-white text-gray-700'
+      ]"
+    >
+      {{ n }}
+    </router-link>
+  </div>
+</div>
         </div>
       </div>
     </div>
   </template>
   
   <script setup>
-  import { ref, computed, onMounted } from 'vue';
+  import { ref, computed, onMounted} from 'vue';
   import axios from 'axios';
   import { useAuthStore } from '@/stores/auth';
-  
+  import { useRoute } from 'vue-router';
+
+  const route = useRoute()
   const authStore = useAuthStore();
   const uploadedFiles = ref({});
   const savedFiles = ref({});
   const totalNilai = ref(0);
+
   
   // Mapping nama field di frontend dengan backend - PERBAIKAN MAPPING UNTUK SECTION A & D
   const fieldMapping = {

@@ -22,9 +22,9 @@ import soal3 from "@/components/soal3.vue";
 import soal4 from "@/components/soal4.vue";
 import soal5 from "@/components/soal5.vue";
 import soal6 from "@/components/soal6.vue";
-// import soal7 from "@/components/soal7.vue";
+import soal7 from "@/components/soal7.vue";
 // import soal8 from "@/components/soal8.vue";
-// import soal9 from "@/components/soal9.vue";
+import soal9 from "@/components/soal9.vue";
 // import soal10 from "@/components/soal10.vue";
 // import soal11 from "@/components/soal11.vue";
 // import soal12 from "@/components/soal12.vue";
@@ -75,24 +75,24 @@ const router = createRouter({
       name: "soal-6",
       component: soal6,
     },
-    // Soal 7
-// {
-//   path: "/soal-7",
-//   name: "soal-7",
-//   component: soal7,
-// },
+    //Soal 7
+{
+  path: "/soal-7",
+  name: "soal-7",
+  component: soal7,
+},
 // // Soal 8
 // {
 //   path: "/soal-8",
 //   name: "soal-8",
 //   component: soal8,
 // },
-// // Soal 9
-// {
-//   path: "/soal-9",
-//   name: "soal-9",
-//   component: soal9,
-// },
+// Soal 9
+{
+  path: "/soal-9",
+  name: "soal-9",
+  component: soal9,
+},
 // // Soal 10
 // {
 //   path: "/soal-10",
