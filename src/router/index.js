@@ -23,22 +23,29 @@ import soal4 from "@/components/soal4.vue";
 import soal5 from "@/components/soal5.vue";
 import soal6 from "@/components/soal6.vue";
 import soal7 from "@/components/soal7.vue";
-// import soal8 from "@/components/soal8.vue";
+import soal8 from "@/components/soal8.vue";
 import soal9 from "@/components/soal9.vue";
-// import soal10 from "@/components/soal10.vue";
-// import soal11 from "@/components/soal11.vue";
-// import soal12 from "@/components/soal12.vue";
-// import soal13 from "@/components/soal13.vue";
-// import soal14 from "@/components/soal14.vue";
-// import soal15 from "@/components/soal15.vue";
-// import soal16 from "@/components/soal16.vue";
-// import soal17 from "@/components/soal17.vue";
+import soal10 from "@/components/soal10.vue";
+import soal11 from "@/components/soal11.vue";
+import soal12 from "@/components/soal12.vue";
+import soal13 from "@/components/soal13.vue";
+import soal14 from "@/components/soal14.vue";
+import soal15 from "@/components/soal15.vue";
+import soal16 from "@/components/soal16.vue";
+import soal17 from "@/components/soal17.vue";
+import kumpul from "@/components/kumpul.vue";
 
 
 // Create a router
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
+    // Kumpul
+    {
+      path: "/kumpul",
+      name: "kumpul",
+      component: kumpul,
+    },
     // Soal 1
     {
       path: "/soal-1",
@@ -81,66 +88,66 @@ const router = createRouter({
   name: "soal-7",
   component: soal7,
 },
-// // Soal 8
-// {
-//   path: "/soal-8",
-//   name: "soal-8",
-//   component: soal8,
-// },
+// Soal 8
+{
+  path: "/soal-8",
+  name: "soal-8",
+  component: soal8,
+},
 // Soal 9
 {
   path: "/soal-9",
   name: "soal-9",
   component: soal9,
 },
-// // Soal 10
-// {
-//   path: "/soal-10",
-//   name: "soal-10",
-//   component: soal10,
-// },
-// // Soal 11
-// {
-//   path: "/soal-11",
-//   name: "soal-11",
-//   component: soal11,
-// },
-// // Soal 12
-// {
-//   path: "/soal-12",
-//   name: "soal-12",
-//   component: soal12,
-// },
-// // Soal 13
-// {
-//   path: "/soal-13",
-//   name: "soal-13",
-//   component: soal13,
-// },
-// // Soal 14
-// {
-//   path: "/soal-14",
-//   name: "soal-14",
-//   component: soal14,
-// },
-// // Soal 15
-// {
-//   path: "/soal-15",
-//   name: "soal-15",
-//   component: soal15,
-// },
-// // Soal 16
-// {
-//   path: "/soal-16",
-//   name: "soal-16",
-//   component: soal16,
-// },
-// // Soal 17
-// {
-//   path: "/soal-17",
-//   name: "soal-17",
-//   component: soal17,
-// },
+// Soal 10
+{
+  path: "/soal-10",
+  name: "soal-10",
+  component: soal10,
+},
+// Soal 11
+{
+  path: "/soal-11",
+  name: "soal-11",
+  component: soal11,
+},
+// Soal 12
+{
+  path: "/soal-12",
+  name: "soal-12",
+  component: soal12,
+},
+// Soal 13
+{
+  path: "/soal-13",
+  name: "soal-13",
+  component: soal13,
+},
+// Soal 14
+{
+  path: "/soal-14",
+  name: "soal-14",
+  component: soal14,
+},
+// Soal 15
+{
+  path: "/soal-15",
+  name: "soal-15",
+  component: soal15,
+},
+// Soal 16
+{
+  path: "/soal-16",
+  name: "soal-16",
+  component: soal16,
+},
+// Soal 17
+{
+  path: "/soal-17",
+  name: "soal-17",
+  component: soal17,
+},
 
     // Home route
     {
