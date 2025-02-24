@@ -1,46 +1,43 @@
 <template>
-  <div class="max-w-6xl mx-auto p-8 bg-white rounded-lg shadow-lg mt-10 transform transition-all hover:scale-105">
-    <!-- Title Section with smooth fade-in -->
-    <h1 class="text-3xl font-bold text-green-800 mb-6 text-center animate__animated animate__fadeIn">
+  <div class="max-w-6xl mx-auto p-8 bg-white rounded-xl shadow-xl mt-12 transition-all duration-300 hover:shadow-2xl">
+    <h1 class="text-4xl font-extrabold text-green-900 mb-8 text-center animate__animated animate__fadeInDown">
       Uji Kompetensi IPBI
     </h1>
 
-    <!-- Button to Start the Test with smooth hover effect -->
-    <div class="flex justify-center mb-8">
+    <div class="flex justify-center mb-10">
       <router-link to="/soal-1">
-        <button class="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-transform transform hover:scale-105 ease-in-out">
+        <button class="px-8 py-3 bg-gradient-to-r from-green-600 to-green-700 text-white rounded-full font-semibold
+          hover:from-green-700 hover:to-green-800 transition-all duration-300 transform hover:scale-105 hover:shadow-lg">
           Ikuti Uji Kompetensi
         </button>
       </router-link>
     </div>
 
-    <!-- Participants List Section with animated fade-in -->
-    <h2 class="text-2xl font-semibold text-green-700 mb-4 animate__animated animate__fadeIn">
-      Peserta yang Sudah Terdaftar
+    <h2 class="text-2xl font-bold text-green-800 mb-6 animate__animated animate__fadeIn">
+      Peserta Terdaftar
     </h2>
 
-    <!-- Table Section with fade-in effect -->
-    <div class="overflow-x-auto animate__animated animate__fadeIn animate__delay-1s">
-      <table class="w-full border-collapse border border-gray-300">
-        <thead class="bg-green-100">
+    <div class="overflow-x-auto rounded-lg shadow-md animate__animated animate__fadeIn animate__delay-1s">
+      <table class="w-full border-collapse bg-white">
+        <thead class="bg-green-50 text-green-900">
           <tr>
-            <th class="border border-gray-300 px-4 py-2 text-left">Nama</th>
-            <th class="border border-gray-300 px-4 py-2 text-center">Poin</th>
-            <th class="border border-gray-300 px-4 py-2 text-center">Rank</th>
+            <th class="px-6 py-4 text-left font-semibold">Nama</th>
+            <th class="px-6 py-4 text-center font-semibold">Status Sertifikasi</th>
+            <th class="px-6 py-4 text-center font-semibold">Peringkat</th>
           </tr>
         </thead>
         <tbody>
-          <tr 
-            v-for="(participant, index) in participants" 
-            :key="index" 
-            class="transition-transform transform hover:scale-105 hover:bg-green-50"
-          >
-            <td class="border border-gray-300 px-4 py-2">{{ participant.name }}</td>
-            <td class="border border-gray-300 px-4 py-2 text-center">
-              <span v-if="participant.certified" class="text-green-600 font-semibold">Sudah</span>
-              <span v-else class="text-red-600 font-semibold">Belum</span>
+          <tr v-for="(participant, index) in participants" :key="index" 
+              class="border-b hover:bg-green-50 transition-all duration-200">
+            <td class="px-6 py-4 text-gray-800">{{ participant.name }}</td>
+            <td class="px-6 py-4 text-center">
+              <span :class="participant.certified ? 'text-green-600' : 'text-red-600'" 
+                    class="font-medium px-3 py-1 rounded-full bg-opacity-10"
+                    :style="{ backgroundColor: participant.certified ? '#dcfce7' : '#fee2e2' }">
+                {{ participant.certified ? 'Tersertifikasi' : 'Belum' }}
+              </span>
             </td>
-            <td class="border border-gray-300 px-4 py-2 text-center">{{ participant.rank }}</td>
+            <td class="px-6 py-4 text-center text-gray-700">{{ participant.rank }}</td>
           </tr>
         </tbody>
       </table>
@@ -49,109 +46,77 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue";
-import axios from "axios";
-import { useAuthStore } from "@/stores/auth";
+import { ref, onMounted } from 'vue';
+import axios from 'axios';
+import { useAuthStore } from '@/stores/auth';
 
 const authStore = useAuthStore();
 const participants = ref([]);
 
-// Function to get participants from the database
 const getParticipants = async () => {
   try {
-    const response = await axios.get("http://localhost:8000/api/users", {
+    const response = await axios.get('http://localhost:8000/api/users', {
       headers: { Authorization: `Bearer ${authStore.accessToken}` },
     });
-
-    // Map through the participants to assign random ranks and get the required data
-    participants.value = response.data.map(participant => ({
-      name: participant.name,  // Assuming `name` is a field in the database
-      certified: participant.certified,  // Assuming `certified` is a field to determine if a participant is certified
-      rank: getRandomRank(), // Random rank for demonstration
-    }));
+    participants.value = response.data;
   } catch (error) {
-    console.error("Error fetching participants:", error);
+    console.error('Gagal mengambil data peserta:', error);
   }
 };
 
-// Function to return a random rank
-const getRandomRank = () => {
-  const ranks = ["Rookie", "Intermediate", "Professional"];
-  return ranks[Math.floor(Math.random() * ranks.length)];
-};
-
-// Fetch participants on component mount
 onMounted(() => {
-  getParticipants();
+  if (authStore.accessToken) {
+    getParticipants();
+  } else {
+    console.log('Silakan login terlebih dahulu.');
+  }
 });
 </script>
 
 <style scoped>
 body {
   font-family: 'Inter', sans-serif;
-  background-color: #f3f4f6;
+  background: linear-gradient(to bottom, #f3f4f6, #e5e7eb);
+  min-height: 100vh;
 }
 
 h1 {
-  color: #1f6f43; /* Dark Green */
+  color: #14532d;
+  text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
 }
 
 h2 {
-  color: #228B22; /* Forest Green */
+  color: #166534;
 }
 
-/* Button animation */
 button {
   transition: all 0.3s ease-in-out;
 }
 
-button:hover {
-  transform: scale(1.05);
-  background-color: #4CAF50; /* Bright Green */
-}
-
-/* Table row hover effect */
-tr {
-  transition: all 0.3s ease;
-}
-
-tr:hover {
-  transform: scale(1.05);
-  background-color: #f0f8f0; /* Light Green */
-}
-
 table {
-  border-collapse: collapse;
+  border-radius: 8px;
+  overflow: hidden;
 }
 
 th, td {
-  padding: 12px 15px;
-  text-align: center;
+  padding: 16px;
 }
 
-/* Add background color to table header */
 th {
-  background-color: #dff0d8; /* Light Green */
+  background: #f0fdf4;
+  letter-spacing: 0.5px;
 }
 
-/* Smooth transitions for elements */
-.animate__fadeIn {
-  animation: fadeIn 1s ease-in-out;
-}
-
-@keyframes fadeIn {
-  0% {
-    opacity: 0;
-  }
-  100% {
-    opacity: 1;
-  }
-}
-
-/* Custom hover effect for table rows */
 tr:hover {
-  background-color: #e8f5e9;
-  transition: background-color 0.3s ease;
+  transform: translateY(-2px);
 }
 
+.animate__fadeInDown {
+  animation: fadeInDown 0.8s ease-out;
+}
+
+@keyframes fadeInDown {
+  0% { opacity: 0; transform: translateY(-20px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
 </style>

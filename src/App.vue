@@ -120,6 +120,7 @@ const logout = () => {
 </script>
 
 <style scoped>
+@import 'animate.css/animate.min.css';
 /* App Container */
 #app {
   display: flex;
