@@ -5,15 +5,23 @@
     <div class="flower-2"></div>
     <div class="flower-3"></div>
 
-    <!-- Main Content with top padding to account for fixed navbar -->
+    <!-- Main Content -->
     <div class="max-w-3xl mx-auto pt-24 pb-16 px-4 sm:px-6 lg:px-8 relative z-10 flex items-center justify-center min-h-[calc(100vh-6rem)]">
       <div class="bg-white rounded-3xl shadow-2xl overflow-hidden transition-all duration-300 hover:shadow-3xl w-full">
         <!-- Header -->
         <div class="bg-gradient-to-r from-emerald-600 to-teal-500 px-8 py-6">
           <div class="flex items-center justify-between">
             <div class="flex items-center space-x-4">
-              <div class="bg-white/20 p-3 rounded-full transition-all duration-300 hover:bg-white/30">
-                <span class="text-2xl text-white">👤</span>
+              <div class="relative">
+                <img
+                  v-if="user?.profile_picture"
+                  :src="user.profile_picture"
+                  alt="Profile Picture"
+                  class="w-16 h-16 rounded-full object-cover border-2 border-white"
+                />
+                <div v-else class="bg-white/20 p-3 rounded-full w-16 h-16 flex items-center justify-center">
+                  <span class="text-2xl text-white">👤</span>
+                </div>
               </div>
               <h1 class="text-3xl font-bold text-white tracking-tight">Profile Settings</h1>
             </div>
@@ -41,7 +49,7 @@
                 <p class="mt-2 text-xl font-medium text-gray-900">{{ user?.email }}</p>
               </div>
             </div>
-            <div class="pt-6 border-t border-emerald-100">
+            <div class="pt-6 border-t border-emerald-100 flex justify-between">
               <button
                 @click="showDeleteConfirm = true"
                 class="text-red-600 font-semibold hover:text-red-700 transition-all duration-300 hover:underline"
@@ -71,6 +79,46 @@
                   class="mt-2 block w-full rounded-lg border border-emerald-200 p-3 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all duration-300"
                   required
                 />
+              </div>
+            </div>
+
+            <!-- Profile Picture Upload/Edit/Delete -->
+            <div class="space-y-4">
+              <label class="block text-sm font-semibold text-emerald-700 uppercase tracking-wide">Profile Picture</label>
+              <div class="flex items-center space-x-4">
+                <img
+                  v-if="previewImage || user?.profile_picture"
+                  :src="previewImage || user.profile_picture"
+                  alt="Profile Preview"
+                  class="w-24 h-24 rounded-full object-cover border-2 border-emerald-200"
+                />
+                <div v-else class="w-24 h-24 rounded-full bg-gray-100 flex items-center justify-center">
+                  <span class="text-2xl text-gray-500">👤</span>
+                </div>
+                <div class="flex flex-col space-y-2">
+                  <input
+                    type="file"
+                    ref="fileInput"
+                    @change="previewFile"
+                    accept="image/*"
+                    class="hidden"
+                  />
+                  <button
+                    type="button"
+                    @click="$refs.fileInput.click()"
+                    class="bg-emerald-100 text-emerald-700 px-4 py-2 rounded-full hover:bg-emerald-200 transition-all duration-300"
+                  >
+                    {{ user?.profile_picture ? 'Change Photo' : 'Upload Photo' }}
+                  </button>
+                  <button
+                    v-if="user?.profile_picture || previewImage"
+                    type="button"
+                    @click="removePhoto"
+                    class="text-red-600 hover:text-red-700 transition-all duration-300 hover:underline"
+                  >
+                    Remove Photo
+                  </button>
+                </div>
               </div>
             </div>
 
@@ -145,17 +193,21 @@ const user = ref(null)
 const isEditing = ref(false)
 const showDeleteConfirm = ref(false)
 const errorMessage = ref('')
+const previewImage = ref(null)
+const fileInput = ref(null)
 
 const editForm = ref({
   name: '',
-  email: ''
+  email: '',
+  profile_picture: null
 })
 
 onMounted(async () => {
   user.value = authStore.user
   editForm.value = {
     name: user.value?.name || '',
-    email: user.value?.email || ''
+    email: user.value?.email || '',
+    profile_picture: null
   }
 })
 
@@ -163,23 +215,50 @@ const startEditing = () => {
   isEditing.value = true
   editForm.value = {
     name: user.value?.name || '',
-    email: user.value?.email || ''
+    email: user.value?.email || '',
+    profile_picture: null
   }
+  previewImage.value = null
 }
 
 const cancelEditing = () => {
   isEditing.value = false
   errorMessage.value = ''
+  previewImage.value = null
+}
+
+const previewFile = (event) => {
+  const file = event.target.files[0]
+  if (file) {
+    previewImage.value = URL.createObjectURL(file)
+    editForm.value.profile_picture = file
+  }
+}
+
+const removePhoto = () => {
+  previewImage.value = null
+  editForm.value.profile_picture = null
+  user.value.profile_picture = null
+  fileInput.value.value = ''
 }
 
 const updateProfile = async () => {
   try {
-    const response = await axios.put(
+    const formData = new FormData()
+    formData.append('name', editForm.value.name)
+    formData.append('email', editForm.value.email)
+    if (editForm.value.profile_picture) {
+      formData.append('profile_picture', editForm.value.profile_picture)
+    }
+    formData.append('_method', 'PUT') // Untuk Laravel spoofing PUT request
+
+    const response = await axios.post(
       'http://localhost:8000/api/users',
-      editForm.value,
+      formData,
       {
         headers: {
-          Authorization: `Bearer ${authStore.accessToken}`
+          Authorization: `Bearer ${authStore.accessToken}`,
+          'Content-Type': 'multipart/form-data'
         }
       }
     )
@@ -188,6 +267,7 @@ const updateProfile = async () => {
     user.value = response.data
     isEditing.value = false
     errorMessage.value = ''
+    previewImage.value = null
   } catch (error) {
     errorMessage.value = error.response?.data?.message || 'Failed to update profile'
   }

@@ -1,12 +1,6 @@
 import { createRouter, createWebHistory } from "vue-router";
 import HomePage from "@/components/HomePage.vue";
-import ProductCreate from "@/components/ProductCreate.vue";
-import ProductDetails from "@/components/ProductDetails.vue";
-import ProductEdit from "@/components/ProductEdit.vue";
 
-import UserCreate from "@/components/UserCreate.vue";
-import UserDetails from "@/components/UserDetails.vue";
-import UserEdit from "@/components/UserEdit.vue";
 import Profile from "@/components/Profile.vue";
 
 import Login from "@/components/Login.vue";
@@ -161,24 +155,7 @@ const router = createRouter({
       name: "login",
       component: Login,
     },
-    // Create product route
-    {
-      path: "/create",
-      name: "productcreate",
-      component: ProductCreate,
-    },
-    // Product details route
-    {
-      path: "/product/:id",
-      name: "productdetail",
-      component: ProductDetails,
-    },
-    // Edit product route
-    {
-      path: "/product/:id/edit",
-      name: "productedit",
-      component: ProductEdit,
-    },
+   
     // Sisi Profile
     {
       path: "/users",
@@ -189,24 +166,6 @@ const router = createRouter({
       path: "/uji-kompetensi",
       name: "ujikompetensi",
       component: UjiKompetensi,
-    },
-    // Create user route
-    {
-      path: "/users/create",
-      name: "usercreate",
-      component: UserCreate,
-    },
-    // User details route
-    {
-      path: "/users/:id",
-      name: "userdetail",
-      component: UserDetails,
-    },
-    // Edit user route
-    {
-      path: "/users/:id/edit",
-      name: "useredit",
-      component: UserEdit,
     },
     {
       path: "/register",

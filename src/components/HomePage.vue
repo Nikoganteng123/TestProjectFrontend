@@ -12,7 +12,7 @@
     <div class="hero-content">
       <h1 class="hero-title animate__animated animate__fadeInDown animate__delay-1s">
         <span class="desktop-title">Selamat Datang di IPBI</span>
-        <span class="mobile-title">I P B I</span>
+        <span class="mobile-title">IPBI</span>
       </h1>
       <p class="hero-subtitle animate__animated animate__fadeInUp animate__delay-2s desktop-subtitle">
         Ikatan Perangkai Bunga Indonesia
@@ -126,6 +126,18 @@
   display: none;
 }
 
+/* Shining Animation for Mobile */
+@keyframes shine {
+  0% { background-position: -200%; }
+  100% { background-position: 200%; }
+}
+
+@keyframes rotate3D {
+  0% { transform: perspective(1000px) rotateX(0deg) rotateY(0deg); }
+  50% { transform: perspective(1000px) rotateX(10deg) rotateY(15deg); }
+  100% { transform: perspective(1000px) rotateX(0deg) rotateY(0deg); }
+}
+
 /* Subtitles */
 .desktop-subtitle {
   display: block;
@@ -143,11 +155,20 @@
   
   .mobile-title {
     display: block;
-    font-size: clamp(5rem, 25vw, 8rem); /* Diperbesar dari sebelumnya */
-    letter-spacing: 0.5rem;
+    font-size: clamp(5rem, 20vw, 8rem); /* Ukuran besar tapi terkendali */
+    letter-spacing: 0.25rem; /* Spasi dikurangi agar muat */
     width: 100%;
     padding: 0 1rem;
-    color: #2d6a4f;
+    color: transparent;
+    background: linear-gradient(90deg, 
+      #2d6a4f 0%, 
+      #34d399 50%, 
+      #2d6a4f 100%);
+    background-size: 200% 100%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    animation: shine 3s linear infinite, rotate3D 6s ease-in-out infinite;
+    white-space: nowrap; /* Pastikan satu baris */
   }
   
   .desktop-subtitle {
@@ -156,10 +177,10 @@
   
   .mobile-subtitle {
     display: block;
-    font-size: clamp(1rem, 3vw, 1.5rem); /* Diperbesar dari sebelumnya */
+    font-size: clamp(1rem, 3vw, 1.5rem);
     font-weight: 300; /* Tulisan tipis */
     color: #2d6a4f;
-    margin-top: 2rem; /* Jarak sedikit lebih besar */
+    margin-top: 2rem;
     text-transform: uppercase;
     letter-spacing: 1px;
     text-shadow: 0 2px 15px rgba(31, 77, 43, 0.3);
