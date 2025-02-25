@@ -55,7 +55,7 @@
           <div class="space-y-2 animate-slide-in-up">
             <h2 class="text-xl sm:text-2xl font-bold text-gray-800">Potensi Nilai</h2>
             <p class="text-lg sm:text-xl text-gray-700 font-semibold">
-              <span class="text-2xl sm:text-3xl font-extrabold text-emerald-700 animate-pulse">{{ totalNilai }}</span> / 382
+              <span class="text-2xl sm:text-3xl font-extrabold text-emerald-700 animate-pulse">{{ totalNilai }}</span> / 462
             </p>
           </div>
   
@@ -153,7 +153,7 @@
         }
       );
       showPopup.value = false;
-      router.push('/home');
+      router.push('/');
     } catch (error) {
       console.error('Error submitting final:', error.response ? error.response.data : error.message);
       showPopup.value = false;

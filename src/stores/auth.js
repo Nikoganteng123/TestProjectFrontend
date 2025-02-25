@@ -3,10 +3,23 @@ import axios from "axios";
 
 export const useAuthStore = defineStore({
   id: "auth",
-  state: () => ({
-    accessToken: localStorage.getItem("accessToken") || null,
-    user: JSON.parse(localStorage.getItem("user")) || null,
-  }),
+  state: () => {
+    const userData = localStorage.getItem("user");
+    console.log("Raw userData from localStorage:", userData); // Debugging
+    let parsedUser = null;
+    if (userData) {
+      try {
+        parsedUser = JSON.parse(userData);
+      } catch (e) {
+        console.error("Failed to parse user data from localStorage:", e);
+        parsedUser = null;
+      }
+    }
+    return {
+      accessToken: localStorage.getItem("accessToken") || null,
+      user: parsedUser,
+    };
+  },
   getters: {
     isLoggedIn() {
       return this.accessToken !== null;
@@ -33,18 +46,16 @@ export const useAuthStore = defineStore({
               Authorization: `Bearer ${this.accessToken}`,
             },
           });
-          
-          // Ambil email dari localStorage
-          const currentUserEmail = localStorage.getItem('email');
-          console.log("Current email:", currentUserEmail); // untuk debugging
-          
-          // Filter user berdasarkan email
+
+          const currentUserEmail = localStorage.getItem("email");
+          console.log("Current email:", currentUserEmail);
+
           const currentUser = response.data.data.find(
-            user => user.email === currentUserEmail
+            (user) => user.email === currentUserEmail
           );
-          
-          console.log("Found user:", currentUser); // untuk debugging
-          
+
+          console.log("Found user:", currentUser);
+
           if (currentUser) {
             this.setUser(currentUser);
           }
@@ -55,15 +66,19 @@ export const useAuthStore = defineStore({
     },
     logout() {
       try {
-        axios.post("http://localhost:8000/api/logout", null, {
-          headers: {
-            Authorization: `Bearer ${this.accessToken}`,
-          },
-        });
+        axios.post(
+          "http://localhost:8000/api/logout",
+          null,
+          {
+            headers: {
+              Authorization: `Bearer ${this.accessToken}`,
+            },
+          }
+        );
         this.removeAccessToken();
         this.user = null;
         localStorage.removeItem("user");
-        localStorage.removeItem("email"); // Tambahkan ini untuk membersihkan email
+        localStorage.removeItem("email");
         console.log("Logout successful");
       } catch (error) {
         console.error("Error during logout:", error.message);

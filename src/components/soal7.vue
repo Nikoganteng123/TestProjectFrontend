@@ -6,6 +6,14 @@
           Soal 7: Kejuaraan/Lomba Merangkai Bunga
         </h1>
 
+        <!-- Success/Error Messages -->
+        <div v-if="successMessage" class="p-4 bg-green-100 text-green-700 rounded-md">
+          {{ successMessage }}
+        </div>
+        <div v-if="errorMessage" class="p-4 bg-red-100 text-red-700 rounded-md">
+          {{ errorMessage }}
+        </div>
+
         <form @submit.prevent="submitAnswer" class="space-y-4">
           <div class="flex flex-col space-y-4">
             <div v-for="(field, index) in certificateFields" :key="index">
@@ -22,14 +30,14 @@
                 </label>
 
                 <!-- Show when file is saved -->
-                <div v-if="savedFiles[field.key]" class="text-green-600 flex items-center gap-2">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <div v-if="savedFiles[field.key]" class="flex items-center gap-2">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                   </svg>
-                  <span>File sudah tersimpan</span>
+                  <span class="text-green-600">File sudah tersimpan</span>
                 </div>
 
-                <!-- Show file input only when no file is saved -->
+                <!-- Show file input when no file is saved -->
                 <input v-else type="file" :id="field.key" accept=".pdf"
                   @change="handleFileUpload($event, field.key)" 
                   class="border p-2 rounded-md w-2/3 form-radio" />
@@ -46,14 +54,18 @@
             <div class="flex flex-col space-y-4 sm:flex-row sm:space-y-0 sm:space-x-4">
               <button type="submit"
                 v-if="Object.keys(uploadedFiles).length > 0"
+                :disabled="loading"
                 class="uniform-button bg-green-600 text-white rounded-xl py-3 px-6 hover:bg-green-700 transition-all duration-300 w-full sm:w-auto">
                 {{ Object.keys(savedFiles).length > 0 ? 'Tambah' : 'Simpan' }}
+                <span v-if="loading" class="spinner ml-2"></span>
               </button>
 
               <button type="button" @click="deleteAllFiles"
                 v-if="Object.keys(savedFiles).length > 0"
+                :disabled="loading"
                 class="uniform-button bg-red-600 text-white rounded-xl py-3 px-6 hover:bg-red-700 transition-all duration-300 w-full sm:w-auto">
-                Hapus
+                Hapus Semua
+                <span v-if="loading" class="spinner ml-2"></span>
               </button>
             </div>
 
@@ -98,6 +110,9 @@ const route = useRoute();
 const authStore = useAuthStore();
 const uploadedFiles = ref({});
 const savedFiles = ref({});
+const successMessage = ref('');
+const errorMessage = ref('');
+const loading = ref(false);
 
 const certificateFields = [
   { key: 'juara_nasional_dpp', label: 'a. Juara tingkat Nasional yang diselenggarakan oleh DPP IPBI' },
@@ -113,7 +128,6 @@ const certificateFields = [
   { key: 'juri_lomba_2', label: 'Menjadi Juri Lomba Merangkai Bunga (2)' },
 ];
 
-// Extract current question number from route
 const currentQuestionNumber = computed(() => {
   const match = route.path.match(/\/soal-(\d+)/);
   return match ? parseInt(match[1]) : 7;
@@ -125,43 +139,55 @@ onMounted(async () => {
 
 const fetchAnswer = async () => {
   try {
+    loading.value = true;
     const response = await axios.get('http://localhost:8000/api/soal7', {
       headers: { Authorization: `Bearer ${authStore.accessToken}` },
     });
     
-    if (response.data && response.data.data) {
-      savedFiles.value = response.data.data;
-    } else {
-      savedFiles.value = {};
-    }
+    savedFiles.value = response.data.data || {};
   } catch (error) {
-    console.error('Error fetching answers:', error);
-    savedFiles.value = {};
+    errorMessage.value = 'Gagal memuat data: ' + (error.response?.data?.message || error.message);
+  } finally {
+    loading.value = false;
   }
 };
 
 const handleFileUpload = (event, field) => {
   const file = event.target.files[0];
-  if (file) {
+  if (file && file.type === 'application/pdf' && file.size <= 2 * 1024 * 1024) {
     uploadedFiles.value[field] = file;
+  } else {
+    errorMessage.value = 'File harus berupa PDF dan maksimum 2MB';
+    event.target.value = '';
   }
 };
 
 const deleteAllFiles = async () => {
+  if (!confirm('Apakah Anda yakin ingin menghapus semua file?')) return;
+  
   try {
+    loading.value = true;
     await axios.delete('http://localhost:8000/api/soal7', {
       headers: { Authorization: `Bearer ${authStore.accessToken}` },
     });
-
+    
     savedFiles.value = {};
     uploadedFiles.value = {};
+    successMessage.value = 'Semua file berhasil dihapus';
+    setTimeout(() => successMessage.value = '', 3000);
   } catch (error) {
-    console.error('Failed to delete all files:', error);
+    errorMessage.value = 'Gagal menghapus semua file: ' + (error.response?.data?.message || error.message);
+  } finally {
+    loading.value = false;
   }
 };
 
 const submitAnswer = async () => {
   try {
+    loading.value = true;
+    successMessage.value = '';
+    errorMessage.value = '';
+    
     const formData = new FormData();
     let hasFiles = false;
 
@@ -173,7 +199,7 @@ const submitAnswer = async () => {
     });
 
     if (!hasFiles) {
-      console.warn('No files selected');
+      errorMessage.value = 'Silakan pilih setidaknya satu file untuk diunggah';
       return;
     }
 
@@ -188,228 +214,37 @@ const submitAnswer = async () => {
       },
     });
 
-    console.log('Answer saved successfully:', response.data);
+    successMessage.value = response.data.message;
     uploadedFiles.value = {};
     await fetchAnswer();
+    setTimeout(() => successMessage.value = '', 3000);
   } catch (error) {
-    console.error('Failed to save answer:', error);
+    errorMessage.value = 'Gagal menyimpan: ' + (error.response?.data?.message || error.message);
+  } finally {
+    loading.value = false;
   }
 };
 </script>
 
 <style scoped>
-/* Container Utama */
-.min-h-screen {
-  background: linear-gradient(to top, #2d6a4f, #f0fdf4);
-  padding: 3rem 1.5rem;
-  position: relative;
-  overflow: hidden;
+/* Keep your existing styles and add these */
+button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
-/* Card Container */
-.max-w-2xl {
-  background: rgba(255, 255, 255, 0.95);
-  border-radius: 1.5rem;
-  box-shadow: 0 20px 40px rgba(45, 106, 79, 0.15);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+.spinner {
+  border: 2px solid #f3f3f3;
+  border-top: 2px solid #34d399;
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  animation: spin 1s linear infinite;
+  display: inline-block;
 }
 
-@media (min-width: 640px) {
-  .max-w-2xl {
-    backdrop-filter: blur(10px);
-  }
-}
-
-.max-w-2xl:hover {
-  transform: translateY(-10px);
-  box-shadow: 0 25px 50px rgba(45, 106, 79, 0.25);
-}
-
-/* Heading */
-.text-3xl {
-  font-size: 2.25rem;
-  font-weight: 800;
-  color: #1f4d2b;
-  letter-spacing: -0.025em;
-  background: linear-gradient(135deg, #2d6a4f, #34d399);
-  -webkit-background-clip: text;
-  background-clip: text;
-  animation: fadeInDown 0.5s ease-out;
-}
-
-/* Form Styling */
-.space-y-4 {
-  padding: 0 1rem;
-}
-
-/* Label dan Input Container */
-.flex.flex-col {
-  position: relative;
-}
-
-.text-lg {
-  color: #2d6a4f;
-  font-weight: 600;
-  margin-bottom: 1rem;
-  transition: color 0.3s ease;
-}
-
-/* File Input */
-.form-radio {
-  appearance: none;
-  border: 2px solid #34d399;
-  border-radius: 0.375rem;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.form-radio:hover:not(:disabled) {
-  box-shadow: 0 0 10px rgba(52, 211, 153, 0.4);
-}
-
-/* Label untuk Input */
-label.text-sm {
-  font-size: 0.875rem;
-  font-weight: 500;
-  transition: all 0.3s ease;
-}
-
-label.text-green-600 {
-  text-shadow: 0 2px 4px rgba(52, 211, 153, 0.2);
-}
-
-/* Uniform Button Styling */
-.uniform-button {
-  padding: 0.75rem 2rem;
-  border-radius: 9999px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  position: relative;
-  overflow: hidden;
-  min-width: 150px; /* Lebar minimal untuk semua button */
-  text-align: center; /* Teks rata tengah */
-}
-
-.uniform-button.bg-green-600 {
-  background: linear-gradient(135deg, #2d6a4f, #34d399);
-}
-
-.uniform-button.bg-red-600 {
-  background: linear-gradient(135deg, #ef4444, #dc2626);
-}
-
-.uniform-button.bg-blue-600 {
-  background: linear-gradient(135deg, #1e3a8a, #3b82f6);
-}
-
-.uniform-button.bg-gray-500 {
-  background: linear-gradient(135deg, #6b7280, #4b5563);
-}
-
-.uniform-button.bg-green-600:hover {
-  background: linear-gradient(135deg, #1f4d36, #22c55e);
-}
-
-.uniform-button.bg-red-600:hover {
-  background: linear-gradient(135deg, #dc2626, #b91c1c);
-}
-
-.uniform-button.bg-blue-600:hover {
-  background: linear-gradient(135deg, #1e40af, #2563eb);
-}
-
-.uniform-button.bg-gray-500:hover {
-  background: linear-gradient(135deg, #4b5563, #374151);
-}
-
-.uniform-button::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(120deg, transparent, rgba(255, 255, 255, 0.3), transparent);
-  transition: all 0.6s ease;
-}
-
-.uniform-button:hover::before {
-  left: 100%;
-}
-
-/* Question Navigation */
-.border-t {
-  border-color: rgba(45, 106, 79, 0.2);
-}
-
-.text-lg.font-medium {
-  color: #2d6a4f;
-  animation: fadeInUp 0.5s ease-out 0.2s both;
-}
-
-.flex.flex-wrap {
-  gap: 0.75rem;
-}
-
-/* Navigation Buttons */
-.w-10.h-10 {
-  background: #f0fdf4;
-  color: #4a4a4a;
-  font-weight: 600;
-  border-radius: 0.75rem;
-  transition: all 0.3s ease;
-  position: relative;
-  overflow: hidden;
-}
-
-.bg-green-600.text-white {
-  background: linear-gradient(135deg, #2d6a4f, #34d399);
-}
-
-.w-10.h-10:hover:not(.bg-green-600) {
-  background: #34d399;
-  color: white;
-  transform: scale(1.1);
-}
-
-.w-10.h-10::after {
-  content: '';
-  position: absolute;
-  top: -50%;
-  left: -50%;
-  width: 200%;
-  height: 200%;
-  background: radial-gradient(circle, rgba(52, 211, 153, 0.2) 0%, transparent 70%);
-  opacity: 0;
-  transition: opacity 0.3s ease;
-}
-
-.w-10.h-10:hover::after {
-  opacity: 1;
-}
-
-/* Animations */
-@keyframes fadeInDown {
-  from {
-    opacity: 0;
-    transform: translateY(-20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 </style>
