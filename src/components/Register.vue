@@ -162,9 +162,8 @@ async function verifyOtp() {
 
 async function registerAccount() {
   try {
-    const response = await axios.post("http://localhost:8000/api/users", {
+    const response = await axios.post("http://localhost:8000/api/register", {
       name: nama.value,
-      nomor: nomor.value,
       email: email.value,
       password: password.value,
     });

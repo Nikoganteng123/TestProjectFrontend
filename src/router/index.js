@@ -29,11 +29,34 @@ import soal16 from "@/components/soal16.vue";
 import soal17 from "@/components/soal17.vue";
 import kumpul from "@/components/kumpul.vue";
 
+import AdminDashboard from "@/components/AdminComponents/AdminDashboard.vue";
+import SoalCard from "@/components/AdminComponents/SoalCard.vue";
+import UserDetails from "@/components/AdminComponents/UserDetails.vue";
+
+
 
 // Create a router
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
+    //Dashboard Admin
+    {
+      path: "/Admin/Dashboard",
+      name: "admindashboard",
+      component: AdminDashboard,
+    },
+    //User Details Admin
+    {
+      path: "/Admin/userdetails",
+      name: "userdetails",
+      component: UserDetails,
+    },
+     //Soal Card Admin
+     {
+      path: "/Admin/soalcard",
+      name: "soalcard",
+      component: SoalCard,
+    },
     // Kumpul
     {
       path: "/kumpul",
@@ -207,7 +230,7 @@ const router = createRouter({
 // Add global navigation guards to the router
 router.beforeEach((to, from, next) => {
   const authStore = useAuthStore();
-  const publicPages = ["login", "register", "home", "forgot-password", "reset-password", "soal-3"]; // Public pages
+  const publicPages = ["login", "register", "home", "forgot-password", "reset-password", "admindashboard", "userdetails", "soalcard"]; // Public pages
   const authRequired = !publicPages.includes(to.name); // Other pages require authentication
 
   if (authRequired && !authStore.isLoggedIn) {
