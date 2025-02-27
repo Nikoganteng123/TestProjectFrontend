@@ -19,6 +19,7 @@
         :user-id="userId"
         @delete-soal="deleteSoal"
         @preview-file="previewFile"
+        @delete-field="deleteField"
       />
     </div>
     
@@ -59,7 +60,7 @@ onMounted(async () => {
 });
 
 const deleteSoal = async (soalNumber) => {
-  if (confirm(`Are you sure you want to delete Soal ${soalNumber}?`)) {
+  if (confirm(`Are you sure you want to delete the entire Soal ${soalNumber}?`)) {
     try {
       await axios.delete(`http://localhost:8000/api/admin/soal/${soalNumber}/${userId}`);
       soals.value[`soal${soalNumber}`] = null;
@@ -73,8 +74,22 @@ const deleteSoal = async (soalNumber) => {
   }
 };
 
+const deleteField = async (soalNumber, fieldName) => {
+  if (confirm(`Are you sure you want to delete ${fieldName} from Soal ${soalNumber}?`)) {
+    try {
+      await axios.delete(`http://localhost:8000/api/admin/soal/${soalNumber}/${userId}/field/${fieldName}`);
+      // Update UI tanpa reload
+      if (soals.value[`soal${soalNumber}`]) {
+        soals.value[`soal${soalNumber}`][fieldName] = null;
+      }
+    } catch (error) {
+      console.error('Error deleting field:', error);
+      alert('Failed to delete field. Please try again.');
+    }
+  }
+};
+
 const previewFile = (soalNumber, fieldName) => {
-  // Buka PDF di tab baru
   const url = `http://localhost:8000/api/admin/soal/${soalNumber}/${userId}/file/${fieldName}`;
   window.open(url, '_blank');
 };

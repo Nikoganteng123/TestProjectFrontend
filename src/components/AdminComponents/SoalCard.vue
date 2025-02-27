@@ -7,16 +7,58 @@
     <!-- Tampilan khusus untuk Soal 1, 3, 12, 14 -->
     <div v-if="soalData && isTextOnlySoal" class="mt-2">
       <p v-if="soalNumber === '1'">Tingkat Pendidikan: {{ soalData.tingkat_pendidikan || 'Tidak ada data' }}</p>
-      
-      <!-- Tampilan untuk Soal 3 -->
-      <div v-if="soalNumber === '3'">
-        <p>Bahasa Inggris: {{ soalData.bahasa_inggris || 'Tidak ada data' }}</p>
-        <p>Bahasa Lain 1: {{ soalData.bahasa_lain1 || 'Tidak ada data' }}</p>
-        <p>Bahasa Lain 2: {{ soalData.bahasa_lain2 || 'Tidak ada data' }}</p>
-        <p>Bahasa Lain 3: {{ soalData.bahasa_lain3 || 'Tidak ada data' }}</p>
-        <p>Bahasa Lain 4: {{ soalData.bahasa_lain4 || 'Tidak ada data' }}</p>
+      <div v-if="soalNumber === '3'" class="space-y-2">
+        <div class="flex items-center gap-2">
+          <span>Bahasa Inggris: {{ soalData.bahasa_inggris || 'Tidak ada data' }}</span>
+          <button
+            v-if="soalData.bahasa_inggris"
+            class="text-red-500 underline text-sm"
+            @click="$emit('delete-field', soalNumber, 'bahasa_inggris')"
+          >
+            Delete
+          </button>
+        </div>
+        <div class="flex items-center gap-2">
+          <span>Bahasa Lain 1: {{ soalData.bahasa_lain1 || 'Tidak ada data' }}</span>
+          <button
+            v-if="soalData.bahasa_lain1"
+            class="text-red-500 underline text-sm"
+            @click="$emit('delete-field', soalNumber, 'bahasa_lain1')"
+          >
+            Delete
+          </button>
+        </div>
+        <div class="flex items-center gap-2">
+          <span>Bahasa Lain 2: {{ soalData.bahasa_lain2 || 'Tidak ada data' }}</span>
+          <button
+            v-if="soalData.bahasa_lain2"
+            class="text-red-500 underline text-sm"
+            @click="$emit('delete-field', soalNumber, 'bahasa_lain2')"
+          >
+            Delete
+          </button>
+        </div>
+        <div class="flex items-center gap-2">
+          <span>Bahasa Lain 3: {{ soalData.bahasa_lain3 || 'Tidak ada data' }}</span>
+          <button
+            v-if="soalData.bahasa_lain3"
+            class="text-red-500 underline text-sm"
+            @click="$emit('delete-field', soalNumber, 'bahasa_lain3')"
+          >
+            Delete
+          </button>
+        </div>
+        <div class="flex items-center gap-2">
+          <span>Bahasa Lain 4: {{ soalData.bahasa_lain4 || 'Tidak ada data' }}</span>
+          <button
+            v-if="soalData.bahasa_lain4"
+            class="text-red-500 underline text-sm"
+            @click="$emit('delete-field', soalNumber, 'bahasa_lain4')"
+          >
+            Delete
+          </button>
+        </div>
       </div>
-      
       <p v-if="soalNumber === '12'">Jabatan: {{ soalData.jabatan || 'Tidak ada data' }}</p>
       <p v-if="soalNumber === '14'">Ngajar Online: {{ soalData.ngajar_online || 'Tidak ada data' }}</p>
     </div>
@@ -32,17 +74,24 @@
         >
           Preview
         </button>
+        <button
+          v-if="soalData[field]"
+          class="text-red-500 underline text-sm"
+          @click="$emit('delete-field', soalNumber, field)"
+        >
+          Delete
+        </button>
         <span v-else class="text-gray-500">No file</span>
       </div>
     </div>
 
-    <!-- Tombol hapus -->
+    <!-- Tombol hapus seluruh soal -->
     <button
       v-if="soalData"
       class="mt-2 bg-red-500 text-white py-1 px-3 rounded hover:bg-red-600"
       @click="$emit('delete-soal', soalNumber)"
     >
-      Delete
+      Delete Entire Soal
     </button>
   </div>
 </template>
@@ -56,14 +105,14 @@ const props = defineProps({
   userId: String,
 });
 
-defineEmits(['delete-soal', 'preview-file']);
+defineEmits(['delete-soal', 'preview-file', 'delete-field']);
 
-// Tentukan soal yang hanya menampilkan teks (tambahkan Soal 3)
+// Tentukan soal yang hanya menampilkan teks
 const isTextOnlySoal = computed(() => ['1', '3', '12', '14'].includes(props.soalNumber));
 
 // Daftar field file untuk soal dengan PDF
 const fileFields = computed(() => {
-  if (isTextOnlySoal.value) return []; // Tidak ada file untuk soal 1, 3, 12, 14
+  if (isTextOnlySoal.value) return [];
   const fieldsMap = {
     '2': ['tp3', 'lpmp_diknas', 'guru_lain_ipbi_1', 'guru_lain_ipbi_2', 'guru_lain_ipbi_3', 'guru_lain_ipbi_4', 'training_trainer'],
     '4': ['independent_org', 'foreign_school_degree', 'foreign_school_no_degree_1', 'foreign_school_no_degree_2', 'foreign_school_no_degree_3', 'foreign_school_no_degree_4', 'foreign_school_no_degree_5', 'domestic_school_no_degree_1', 'domestic_school_no_degree_2', 'domestic_school_no_degree_3', 'domestic_school_no_degree_4', 'domestic_school_no_degree_5'],
