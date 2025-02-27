@@ -41,14 +41,13 @@ const router = createRouter({
   routes: [
     //Dashboard Admin
     {
-      path: "/Admin/Dashboard",
-      name: "admindashboard",
+      path: '/admin',
+      name: 'AdminDashboard',
       component: AdminDashboard,
     },
-    //User Details Admin
     {
-      path: "/Admin/userdetails",
-      name: "userdetails",
+      path: '/admin/users/:userId',
+      name: 'UserDetails',
       component: UserDetails,
     },
      //Soal Card Admin
@@ -230,7 +229,7 @@ const router = createRouter({
 // Add global navigation guards to the router
 router.beforeEach((to, from, next) => {
   const authStore = useAuthStore();
-  const publicPages = ["login", "register", "home", "forgot-password", "reset-password", "admindashboard", "userdetails", "soalcard"]; // Public pages
+  const publicPages = ["login", "register", "home", "forgot-password", "reset-password", "AdminDashboard", "UserDetails", "SoalCard"]; // Public pages
   const authRequired = !publicPages.includes(to.name); // Other pages require authentication
 
   if (authRequired && !authStore.isLoggedIn) {
