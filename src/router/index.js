@@ -29,9 +29,10 @@ import soal16 from "@/components/soal16.vue";
 import soal17 from "@/components/soal17.vue";
 import kumpul from "@/components/kumpul.vue";
 
-import AdminDashboard from "@/components/AdminComponents/AdminDashboard.vue";
+import AdminUserList from "@/components/AdminComponents/AdminUserList.vue";
 import SoalCard from "@/components/AdminComponents/SoalCard.vue";
 import UserDetails from "@/components/AdminComponents/UserDetails.vue";
+import AdminDashboard from "@/components/AdminComponents/AdminDashboard.vue";
 
 
 
@@ -39,11 +40,17 @@ import UserDetails from "@/components/AdminComponents/UserDetails.vue";
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
-    //Dashboard Admin
+    //Dashboard
     {
       path: '/admin',
       name: 'AdminDashboard',
       component: AdminDashboard,
+    },
+    //Dashboard Admin
+    {
+      path: '/admin/userlist',
+      name: 'AdminUserList',
+      component: AdminUserList,
     },
     {
       path: '/admin/users/:userId',
@@ -229,7 +236,7 @@ const router = createRouter({
 // Add global navigation guards to the router
 router.beforeEach((to, from, next) => {
   const authStore = useAuthStore();
-  const publicPages = ["login", "register", "home", "forgot-password", "reset-password", "AdminDashboard", "UserDetails", "SoalCard"]; // Public pages
+  const publicPages = ["login", "register", "home", "forgot-password", "reset-password", "AdminDashboard", "AdminUserList", "SoalCard"]; // Public pages
   const authRequired = !publicPages.includes(to.name); // Other pages require authentication
 
   if (authRequired && !authStore.isLoggedIn) {

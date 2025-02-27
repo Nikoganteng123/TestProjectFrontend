@@ -6,6 +6,8 @@ import router from './router'
 import axios from 'axios';
 axios.defaults.baseURL = 'http://127.0.0.1:8000';
 
+import "@fortawesome/fontawesome-free/css/all.min.css";
+
 
 const app = createApp(App)
 
