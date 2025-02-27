@@ -32,7 +32,7 @@ import kumpul from "@/components/kumpul.vue";
 import AdminUserList from "@/components/AdminComponents/AdminUserList.vue";
 import SoalCard from "@/components/AdminComponents/SoalCard.vue";
 import UserDetails from "@/components/AdminComponents/UserDetails.vue";
-import AdminDashboard from "@/components/AdminComponents/AdminDashboard.vue";
+import AdminDashboard from "@/AdminApp.vue";
 
 
 
@@ -236,7 +236,7 @@ const router = createRouter({
 // Add global navigation guards to the router
 router.beforeEach((to, from, next) => {
   const authStore = useAuthStore();
-  const publicPages = ["login", "register", "home", "forgot-password", "reset-password", "AdminDashboard", "AdminUserList", "SoalCard"]; // Public pages
+  const publicPages = ["login", "register", "home", "forgot-password", "reset-password", "AdminDashboard", "AdminUserList", "SoalCard", "UserDetails"]; // Public pages
   const authRequired = !publicPages.includes(to.name); // Other pages require authentication
 
   if (authRequired && !authStore.isLoggedIn) {
