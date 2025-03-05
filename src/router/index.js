@@ -1,14 +1,11 @@
 import { createRouter, createWebHistory } from "vue-router";
 import HomePage from "@/components/HomePage.vue";
-
 import Profile from "@/components/Profile.vue";
-
 import Login from "@/components/Login.vue";
 import { useAuthStore } from "@/stores/auth";
 import Register from "@/components/Register.vue";
 import ForgotPassword from "@/components/ForgotPassword.vue";
 import ResetPassword from "@/components/ResetPassword.vue";
-
 import UjiKompetensi from "@/components/UjiKompetensi.vue";
 import soal1 from "@/components/soal1.vue";
 import soal2 from "@/components/soal2.vue";
@@ -28,179 +25,29 @@ import soal15 from "@/components/soal15.vue";
 import soal16 from "@/components/soal16.vue";
 import soal17 from "@/components/soal17.vue";
 import kumpul from "@/components/kumpul.vue";
+import AdminDashboard from "@/components/AdminComponents/AdminDashboard.vue";
+import UserList from '@/components/AdminComponents/UserList.vue';
+import UserDetail from '@/components/AdminComponents/UserDetail.vue';
+import SoalDetail from '@/components/AdminComponents/SoalDetail.vue';
 
-import AdminUserList from "@/components/AdminComponents/AdminUserList.vue";
-import SoalCard from "@/components/AdminComponents/SoalCard.vue";
-import UserDetails from "@/components/AdminComponents/UserDetails.vue";
-import AdminDashboard from "@/AdminApp.vue";
-
-
-
-// Create a router
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
-    //Dashboard
+    // Admin routes
     {
       path: '/admin',
-      name: 'AdminDashboard',
       component: AdminDashboard,
+      meta: { requiresAdmin: true },
+      children: [
+        { path: '', component: UserList, name: 'user-list' },
+        { path: 'users/:userId', component: UserDetail, name: 'user-detail' },
+        { path: 'soal/:soalNumber/:userId', component: SoalDetail, name: 'soal-detail' },
+      ]
     },
-    //Dashboard Admin
-    {
-      path: '/admin/userlist',
-      name: 'AdminUserList',
-      component: AdminUserList,
-    },
-    {
-      path: '/admin/users/:userId',
-      name: 'UserDetails',
-      component: UserDetails,
-    },
-     //Soal Card Admin
-     {
-      path: "/Admin/soalcard",
-      name: "soalcard",
-      component: SoalCard,
-    },
-    // Kumpul
-    {
-      path: "/kumpul",
-      name: "kumpul",
-      component: kumpul,
-    },
-    // Soal 1
-    {
-      path: "/soal-1",
-      name: "soal-1",
-      component: soal1,
-    },
-    // Soal 2
-    {
-      path: "/soal-2",
-      name: "soal-2",
-      component: soal2,
-    },
-    // Soal 3
-    {
-      path: "/soal-3",
-      name: "soal-3",
-      component: soal3,
-    },
-    // Soal 4
-    {
-      path: "/soal-4",
-      name: "soal-4",
-      component: soal4,
-    },
-    // Soal 5
-    {
-      path: "/soal-5",
-      name: "soal-5",
-      component: soal5,
-    },
-    // Soal 6
-    {
-      path: "/soal-6",
-      name: "soal-6",
-      component: soal6,
-    },
-    //Soal 7
-{
-  path: "/soal-7",
-  name: "soal-7",
-  component: soal7,
-},
-// Soal 8
-{
-  path: "/soal-8",
-  name: "soal-8",
-  component: soal8,
-},
-// Soal 9
-{
-  path: "/soal-9",
-  name: "soal-9",
-  component: soal9,
-},
-// Soal 10
-{
-  path: "/soal-10",
-  name: "soal-10",
-  component: soal10,
-},
-// Soal 11
-{
-  path: "/soal-11",
-  name: "soal-11",
-  component: soal11,
-},
-// Soal 12
-{
-  path: "/soal-12",
-  name: "soal-12",
-  component: soal12,
-},
-// Soal 13
-{
-  path: "/soal-13",
-  name: "soal-13",
-  component: soal13,
-},
-// Soal 14
-{
-  path: "/soal-14",
-  name: "soal-14",
-  component: soal14,
-},
-// Soal 15
-{
-  path: "/soal-15",
-  name: "soal-15",
-  component: soal15,
-},
-// Soal 16
-{
-  path: "/soal-16",
-  name: "soal-16",
-  component: soal16,
-},
-// Soal 17
-{
-  path: "/soal-17",
-  name: "soal-17",
-  component: soal17,
-},
-
-    // Home route
-    {
-      path: "/",
-      name: "home",
-      component: HomePage,
-    },
-    // Login route
-    {
-      path: "/login",
-      name: "login",
-      component: Login,
-    },
-   
-    // Sisi Profile
-    {
-      path: "/users",
-      name: "userlist",
-      component: Profile,
-    },
-    {
-      path: "/uji-kompetensi",
-      name: "ujikompetensi",
-      component: UjiKompetensi,
-    },
-    {
-      path: "/register",
-      name: "register",
-      component: Register,
-    },
+    // Other routes
+    { path: "/", name: "home", component: HomePage },
+    { path: "/login", name: "login", component: Login },
+    { path: "/register", name: "register", component: Register },
     {
       path: "/forgot-password",
       name: "forgot-password",
@@ -208,44 +55,73 @@ const router = createRouter({
       beforeEnter: (to, from, next) => {
         const authStore = useAuthStore();
         if (authStore.isLoggedIn) {
-          next({ name: "home" }); // If already logged in, redirect to home page
+          next({ name: "home" });
         } else {
-          next(); // Continue to forgot-password page
+          next();
         }
       },
     },
     {
-        path: "/reset-password",
-        name: "reset-password",
-        component: ResetPassword,
-        beforeEnter: (to, from, next) => {
-          const email = to.query.email;
-          
-          // Check if the email exists in query params (to ensure it comes from /forgot-password)
-          if (!email) {
-            alert("You must come from the Forgot Password page to reset your password.");
-            next({ name: "forgot-password" }); // Redirect to forgot-password if email is not provided
-          } else {
-            next(); // Proceed to reset-password page if email is present
-          }
-        },
+      path: "/reset-password",
+      name: "reset-password",
+      component: ResetPassword,
+      beforeEnter: (to, from, next) => {
+        const email = to.query.email;
+        if (!email) {
+          alert("You must come from the Forgot Password page to reset your password.");
+          next({ name: "forgot-password" });
+        } else {
+          next();
+        }
+      },
     },
+    { path: "/users", name: "userlist", component: Profile },
+    { path: "/uji-kompetensi", name: "ujikompetensi", component: UjiKompetensi },
+    { path: "/kumpul", name: "kumpul", component: kumpul },
+    { path: "/soal-1", name: "soal-1", component: soal1 },
+    { path: "/soal-2", name: "soal-2", component: soal2 },
+    { path: "/soal-3", name: "soal-3", component: soal3 },
+    { path: "/soal-4", name: "soal-4", component: soal4 },
+    { path: "/soal-5", name: "soal-5", component: soal5 },
+    { path: "/soal-6", name: "soal-6", component: soal6 },
+    { path: "/soal-7", name: "soal-7", component: soal7 },
+    { path: "/soal-8", name: "soal-8", component: soal8 },
+    { path: "/soal-9", name: "soal-9", component: soal9 },
+    { path: "/soal-10", name: "soal-10", component: soal10 },
+    { path: "/soal-11", name: "soal-11", component: soal11 },
+    { path: "/soal-12", name: "soal-12", component: soal12 },
+    { path: "/soal-13", name: "soal-13", component: soal13 },
+    { path: "/soal-14", name: "soal-14", component: soal14 },
+    { path: "/soal-15", name: "soal-15", component: soal15 },
+    { path: "/soal-16", name: "soal-16", component: soal16 },
+    { path: "/soal-17", name: "soal-17", component: soal17 },
   ],
 });
 
-// Add global navigation guards to the router
 router.beforeEach((to, from, next) => {
   const authStore = useAuthStore();
-  const publicPages = ["login", "register", "home", "forgot-password", "reset-password", "AdminDashboard", "AdminUserList", "SoalCard", "UserDetails"]; // Public pages
-  const authRequired = !publicPages.includes(to.name); // Other pages require authentication
+  const publicPages = ["login", "register", "home", "forgot-password", "reset-password"];
+  const authRequired = !publicPages.includes(to.name);
+  const requiresAdmin = to.matched.some(record => record.meta.requiresAdmin);
+
+  console.log("Route to:", to.path, "authRequired:", authRequired, "requiresAdmin:", requiresAdmin);
+  console.log("authStore state:", {
+    isLoggedIn: authStore.isLoggedIn,
+    isAdmin: authStore.isAdmin,
+    user: authStore.user,
+  });
 
   if (authRequired && !authStore.isLoggedIn) {
-    // If the user is not logged in and trying to access a protected page
     alert("Please log in to access the page.");
-    next({ name: "login" }); // Redirect to login page
-  } else {
-    next(); // Allow navigation to the page
+    return next({ name: "login" });
   }
+
+  if (requiresAdmin && !authStore.isAdmin) {
+    alert("You do not have permission to access the admin page.");
+    return next({ name: "home" });
+  }
+
+  next();
 });
 
 export default router;

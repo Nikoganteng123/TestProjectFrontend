@@ -93,6 +93,8 @@ import { ref, onMounted, computed } from 'vue';
 import axios from 'axios';
 import { useAuthStore } from '@/stores/auth';
 import { useRoute } from 'vue-router'
+import 'animate.css';
+import '@fortawesome/fontawesome-free/css/all.min.css';
 
 const route = useRoute()
 const authStore = useAuthStore();

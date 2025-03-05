@@ -15,17 +15,17 @@
                   value="SMP-D3"
                   v-model="selectedAnswer"
                   class="form-radio h-5 w-5"
-                  :disabled="isAnswerSaved && !isEditMode"
+                  :disabled="isAnswerSaved"
                 />
                 <label
                   for="smp-d3"
                   class="ml-2 text-sm"
                   :class="{
-                    'text-green-600 font-semibold': isAnswerSaved && !isEditMode && selectedAnswer === 'SMP-D3',
-                    'text-gray-700': !isAnswerSaved || isEditMode || selectedAnswer !== 'SMP-D3'
+                    'text-green-600 font-semibold': isAnswerSaved && selectedAnswer === 'SMP-D3',
+                    'text-gray-700': !isAnswerSaved || selectedAnswer !== 'SMP-D3'
                   }"
                 >
-                  SMP - D3 (3 poin)
+                  SMP - D3 (2 poin)
                 </label>
               </div>
               <div class="flex items-center">
@@ -35,14 +35,14 @@
                   value="S1"
                   v-model="selectedAnswer"
                   class="form-radio h-5 w-5"
-                  :disabled="isAnswerSaved && !isEditMode"
+                  :disabled="isAnswerSaved"
                 />
                 <label
                   for="s1"
                   class="ml-2 text-sm"
                   :class="{
-                    'text-green-600 font-semibold': isAnswerSaved && !isEditMode && selectedAnswer === 'S1',
-                    'text-gray-700': !isAnswerSaved || isEditMode || selectedAnswer !== 'S1'
+                    'text-green-600 font-semibold': isAnswerSaved && selectedAnswer === 'S1',
+                    'text-gray-700': !isAnswerSaved || selectedAnswer !== 'S1'
                   }"
                 >
                   S1 (4 poin)
@@ -55,19 +55,47 @@
                   value="S2_atau_lebih"
                   v-model="selectedAnswer"
                   class="form-radio h-5 w-5"
-                  :disabled="isAnswerSaved && !isEditMode"
+                  :disabled="isAnswerSaved"
                 />
                 <label
                   for="s2_atau_lebih"
                   class="ml-2 text-sm"
                   :class="{
-                    'text-green-600 font-semibold': isAnswerSaved && !isEditMode && selectedAnswer === 'S2_atau_lebih',
-                    'text-gray-700': !isAnswerSaved || isEditMode || selectedAnswer !== 'S2_atau_lebih'
+                    'text-green-600 font-semibold': isAnswerSaved && selectedAnswer === 'S2_atau_lebih',
+                    'text-gray-700': !isAnswerSaved || selectedAnswer !== 'S2_atau_lebih'
                   }"
                 >
                   S2 atau lebih (5 poin)
                 </label>
               </div>
+            </div>
+
+           <!-- Input PDF Bukti -->
+<div v-if="selectedAnswer && !isAnswerSaved" class="mt-6 bg-gray-50 p-4 rounded-lg border border-gray-200 shadow-sm transition-all duration-300">
+  <label for="tingkat_pendidikan_file" class="block text-sm font-medium text-gray-700 mb-2">
+    Unggah Bukti Pendidikan (PDF, maks 2MB)
+    <span class="text-red-500">*</span>
+  </label>
+  <div class="relative">
+    <input
+      type="file"
+      id="tingkat_pendidikan_file"
+      accept=".pdf"
+      @change="handleFileUpload"
+      class="file-input block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-green-50 file:text-green-700 hover:file:bg-green-100 cursor-pointer transition-all duration-200"
+    />
+    <span class="absolute right-0 top-1/2 transform -translate-y-1/2 text-xs text-gray-500">
+      {{ selectedFile ? selectedFile.name : 'Belum ada file dipilih' }}
+    </span>
+  </div>
+</div>
+
+            <!-- Tampilkan status file tersimpan -->
+            <div v-if="isAnswerSaved" class="text-green-600 flex items-center gap-2 mt-4">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+              </svg>
+              <span>File bukti pendidikan sudah tersimpan</span>
             </div>
           </div>
 
@@ -75,21 +103,13 @@
           <div class="flex flex-col space-y-4 sm:flex-row sm:space-y-0 sm:space-x-4 sm:justify-between items-center mt-6">
             <button
               type="submit"
+              :disabled="!selectedAnswer || !selectedFile || isAnswerSaved"
               class="bg-green-600 text-white rounded-xl py-3 px-6 hover:bg-green-700 transition-all duration-300 w-full sm:w-auto"
             >
-              {{ isEditMode && isAnswerSaved ? 'Ubah' : 'Simpan' }}
+              Simpan
             </button>
             <button
               v-if="isAnswerSaved"
-              type="button"
-              @click="enableEdit"
-              class="bg-yellow-500 text-white rounded-xl py-3 px-6 hover:bg-yellow-600 transition-all duration-300 w-full sm:w-auto"
-              v-show="!isEditMode"
-            >
-              Edit
-            </button>
-            <button
-              v-if="selectedAnswer"
               type="button"
               @click="deleteAnswer"
               class="bg-red-500 text-white rounded-xl py-3 px-6 hover:bg-red-600 transition-all duration-300 w-full sm:w-auto"
@@ -133,14 +153,15 @@
 import { ref, onMounted, computed } from 'vue'
 import axios from 'axios'
 import { useAuthStore } from '@/stores/auth'
-import { useRouter, useRoute } from 'vue-router'
+import { useRoute } from 'vue-router'
+import 'animate.css';
+import '@fortawesome/fontawesome-free/css/all.min.css';
 
-const router = useRouter()
 const route = useRoute()
 const authStore = useAuthStore()
 
 const selectedAnswer = ref('')
-const isEditMode = ref(false)
+const selectedFile = ref(null)
 const isAnswerSaved = ref(false)
 
 const currentQuestionNumber = computed(() => {
@@ -162,39 +183,53 @@ const fetchAnswer = async () => {
     if (response.data) {
       selectedAnswer.value = response.data.tingkat_pendidikan
       isAnswerSaved.value = true
-      isEditMode.value = false
     }
   } catch (error) {
-    console.error(error)
+    console.error('Failed to fetch answer:', error)
+  }
+}
+
+const handleFileUpload = (event) => {
+  const file = event.target.files[0]
+  if (file && file.type === 'application/pdf' && file.size <= 2 * 1024 * 1024) {
+    selectedFile.value = file
+  } else {
+    alert('File harus berupa PDF dan maksimum 2MB')
+    event.target.value = ''
+    selectedFile.value = null
   }
 }
 
 const submitAnswer = async () => {
+  if (!selectedAnswer.value || !selectedFile.value) {
+    alert('Harap pilih tingkat pendidikan dan unggah file bukti!')
+    return
+  }
+
   try {
-    const response = isAnswerSaved.value
-      ? await axios.put(
-          'http://localhost:8000/api/soal1',
-          { tingkat_pendidikan: selectedAnswer.value },
-          { headers: { Authorization: `Bearer ${authStore.accessToken}` } }
-        )
-      : await axios.post(
-          'http://localhost:8000/api/soal1',
-          { tingkat_pendidikan: selectedAnswer.value },
-          { headers: { Authorization: `Bearer ${authStore.accessToken}` } }
-        )
+    const formData = new FormData()
+    formData.append('tingkat_pendidikan', selectedAnswer.value)
+    formData.append('tingkat_pendidikan_file', selectedFile.value)
+
+    const response = await axios.post('http://localhost:8000/api/soal1', formData, {
+      headers: {
+        Authorization: `Bearer ${authStore.accessToken}`,
+        'Content-Type': 'multipart/form-data'
+      }
+    })
+
     console.log('Answer saved successfully:', response.data)
     isAnswerSaved.value = true
-    isEditMode.value = false
+    selectedFile.value = null
   } catch (error) {
-    console.error('Failed to save answer', error)
+    console.error('Failed to save answer:', error)
+    alert('Gagal menyimpan jawaban: ' + (error.response?.data?.message || error.message))
   }
 }
 
-const enableEdit = () => {
-  isEditMode.value = true
-}
-
 const deleteAnswer = async () => {
+  if (!confirm('Apakah Anda yakin ingin menghapus jawaban?')) return
+
   try {
     await axios.delete('http://localhost:8000/api/soal1', {
       headers: {
@@ -202,11 +237,12 @@ const deleteAnswer = async () => {
       }
     })
     selectedAnswer.value = ''
+    selectedFile.value = null
     isAnswerSaved.value = false
-    isEditMode.value = false
     console.log('Answer deleted successfully')
   } catch (error) {
-    console.error('Failed to delete answer', error)
+    console.error('Failed to delete answer:', error)
+    alert('Gagal menghapus jawaban: ' + (error.response?.data?.message || error.message))
   }
 }
 </script>
@@ -319,7 +355,26 @@ const deleteAnswer = async () => {
   cursor: not-allowed;
 }
 
-/* Label untuk Radio */
+/* File Input Styling */
+.file-input {
+  background: white;
+  border: 2px solid #34d399;
+  border-radius: 0.5rem;
+  padding: 0.5rem;
+  transition: all 0.3s ease;
+}
+
+.file-input:hover:not(:disabled) {
+  border-color: #2d6a4f;
+  box-shadow: 0 0 10px rgba(52, 211, 153, 0.2);
+}
+
+.file-input:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(52, 211, 153, 0.3);
+}
+
+/* Label untuk Radio dan File */
 label.ml-2 {
   font-size: 0.875rem;
   font-weight: 500;
@@ -342,8 +397,7 @@ label.text-green-600 {
 /* Buttons */
 .bg-green-600,
 .bg-red-500,
-.bg-blue-600,
-.bg-yellow-500 {
+.bg-blue-600 {
   padding: 0.75rem 2rem;
   border-radius: 9999px;
   font-weight: 600;
@@ -366,11 +420,7 @@ label.text-green-600 {
   background: linear-gradient(135deg, #1e3a8a, #3b82f6);
 }
 
-.bg-yellow-500 {
-  background: linear-gradient(135deg, #d97706, #facc15);
-}
-
-.bg-green-600:hover {
+.bg-green-600:hover:not(:disabled) {
   background: linear-gradient(135deg, #1f4d36, #22c55e);
 }
 
@@ -382,14 +432,9 @@ label.text-green-600 {
   background: linear-gradient(135deg, #1e40af, #2563eb);
 }
 
-.bg-yellow-500:hover {
-  background: linear-gradient(135deg, #b45309, #eab308);
-}
-
 .bg-green-600::before,
 .bg-red-500::before,
-.bg-blue-600::before,
-.bg-yellow-500::before {
+.bg-blue-600::before {
   content: '';
   position: absolute;
   top: 0;
@@ -402,9 +447,13 @@ label.text-green-600 {
 
 .bg-green-600:hover::before,
 .bg-red-500:hover::before,
-.bg-blue-600:hover::before,
-.bg-yellow-500:hover::before {
+.bg-blue-600:hover::before {
   left: 100%;
+}
+
+.bg-green-600:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 /* Question Navigation */

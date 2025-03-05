@@ -82,19 +82,17 @@
 import { useAuthStore } from "@/stores/auth";
 import { useRouter, useRoute } from "vue-router";
 import { computed, ref, onMounted, onUnmounted } from "vue";
-import AdminDashboard from "./components/AdminComponents/AdminUserList.vue";
 
 const authStore = useAuthStore();
 const router = useRouter();
 const route = useRoute();
 
 const hideNavAndFooter = computed(() => {
-  return route.path === "/login" || route.path === "/register" || 
-         route.path === "/forgot-password" || route.path === "/reset-password" ||
-         route.name === "AdminDashboard" ||
-         route.name === "AdminUserList" ||
-         route.name === "UserDetails";
-
+  const authRoutes = ["/login", "/register", "/forgot-password", "/reset-password"];
+  const adminRoutes = [
+    route.path.startsWith("/admin"),
+  ];
+  return authRoutes.includes(route.path) || adminRoutes.some(condition => condition);
 });
 
 const menuOpen = ref(false);

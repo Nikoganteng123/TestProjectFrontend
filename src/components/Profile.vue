@@ -5,7 +5,7 @@
     <div class="flower-2"></div>
     <div class="flower-3"></div>
 
-    <!-- Main Content with top padding to account for fixed navbar -->
+    <!-- Main Content -->
     <div class="max-w-3xl mx-auto pt-24 pb-16 px-4 sm:px-6 lg:px-8 relative z-10 flex items-center justify-center min-h-[calc(100vh-6rem)]">
       <div class="bg-white rounded-3xl shadow-2xl overflow-hidden transition-all duration-300 hover:shadow-3xl w-full">
         <!-- Header -->
@@ -46,6 +46,21 @@
                 <p class="mt-2 text-xl font-medium text-gray-900">{{ user?.email || 'Not set' }}</p>
               </div>
             </div>
+
+            <!-- Uji Kompetensi Section -->
+            <div class="pt-6 border-t border-emerald-100">
+              <h2 class="text-xl font-semibold text-emerald-700 mb-4">Uji Kompetensi</h2>
+              <div class="bg-emerald-50 p-6 rounded-2xl space-y-4">
+                <div>
+                  <p class="text-sm font-semibold text-emerald-700 uppercase tracking-wide">Nilai Final</p>
+                  <p class="mt-2 text-xl font-medium text-gray-900">
+                    {{ user?.nilai > 0 ? user.nilai : '-' }}
+                  </p>
+                </div>
+            
+              </div>
+            </div>
+
             <div class="pt-6 border-t border-emerald-100">
               <button
                 @click="showDeleteConfirm = true"
@@ -157,25 +172,16 @@ const editForm = ref({
   email: ''
 });
 
-// Mengambil data pengguna saat komponen dimuat
 onMounted(async () => {
   isLoading.value = true;
   try {
-    // Coba gunakan data dari authStore jika ada
-    if (authStore.user && authStore.accessToken) {
-      user.value = authStore.user;
-    } else {
-      // Jika kosong, ambil dari server
-      const response = await axios.get('http://localhost:8000/api/profile', {
-        headers: {
-          Authorization: `Bearer ${authStore.accessToken}`
-        }
-      });
-      authStore.setUser(response.data); // Simpan ke store
-      user.value = response.data;
-    }
-
-    // Set nilai awal untuk form edit
+    const response = await axios.get('http://localhost:8000/api/profile', {
+      headers: {
+        Authorization: `Bearer ${authStore.accessToken}`
+      }
+    });
+    user.value = response.data;
+    authStore.setUser(response.data);
     editForm.value = {
       name: user.value?.name || '',
       email: user.value?.email || ''
@@ -188,7 +194,6 @@ onMounted(async () => {
   }
 });
 
-// Mulai mode edit
 const startEditing = () => {
   isEditing.value = true;
   editForm.value = {
@@ -197,13 +202,11 @@ const startEditing = () => {
   };
 };
 
-// Batal edit
 const cancelEditing = () => {
   isEditing.value = false;
   errorMessage.value = '';
 };
 
-// Update profil
 const updateProfile = async () => {
   try {
     const response = await axios.post(
@@ -216,8 +219,8 @@ const updateProfile = async () => {
       }
     );
 
-    authStore.setUser(response.data); // Update store
-    user.value = response.data; // Update local ref
+    authStore.setUser(response.data);
+    user.value = response.data;
     isEditing.value = false;
     errorMessage.value = '';
   } catch (error) {
@@ -226,7 +229,6 @@ const updateProfile = async () => {
   }
 };
 
-// Hapus akun
 const deleteAccount = async () => {
   try {
     await axios.delete('http://localhost:8000/api/profile', {
@@ -235,8 +237,8 @@ const deleteAccount = async () => {
       }
     });
 
-    authStore.logout(); // Logout dari store
-    router.push({ name: 'login' }); // Redirect ke login
+    authStore.logout();
+    router.push({ name: 'login' });
   } catch (error) {
     errorMessage.value = error.response?.data?.message || 'Failed to delete account';
     showDeleteConfirm.value = false;
@@ -246,7 +248,6 @@ const deleteAccount = async () => {
 </script>
 
 <style scoped>
-/* Decorative Flowers */
 .flower-1,
 .flower-2,
 .flower-3 {
@@ -272,7 +273,6 @@ const deleteAccount = async () => {
   animation: float 9s ease-in-out infinite 2s;
 }
 
-/* Animations */
 @keyframes float {
   0%,
   100% {
@@ -283,7 +283,6 @@ const deleteAccount = async () => {
   }
 }
 
-/* Shadow enhancement */
 .shadow-3xl {
   box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
 }

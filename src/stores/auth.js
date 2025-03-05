@@ -18,11 +18,16 @@ export const useAuthStore = defineStore({
     return {
       accessToken: localStorage.getItem("accessToken") || null,
       user: parsedUser,
+      isAdmin: parsedUser ? parsedUser.is_admin : false, // Tambahkan isAdmin
     };
   },
   getters: {
     isLoggedIn() {
       return this.accessToken !== null;
+    },
+    // Getter untuk isAdmin (opsional, karena sudah ada di state)
+    isUserAdmin() {
+      return this.isAdmin;
     },
   },
   actions: {
@@ -36,6 +41,7 @@ export const useAuthStore = defineStore({
     },
     setUser(user) {
       this.user = user;
+      this.isAdmin = user.is_admin; // Set isAdmin berdasarkan data user
       localStorage.setItem("user", JSON.stringify(user));
     },
     async fetchUserProfile() {
@@ -77,6 +83,7 @@ export const useAuthStore = defineStore({
         );
         this.removeAccessToken();
         this.user = null;
+        this.isAdmin = false; // Reset isAdmin saat logout
         localStorage.removeItem("user");
         localStorage.removeItem("email");
         console.log("Logout successful");

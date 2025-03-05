@@ -28,7 +28,7 @@
         <p :class="canTakeTest ? 'text-green-600' : 'text-red-600'" class="font-semibold text-lg mb-4">
           {{ availabilityMessage }}
         </p>
-        <div v-if="!canTakeTest && remainingSeconds > 0" class="relative flex justify-center items-center">
+        <div v-if="!canTakeTest && remainingDays > 0" class="relative flex justify-center items-center">
           <svg class="w-24 h-24 transform -rotate-90">
             <circle
               class="text-gray-200"
@@ -53,11 +53,11 @@
             />
           </svg>
           <span class="absolute text-3xl font-extrabold text-green-600 glowing-number animate-pulse transition-all duration-300 hover:scale-110">
-            {{ Math.floor(remainingSeconds) }}
+            {{ remainingDays }}
           </span>
         </div>
-        <p v-if="!canTakeTest && remainingSeconds > 0" class="text-gray-600 mt-4">
-          Tunggu hingga hitungan selesai untuk mencoba lagi!
+        <p v-if="!canTakeTest && remainingDays > 0" class="text-gray-600 mt-4">
+          Tunggu {{ remainingDays }} hari untuk mencoba lagi!
         </p>
       </div>
     </div>
@@ -107,11 +107,13 @@ const isChecking = ref(false);
 const canTakeTest = ref(null);
 const availabilityMessage = ref('');
 const remainingSeconds = ref(0);
+const remainingDays = ref(0);
 let timer = null;
 
-const circumference = computed(() => 2 * Math.PI * 38); // Keliling lingkaran (r = 38)
+const circumference = computed(() => 2 * Math.PI * 38);
 const dashOffset = computed(() => {
-  const progress = remainingSeconds.value / 30; // Asumsi maksimum 30 detik
+  // Asumsikan cooldown maksimum adalah 30 hari untuk visualisasi
+  const progress = remainingDays.value / 30;
   return circumference.value * (1 - progress);
 });
 
@@ -142,6 +144,7 @@ const checkAvailabilityAndRedirect = async () => {
     const { can_take_test, next_available_date, remaining_seconds } = response.data;
     canTakeTest.value = can_take_test;
     remainingSeconds.value = remaining_seconds;
+    remainingDays.value = Math.ceil(remaining_seconds / (24 * 60 * 60)); // Konversi detik ke hari
 
     if (can_take_test) {
       availabilityMessage.value = 'Selamat, Anda dapat mengikuti uji kompetensi sekarang!';
@@ -162,15 +165,18 @@ const checkAvailabilityAndRedirect = async () => {
 
 const startCountdown = (seconds) => {
   remainingSeconds.value = seconds;
+  remainingDays.value = Math.ceil(seconds / (24 * 60 * 60));
+  
   if (timer) clearInterval(timer);
   timer = setInterval(() => {
     if (remainingSeconds.value > 0) {
-      remainingSeconds.value--;
+      remainingSeconds.value -= 1;
+      remainingDays.value = Math.ceil(remainingSeconds.value / (24 * 60 * 60));
     } else {
       clearInterval(timer);
       checkAvailabilityAndRedirect();
     }
-  }, 1000);
+  }, 1000); // Update setiap detik untuk memperbarui hari jika diperlukan
 };
 
 onMounted(() => {

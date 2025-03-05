@@ -54,9 +54,10 @@
         <div class="space-y-4">
           <button
             type="submit"
-            class="w-full bg-emerald-600 text-white py-3 px-6 rounded-full font-semibold hover:bg-emerald-700 transition-all duration-300 hover:shadow-md hover:scale-[1.02]"
+            :disabled="isLoading"
+            class="w-full bg-emerald-600 text-white py-3 px-6 rounded-full font-semibold hover:bg-emerald-700 transition-all duration-300 hover:shadow-md hover:scale-[1.02] disabled:bg-emerald-400"
           >
-            Login
+            {{ isLoading ? 'Logging in...' : 'Login' }}
           </button>
           <button
             @click="goToRegisterPage"
@@ -71,7 +72,7 @@
             Back to Home
           </button>
           <button
-            @click="goToforgotPasswordPage"
+            @click="goToForgotPasswordPage"
             class="w-full text-blue-600 py-3 px-6 rounded-full font-medium hover:text-blue-700 hover:bg-blue-50 transition-all duration-300"
           >
             Forgot Password?
@@ -85,29 +86,33 @@
 <script setup>
 import { ref } from "vue";
 import axios from "axios";
-import { useRouter, useRoute } from "vue-router";
+import { useRouter } from "vue-router";
 import { useAuthStore } from "@/stores/auth";
 
 const router = useRouter();
-const route = useRoute();
 const authStore = useAuthStore();
 
 const email = ref("");
 const password = ref("");
 const errorMessage = ref(null);
+const isLoading = ref(false);
 
 const goToRegisterPage = () => {
   router.push({ name: "register" });
 };
+
 const goToHomePage = () => {
   router.push({ name: "home" });
 };
-const goToforgotPasswordPage = () => {
+
+const goToForgotPasswordPage = () => {
   router.push({ name: "forgot-password" });
 };
 
 async function onSubmit() {
   errorMessage.value = null;
+  isLoading.value = true;
+
   try {
     await axios.get("http://localhost:8000/sanctum/csrf-cookie");
     const response = await axios.post("http://localhost:8000/api/login", {
@@ -115,17 +120,39 @@ async function onSubmit() {
       password: password.value,
     });
 
+    console.log("Login response:", response.data);
+
     if (response.data.access_token) {
       authStore.setAccessToken(response.data.access_token);
+      authStore.setUser(response.data.user);
       localStorage.setItem('email', email.value);
-      await authStore.fetchUserProfile();
-      router.push({ name: "home" });
+      localStorage.setItem('user', JSON.stringify(response.data.user));
+
+      console.log("authStore after login:", {
+        accessToken: authStore.accessToken,
+        user: authStore.user,
+        isAdmin: authStore.isAdmin,
+      });
+
+      if (authStore.isAdmin) {
+        console.log("Redirecting to /admin");
+        await router.push('/admin');
+      } else {
+        console.log("Redirecting to Home");
+        await router.push('/');
+      }
     } else {
       throw new Error("Invalid login response");
     }
   } catch (error) {
-    errorMessage.value = error.response?.data?.message || "Login failed. Please try again.";
-    console.error(errorMessage.value);
+    if (error.response?.data?.errors?.email) {
+      errorMessage.value = error.response.data.errors.email[0];
+    } else {
+      errorMessage.value = error.response?.data?.message || "Login failed. Please try again.";
+    }
+    console.error("Login error:", error);
+  } finally {
+    isLoading.value = false;
   }
 }
 </script>

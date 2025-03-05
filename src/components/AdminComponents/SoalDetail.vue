@@ -1,0 +1,275 @@
+<template>
+  <div class="min-h-screen bg-gradient-to-br from-gray-100 to-emerald-50 py-10 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-4xl mx-auto">
+      <!-- Header -->
+      <h1 class="text-4xl font-extrabold text-emerald-900 mb-10 text-center tracking-tight animate__animated animate__fadeInDown">
+        Soal {{ soalNumber }} - Detail Jawaban
+      </h1>
+
+      <!-- Loading State -->
+      <div v-if="isLoading" class="text-center text-gray-600 animate__animated animate__pulse animate__infinite">
+        Memuat detail soal...
+      </div>
+
+      <!-- Error State -->
+      <div v-if="error" class="mb-8 p-6 bg-red-50 rounded-xl shadow-md text-center">
+        <p class="text-lg font-medium text-red-600">{{ error }}</p>
+      </div>
+
+      <!-- Soal Detail -->
+      <div v-if="!isLoading && !error && soal && Object.keys(soal).length > 0" class="bg-white p-8 rounded-xl shadow-lg transition-all duration-300 hover:shadow-xl">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+          <p class="text-lg text-gray-600">
+            <strong class="text-emerald-800">Status:</strong> {{ soal.status }}
+          </p>
+          <p class="text-lg text-gray-600">
+            <strong class="text-emerald-800">Nilai:</strong> {{ soal.nilai || 0 }}
+          </p>
+        </div>
+
+        <!-- Answer Details -->
+        <div class="mt-8">
+          <h2 class="text-2xl font-semibold text-emerald-900 mb-6 border-b border-gray-200 pb-2">
+            Detail Jawaban
+          </h2>
+          <div class="space-y-6">
+            <div
+              v-for="(value, key) in filteredSoal"
+              :key="key"
+              class="p-5 bg-gray-50 rounded-lg transition-all duration-200 hover:bg-gray-100"
+            >
+              <p class="text-gray-700 text-base">
+                <strong class="font-medium text-emerald-800 capitalize">{{ key }}:</strong>
+                <span class="ml-2 text-gray-600">{{ value || 'Tidak ada data' }}</span>
+              </p>
+              <div class="mt-3 flex space-x-4">
+                <button
+                  v-if="value"
+                  @click="deleteField(key)"
+                  class="text-red-600 text-sm px-4 py-1 rounded-md bg-red-50 hover:bg-red-100 hover:text-red-700 transition-all duration-200"
+                >
+                  Hapus
+                </button>
+                <button
+                  v-if="isFileField(key) && value"
+                  @click="viewFile(key)"
+                  class="text-teal-600 text-sm px-4 py-1 rounded-md bg-teal-50 hover:bg-teal-100 hover:text-teal-700 transition-all duration-200"
+                >
+                  Lihat PDF
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Delete All Button -->
+        <button
+          @click="deleteSoal"
+          class="mt-8 w-full bg-red-600 text-white px-6 py-3 rounded-md font-semibold shadow-md hover:bg-red-700 hover:scale-105 transition-all duration-300"
+        >
+          Hapus Semua Jawaban
+        </button>
+      </div>
+
+      <!-- No Data State -->
+      <div v-if="!isLoading && !error && (!soal || Object.keys(soal).length === 0)" class="text-center text-gray-600 p-8 bg-white rounded-xl shadow-lg">
+        Tidak ada data jawaban untuk soal ini.
+      </div>
+    </div>
+  </div>
+</template>
+
+<script>
+import axios from 'axios';
+import { useAuthStore } from '@/stores/auth';
+import 'animate.css';
+
+export default {
+  data() {
+    return {
+      soal: null,
+      fileFields: [],
+      isLoading: false,
+      error: null,
+    };
+  },
+  computed: {
+    soalNumber() {
+      return this.$route.params.soalNumber;
+    },
+    userId() {
+      return this.$route.params.userId;
+    },
+    filteredSoal() {
+      if (!this.soal) return {};
+      return Object.fromEntries(
+        Object.entries(this.soal).filter(
+          ([key]) => !['id', 'user_id', 'nilai', 'status', 'created_at', 'updated_at'].includes(key)
+        )
+      );
+    },
+  },
+  created() {
+    this.fetchSoal();
+  },
+  methods: {
+    async fetchSoal() {
+      const authStore = useAuthStore();
+      this.isLoading = true;
+      this.error = null;
+
+      if (!authStore.accessToken) {
+        this.error = 'Silakan login terlebih dahulu.';
+        this.isLoading = false;
+        this.$router.push({ name: 'login' });
+        return;
+      }
+
+      try {
+        const response = await axios.get(
+          `http://localhost:8000/api/admin/soal/${this.soalNumber}/${this.userId}`,
+          {
+            headers: {
+              Authorization: `Bearer ${authStore.accessToken}`,
+            },
+          }
+        );
+        console.log('Soal detail response:', response.data);
+        this.soal = response.data.data || {};
+        this.fileFields = this.getFileFields();
+      } catch (error) {
+        console.error('Error fetching soal:', error.response || error);
+        this.error = error.response?.data?.message || 'Gagal memuat detail soal.';
+        if (error.response?.status === 401) {
+          this.$router.push({ name: 'login' });
+        }
+      } finally {
+        this.isLoading = false;
+      }
+    },
+    async deleteSoal() {
+      const authStore = useAuthStore();
+      if (!confirm('Apakah Anda yakin ingin menghapus semua jawaban ini?')) return;
+
+      try {
+        await axios.delete(
+          `http://localhost:8000/api/admin/soal/${this.soalNumber}/${this.userId}`,
+          {
+            headers: {
+              Authorization: `Bearer ${authStore.accessToken}`,
+            },
+          }
+        );
+        this.$router.push({ name: 'user-detail', params: { userId: this.userId } });
+      } catch (error) {
+        console.error('Error deleting soal:', error.response || error);
+        alert('Gagal menghapus semua jawaban: ' + (error.response?.data?.message || 'Kesalahan tidak diketahui'));
+      }
+    },
+    async deleteField(fieldName) {
+      const authStore = useAuthStore();
+      if (!confirm(`Apakah Anda yakin ingin menghapus ${fieldName}?`)) return;
+
+      try {
+        const response = await axios.delete(
+          `http://localhost:8000/api/admin/soal/${this.soalNumber}/${this.userId}/field/${fieldName}`,
+          {
+            headers: {
+              Authorization: `Bearer ${authStore.accessToken}`,
+            },
+          }
+        );
+        this.soal = response.data.data || {};
+        this.fileFields = this.getFileFields();
+        if (Object.keys(this.soal).length === 0) {
+          this.fetchSoal(); // Refresh jika data kosong
+        }
+      } catch (error) {
+        console.error('Error deleting field:', error.response || error);
+        alert('Gagal menghapus field: ' + (error.response?.data?.message || 'Kesalahan tidak diketahui'));
+      }
+    },
+    async viewFile(fieldName) {
+      const authStore = useAuthStore();
+      try {
+        const url = `http://localhost:8000/api/admin/soal/${this.soalNumber}/${this.userId}/file/${fieldName}`;
+        const response = await axios.get(url, {
+          responseType: 'blob',
+          headers: {
+            Authorization: `Bearer ${authStore.accessToken}`,
+          },
+        });
+        const blob = new Blob([response.data], { type: 'application/pdf' });
+        const blobUrl = window.URL.createObjectURL(blob);
+        window.open(blobUrl, '_blank');
+        setTimeout(() => window.URL.revokeObjectURL(blobUrl), 1000);
+      } catch (error) {
+        console.error('Error fetching PDF:', error.response || error);
+        alert('Gagal membuka file PDF: ' + (error.response?.data?.message || 'File tidak ditemukan'));
+      }
+    },
+    isFileField(fieldName) {
+      return this.fileFields.includes(fieldName);
+    },
+    getFileFields() {
+      const fileFieldsMap = {
+        '1': ['tingkat_pendidikan'],
+        '2': ['tp3', 'lpmp_diknas', 'guru_lain_ipbi_1', 'guru_lain_ipbi_2', 'guru_lain_ipbi_3', 'guru_lain_ipbi_4', 'training_trainer'],
+        '3': ['bahasa_inggris', 'bahasa_lain1', 'bahasa_lain2', 'bahasa_lain3', 'bahasa_lain4'],
+        '4': [
+          'independent_org', 'foreign_school_degree',
+          'foreign_school_no_degree_1', 'foreign_school_no_degree_2', 'foreign_school_no_degree_3', 'foreign_school_no_degree_4', 'foreign_school_no_degree_5',
+          'domestic_school_no_degree_1', 'domestic_school_no_degree_2', 'domestic_school_no_degree_3', 'domestic_school_no_degree_4', 'domestic_school_no_degree_5'
+        ],
+        '5': ['sertifikat_1', 'sertifikat_2', 'sertifikat_3'],
+        '6': ['penghargaan_daerah', 'penghargaan_nasional', 'penghargaan_internasional'],
+        '7': [
+          'juara_nasional_dpp', 'juara_non_dpp', 'juara_instansi_lain', 'juara_internasional',
+          'peserta_lomba_1', 'peserta_lomba_2', 'peserta_lomba_3', 'peserta_lomba_4', 'peserta_lomba_5',
+          'juri_lomba_1', 'juri_lomba_2'
+        ],
+        '8': [
+          'demo_dpp_dpd1', 'demo_dpp_dpd2', 'demo_dpp_dpd3', 'demo_dpp_dpd4', 'demo_dpp_dpd5',
+          'non_ipbi1', 'non_ipbi2', 'non_ipbi3', 'non_ipbi4', 'non_ipbi5',
+          'international1', 'international2'
+        ],
+        '9': ['pembina_demonstrator', 'panitia', 'peserta'],
+        '10': [
+          'ipbi_offline1', 'ipbi_offline2', 'ipbi_offline3',
+          'ipbi_online1', 'ipbi_online2', 'ipbi_online3',
+          'non_ipbi_offline1', 'non_ipbi_offline2', 'non_ipbi_offline3',
+          'non_ipbi_online1', 'non_ipbi_online2', 'non_ipbi_online3',
+          'international_offline1', 'international_offline2',
+          'international_online1', 'international_online2',
+          'host_moderator1', 'host_moderator2', 'host_moderator3', 'host_moderator4', 'host_moderator5'
+        ],
+        '11': ['penguji_sertifikasi1', 'penguji_sertifikasi2', 'juri_ipbi1', 'juri_ipbi2', 'juri_non_ipbi1', 'juri_non_ipbi2'],
+        '12': ['jabatan'],
+        '13': [
+          'guru_tetap', 'asisten_guru', 'owner_sekolah',
+          'guru_tidak_tetap_offline', 'guru_tidak_tetap_online',
+          'guru_luar_negeri1', 'guru_luar_negeri2'
+        ],
+        '14': ['ngajar_online'],
+        '15': ['ikebana_murid', 'ikebana_guru', 'rangkaian_tradisional', 'lainnya'],
+        '16': ['aktif_merangkai', 'owner_berbadan_hukum', 'owner_tanpa_badan_hukum', 'freelance_designer'],
+        '17': [
+          'media_cetak_nasional', 'media_cetak_internasional', 'buku_merangkai_bunga',
+          'kontributor_buku1', 'kontributor_buku2', 'kontributor_tv1', 'kontributor_tv2'
+        ],
+      };
+      return fileFieldsMap[this.soalNumber] || [];
+    },
+  },
+};
+</script>
+
+<style scoped>
+button {
+  transition: all 0.3s ease-in-out;
+}
+
+.space-y-6 > div {
+  transition: all 0.2s ease-in-out;
+}
+</style>
