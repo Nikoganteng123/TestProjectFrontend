@@ -3,7 +3,7 @@
     <div class="max-w-2xl mx-auto bg-white rounded-xl shadow-lg overflow-hidden">
       <div class="p-8 space-y-6">
         <h1 class="text-3xl font-bold text-gray-900 mb-6">
-          Soal 5: Sertifikasi Kompetensi di Bidang Merangkai Bunga
+          Data 5: Sertifikasi Kompetensi di Bidang Merangkai Bunga
         </h1>
 
         <form @submit.prevent="submitAnswer" class="space-y-4">

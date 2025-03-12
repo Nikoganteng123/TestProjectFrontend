@@ -8,7 +8,7 @@
     </div>
 
     <h1 class="text-4xl font-extrabold text-green-900 mb-8 text-center animate__animated animate__fadeInDown">
-      Uji Kompetensi IPBI
+      Pemetaan Data Guru IPBI
     </h1>
 
     <div class="flex justify-center mb-10">
@@ -17,7 +17,7 @@
         :disabled="isChecking"
         class="px-8 py-3 bg-gradient-to-r from-green-600 to-green-700 text-white rounded-full font-semibold hover:from-green-700 hover:to-green-800 transition-all duration-300 transform hover:scale-105 hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed relative overflow-hidden"
       >
-        <span class="relative z-10">{{ isChecking ? 'Memeriksa...' : 'Ikuti Uji Kompetensi' }}</span>
+        <span class="relative z-10">{{ isChecking ? 'Memeriksa...' : 'Mulai Pemetaan Data' }}</span>
         <span class="absolute inset-0 bg-white opacity-0 hover:opacity-20 transition-opacity duration-300"></span>
       </button>
     </div>
@@ -58,38 +58,9 @@
         </div>
         <p v-if="!canTakeTest && remainingDays > 0" class="text-gray-600 mt-4">
           Tunggu {{ remainingDays }} hari untuk mencoba lagi!
+          Jika anda ingin membukanya lagi silahkan hubungi Admin IPBI
         </p>
       </div>
-    </div>
-
-    <h2 class="text-2xl font-bold text-green-800 mb-6 animate__animated animate__fadeIn">
-      Peserta Terdaftar
-    </h2>
-
-    <div class="overflow-x-auto rounded-lg shadow-md animate__animated animate__fadeIn animate__delay-1s">
-      <table class="w-full border-collapse bg-white">
-        <thead class="bg-green-50 text-green-900">
-          <tr>
-            <th class="px-6 py-4 text-left font-semibold">Nama</th>
-            <th class="px-6 py-4 text-center font-semibold">Status Sertifikasi</th>
-            <th class="px-6 py-4 text-center font-semibold">Peringkat</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="(participant, index) in participants" :key="index" 
-              class="border-b hover:bg-green-50 transition-all duration-200">
-            <td class="px-6 py-4 text-gray-800">{{ participant.name }}</td>
-            <td class="px-6 py-4 text-center">
-              <span :class="participant.certified ? 'text-green-600' : 'text-red-600'" 
-                    class="font-medium px-3 py-1 rounded-full bg-opacity-10"
-                    :style="{ backgroundColor: participant.certified ? '#dcfce7' : '#fee2e2' }">
-                {{ participant.certified ? 'Tersertifikasi' : 'Belum' }}
-              </span>
-            </td>
-            <td class="px-6 py-4 text-center text-gray-700">{{ participant.rank }}</td>
-          </tr>
-        </tbody>
-      </table>
     </div>
   </div>
 </template>
@@ -147,12 +118,12 @@ const checkAvailabilityAndRedirect = async () => {
     remainingDays.value = Math.ceil(remaining_seconds / (24 * 60 * 60)); // Konversi detik ke hari
 
     if (can_take_test) {
-      availabilityMessage.value = 'Selamat, Anda dapat mengikuti uji kompetensi sekarang!';
+      availabilityMessage.value = 'Selamat, Anda dapat mengikuti Pemetaan Data Guru sekarang!';
       setTimeout(() => {
         router.push('/soal-1');
       }, 1500);
     } else {
-      availabilityMessage.value = 'Anda sudah pernah menyelesaikan Uji Kompetensi IPBI sebelumnya.';
+      availabilityMessage.value = 'Anda sudah pernah menyelesaikan Pemetaan Data Guru IPBI sebelumnya.';
       startCountdown(remaining_seconds);
     }
   } catch (error) {

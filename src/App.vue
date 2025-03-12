@@ -12,7 +12,7 @@
           class="logo-link flex items-center transition-all duration-300 ease-in-out hover:scale-105"
         >
           <img src="/src/assets/logoipbi.jpg" alt="Logo" class="h-12 w-auto">
-          <span class="logo-text hidden lg:inline">Ikatan Perangkai Bunga Indonesia</span>
+          <span class="logo-text hidden lg:inline">Pemetaan Data Guru IPBI</span>
         </RouterLink>
 
         <!-- Hamburger Menu -->
@@ -26,7 +26,7 @@
         <!-- Desktop Menu -->
         <div class="hidden lg:flex items-center space-x-8">
           <RouterLink to="/" class="nav-link">Home</RouterLink>
-          <RouterLink to="/uji-kompetensi" class="nav-link">Uji Kompetensi</RouterLink>
+          <RouterLink to="/uji-kompetensi" class="nav-link">Pemetaan Data</RouterLink>
           
           <!-- Auth Links -->
           <template v-if="!authStore.isLoggedIn">
@@ -46,7 +46,7 @@
         class="dropdown lg:hidden animate__animated animate__fadeInDown animate__faster"
       >
         <RouterLink to="/" class="dropdown-item" @click="toggleMenu">Home</RouterLink>
-        <RouterLink to="/uji-kompetensi" class="dropdown-item" @click="toggleMenu">Uji Kompetensi</RouterLink>
+        <RouterLink to="/uji-kompetensi" class="dropdown-item" @click="toggleMenu">Pemetaan Data</RouterLink>
         <RouterLink to="/users" class="dropdown-item" v-if="authStore.isLoggedIn" @click="toggleMenu">Profile</RouterLink>
         <RouterLink to="/login" class="dropdown-item" v-if="!authStore.isLoggedIn" @click="toggleMenu">Login</RouterLink>
         <RouterLink to="/register" class="dropdown-item" v-if="!authStore.isLoggedIn" @click="toggleMenu">Register</RouterLink>

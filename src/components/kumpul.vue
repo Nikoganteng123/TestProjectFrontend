@@ -11,7 +11,7 @@
         <div class="p-6 sm:p-10 space-y-12">
           <!-- Header -->
           <h1 class="text-3xl sm:text-4xl font-extrabold text-emerald-900 tracking-tight animate-slide-in">
-            Status Pengerjaan Uji Kompetensi
+            Status Pengerjaan Pemetaan Data Guru IPBI
           </h1>
   
           <!-- Status Soal -->
@@ -19,7 +19,7 @@
             <router-link
               v-for="(data, key) in overview"
               :key="key"
-              :to="`/soal-${key.replace('soal', '')}`"
+              :to="`/soal-${key.replace('Data', '')}`"
               class="relative group p-6 rounded-xl bg-gradient-to-br transition-all duration-300 transform hover:scale-105 hover:shadow-xl"
               :class="data.completed ? 'from-green-100 to-green-200 border-green-400' : 'from-red-100 to-red-200 border-red-400'"
             >
@@ -40,15 +40,15 @@
   
           <!-- Daftar Soal yang Kosong -->
           <div class="space-y-4 animate-slide-in-up">
-            <h2 class="text-xl sm:text-2xl font-bold text-gray-800">Soal yang Belum Dijawab</h2>
+            <h2 class="text-xl sm:text-2xl font-bold text-gray-800">Data yang Belum Dijawab</h2>
             <ul v-if="emptySoals.length > 0" class="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <li v-for="soal in emptySoals" :key="soal" class="p-3 bg-red-50 rounded-lg text-gray-700 font-medium transform transition-all duration-300 hover:bg-red-100 hover:scale-102">
                 <router-link :to="`/soal-${soal}`" class="block w-full h-full">
-                  Soal {{ soal }}
+                  Data {{ soal }}
                 </router-link>
               </li>
             </ul>
-            <p v-else class="text-green-600 text-lg font-semibold animate-bounce-in">Semua soal telah dijawab!</p>
+            <p v-else class="text-green-600 text-lg font-semibold animate-bounce-in">Semua Data telah dijawab!</p>
           </div>
   
           <!-- Potensi Nilai -->
@@ -82,7 +82,7 @@
         <div class="bg-white rounded-2xl p-6 sm:p-8 max-w-md w-full shadow-2xl transform transition-all duration-300 scale-95 hover:scale-100">
           <h3 class="text-lg sm:text-xl font-bold text-gray-800 mb-4 animate-slide-in-down">Konfirmasi Pengumpulan</h3>
           <p class="text-gray-700 leading-relaxed animate-fade-in-up">
-            Apakah Anda yakin? Jika Anda sudah mengumpulkan, Anda tidak bisa mengedit atau kembali ke uji kompetensi yang telah Anda kumpul!
+            Apakah Anda yakin? Jika Anda sudah mengumpulkan, Anda tidak bisa mengedit atau kembali ke Pemetaan Data yang telah Anda kumpul!
           </p>
           <div class="flex justify-end space-x-4 mt-6">
             <button
