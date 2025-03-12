@@ -51,7 +51,7 @@
                   Hapus
                 </button>
                 <button
-                  v-if="isFileField(key) && value"
+                  v-if="shouldShowPdfButton(key, value)"
                   @click="viewFile(key)"
                   class="text-teal-600 text-sm px-4 py-1 rounded-md bg-teal-50 hover:bg-teal-100 hover:text-teal-700 transition-all duration-200"
                 >
@@ -179,14 +179,24 @@ export default {
             },
           }
         );
-        this.soal = response.data.data || {};
-        this.fileFields = this.getFileFields();
-        if (Object.keys(this.soal).length === 0) {
-          this.fetchSoal(); // Refresh jika data kosong
+
+        // Jika response sukses (status 200 atau 204), perbarui data
+        if (response.status === 200 || response.status === 204) {
+          this.soal = response.data.data || {};
+          this.fileFields = this.getFileFields();
+          // Selalu fetch ulang data untuk memastikan sinkronisasi
+          await this.fetchSoal();
         }
       } catch (error) {
         console.error('Error deleting field:', error.response || error);
-        alert('Gagal menghapus field: ' + (error.response?.data?.message || 'Kesalahan tidak diketahui'));
+        // Tangani error dengan lebih spesifik
+        if (error.response && error.response.status === 422) {
+          // Jika error validasi tapi data tetap terhapus, fetch ulang data
+          await this.fetchSoal();
+          console.log('Validasi error tetapi penghapusan mungkin berhasil, data diperbarui.');
+        } else {
+          alert('Gagal menghapus field: ' + (error.response?.data?.message || 'Kesalahan tidak diketahui'));
+        }
       }
     },
     async viewFile(fieldName) {
@@ -211,9 +221,16 @@ export default {
     isFileField(fieldName) {
       return this.fileFields.includes(fieldName);
     },
+    shouldShowPdfButton(key, value) {
+      if (!value || !this.isFileField(key)) return false;
+      if (this.soalNumber === '1') {
+        return key === 'tingkat_pendidikan_file';
+      }
+      return !['3', '12', '14'].includes(this.soalNumber);
+    },
     getFileFields() {
       const fileFieldsMap = {
-        '1': ['tingkat_pendidikan'],
+        '1': ['tingkat_pendidikan_file'],
         '2': ['tp3', 'lpmp_diknas', 'guru_lain_ipbi_1', 'guru_lain_ipbi_2', 'guru_lain_ipbi_3', 'guru_lain_ipbi_4', 'training_trainer'],
         '3': ['bahasa_inggris', 'bahasa_lain1', 'bahasa_lain2', 'bahasa_lain3', 'bahasa_lain4'],
         '4': [

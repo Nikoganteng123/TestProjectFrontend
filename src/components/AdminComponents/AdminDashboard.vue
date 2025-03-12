@@ -36,7 +36,7 @@
             active-class="bg-emerald-800 shadow-inner"
           >
             <i class="fas fa-users mr-3 text-lg group-hover:text-emerald-300 transition-colors duration-300"></i>
-            <span class="font-medium group-hover:ml-1 transition-all duration-300">Daftar Pengguna</span>
+            <span class="font-medium group-hover:ml-1 transition-all duration-300">Daftar Guru</span>
           </router-link>
           <router-link
             to="/admin/settings"

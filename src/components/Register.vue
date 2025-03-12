@@ -54,12 +54,21 @@
             placeholder="Masukkan kode OTP"
           />
         </div>
-        <button
-          type="submit"
-          class="w-full bg-emerald-600 text-white py-3 px-6 rounded-full font-semibold hover:bg-emerald-700 transition-all duration-300 hover:shadow-md hover:scale-[1.02]"
-        >
-          Verifikasi OTP
-        </button>
+        <div class="flex space-x-4">
+          <button
+            type="button"
+            @click="goBackToRequestOtp"
+            class="w-full bg-gray-500 text-white py-3 px-6 rounded-full font-semibold hover:bg-gray-600 transition-all duration-300 hover:shadow-md hover:scale-[1.02]"
+          >
+            Kembali
+          </button>
+          <button
+            type="submit"
+            class="w-full bg-emerald-600 text-white py-3 px-6 rounded-full font-semibold hover:bg-emerald-700 transition-all duration-300 hover:shadow-md hover:scale-[1.02]"
+          >
+            Verifikasi OTP
+          </button>
+        </div>
       </form>
 
       <!-- Step 3: Register Account -->
@@ -97,20 +106,27 @@
             placeholder="Buat Password"
           />
         </div>
-        <div class="space-y-4">
+        <div class="flex space-x-4">
+          <button
+            type="button"
+            @click="goBackToVerifyOtp"
+            class="w-full bg-gray-500 text-white py-3 px-6 rounded-full font-semibold hover:bg-gray-600 transition-all duration-300 hover:shadow-md hover:scale-[1.02]"
+          >
+            Kembali
+          </button>
           <button
             type="submit"
             class="w-full bg-emerald-600 text-white py-3 px-6 rounded-full font-semibold hover:bg-emerald-700 transition-all duration-300 hover:shadow-md hover:scale-[1.02]"
           >
             Daftar Akun
           </button>
-          <button
-            @click="goToLoginPage"
-            class="w-full text-emerald-700 py-3 px-6 rounded-full font-medium hover:text-emerald-800 hover:bg-emerald-50 transition-all duration-300"
-          >
-            Sudah punya akun? Login di sini
-          </button>
         </div>
+        <button
+          @click="goToLoginPage"
+          class="w-full text-emerald-700 py-3 px-6 rounded-full font-medium hover:text-emerald-800 hover:bg-emerald-50 transition-all duration-300"
+        >
+          Sudah punya akun? Login di sini
+        </button>
       </form>
     </div>
   </div>
@@ -133,6 +149,20 @@ const errorMessage = ref(null);
 
 const goToLoginPage = () => {
   router.push({ name: "login" });
+};
+
+const goBackToRequestOtp = () => {
+  isOtpRequested.value = false;
+  kodeOtp.value = ""; // Reset kode OTP
+  errorMessage.value = null; // Reset error message
+};
+
+const goBackToVerifyOtp = () => {
+  isVerified.value = false;
+  nama.value = ""; // Reset nama
+  email.value = ""; // Reset email
+  password.value = ""; // Reset password
+  errorMessage.value = null; // Reset error message
 };
 
 async function requestOtp() {

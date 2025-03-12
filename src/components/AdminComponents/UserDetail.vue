@@ -30,16 +30,46 @@
           </p>
           <p class="text-lg text-gray-700">
             <strong class="text-emerald-800">Total Nilai:</strong>
-            <span class="font-semibold text-emerald-700">{{ totalNilai }}</span>
+            <span v-if="!isEditingTotal" class="font-semibold text-emerald-700">{{ totalNilai }}</span>
+            <input
+              v-else
+              v-model.number="editedTotalNilai"
+              type="number"
+              class="font-semibold text-emerald-700 border rounded px-2 py-1 w-20"
+              @keypress.enter="confirmUpdateAndVerify"
+            >
+            <button
+              v-if="!user.is_verified"
+              @click="toggleEditTotal"
+              class="ml-2 text-sm text-emerald-600 hover:text-emerald-800"
+            >
+              {{ isEditingTotal ? 'Batal' : 'Edit' }}
+            </button>
           </p>
         </div>
-        <button
-          v-if="!user.is_verified"
-          @click="verifyUser"
-          class="mt-6 w-full bg-emerald-600 text-white px-6 py-3 rounded-lg font-semibold shadow-md hover:bg-emerald-700 hover:scale-105 transform transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-emerald-500"
-        >
-          Verifikasi Uji Kompetensi
-        </button>
+        <div class="mt-6 flex space-x-4">
+          <button
+            v-if="!user.is_verified && !isEditingTotal"
+            @click="verifyUser"
+            class="w-full bg-emerald-600 text-white px-6 py-3 rounded-lg font-semibold shadow-md hover:bg-emerald-700 hover:scale-105 transform transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+          >
+            Verifikasi Uji Kompetensi
+          </button>
+          <button
+            v-if="isEditingTotal"
+            @click="confirmUpdateAndVerify"
+            class="w-full bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold shadow-md hover:bg-blue-700 hover:scale-105 transform transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            Simpan & Verifikasi
+          </button>
+          <button
+            v-if="user.is_verified"
+            @click="unverifyUser"
+            class="w-full bg-red-600 text-white px-6 py-3 rounded-lg font-semibold shadow-md hover:bg-red-700 hover:scale-105 transform transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-red-500"
+          >
+            Batalkan Verifikasi
+          </button>
+        </div>
       </div>
 
       <!-- Submissions Section -->
@@ -82,6 +112,8 @@ export default {
       user: null,
       soals: {},
       totalNilai: 0,
+      editedTotalNilai: 0,
+      isEditingTotal: false,
       isLoading: false,
       error: null,
     };
@@ -112,6 +144,7 @@ export default {
         this.user = response.data.user;
         this.soals = response.data.soals;
         this.totalNilai = response.data.totalNilai;
+        this.editedTotalNilai = this.totalNilai; // Inisialisasi nilai edit
       } catch (error) {
         console.error('Error fetching user detail:', error.response || error);
         this.error = error.response?.data?.message || 'Gagal memuat detail pengguna.';
@@ -137,9 +170,69 @@ export default {
           }
         );
         this.fetchUserDetail(); // Refresh data setelah verifikasi
+        alert('Pengguna telah diverifikasi!');
       } catch (error) {
         console.error('Error verifying user:', error.response || error);
         alert('Gagal memverifikasi pengguna: ' + (error.response?.data?.message || 'Kesalahan tidak diketahui'));
+      }
+    },
+    toggleEditTotal() {
+      this.isEditingTotal = !this.isEditingTotal;
+      if (!this.isEditingTotal) {
+        this.editedTotalNilai = this.totalNilai; // Reset ke nilai awal jika batal
+      }
+    },
+    confirmUpdateAndVerify() {
+      const confirmation = confirm(
+        'Anda akan mengubah nilai Guru secara manual (Tidak berdasarkan perhitungan pemeriksaan). Pastikan anda memberikan nilai yang tepat!'
+      );
+      if (confirmation) {
+        this.verifyUserWithCustomScore();
+      }
+    },
+    async verifyUserWithCustomScore() {
+      const authStore = useAuthStore();
+      try {
+        const response = await axios.post(
+          `http://localhost:8000/api/admin/users/${this.$route.params.userId}/verify`,
+          {
+            total_nilai: this.editedTotalNilai, // Kirim nilai yang diinput admin
+          },
+          {
+            headers: {
+              Authorization: `Bearer ${authStore.accessToken}`,
+            },
+          }
+        );
+        console.log('Verification response:', response.data);
+        this.totalNilai = response.data.totalNilai || this.editedTotalNilai;
+        this.isEditingTotal = false;
+        this.fetchUserDetail(); // Refresh data dari server
+        alert('Nilai berhasil diperbarui dan pengguna telah diverifikasi!');
+      } catch (error) {
+        console.error('Error verifying user with custom score:', error.response || error);
+        alert('Gagal memperbarui nilai dan verifikasi: ' + (error.response?.data?.message || 'Kesalahan tidak diketahui'));
+      }
+    },
+    async unverifyUser() {
+      const authStore = useAuthStore();
+      if (!confirm('Apakah Anda yakin ingin membatalkan verifikasi pengguna ini? Nilai dan status verifikasi akan direset.')) return;
+
+      try {
+        await axios.post(
+          `http://localhost:8000/api/admin/users/${this.$route.params.userId}/unverify`,
+          {},
+          {
+            headers: {
+              Authorization: `Bearer ${authStore.accessToken}`,
+            },
+          }
+        );
+        this.fetchUserDetail(); // Refresh data setelah pembatalan verifikasi
+        alert('Verifikasi pengguna telah dibatalkan!');
+      } catch (error) {
+        console.error('Error unverifying user:', error.response || error);
+        alert('Gagal membatalkan verifikasi: ' + (error.response?.data?.message || 'Kesalahan tidak diketahui'));
       }
     },
   },
@@ -154,5 +247,16 @@ a {
 
 .grid > div {
   transition: all 0.3s ease-in-out;
+}
+
+input[type="number"] {
+  appearance: textfield;
+  -moz-appearance: textfield;
+}
+
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
 }
 </style>
