@@ -142,6 +142,7 @@ async function requestOtp() {
     });
     alert(response.data.message);
     isOtpRequested.value = true;
+    errorMessage.value = null; // Reset error message saat request OTP berhasil
   } catch (error) {
     errorMessage.value = error.response?.data?.message || "Terjadi kesalahan saat mengirim OTP";
   }
@@ -155,6 +156,7 @@ async function verifyOtp() {
     });
     alert(response.data.message);
     isVerified.value = true;
+    errorMessage.value = null; // Reset error message saat OTP berhasil diverifikasi
   } catch (error) {
     errorMessage.value = error.response?.data?.message || "Kode OTP salah atau kadaluarsa";
   }

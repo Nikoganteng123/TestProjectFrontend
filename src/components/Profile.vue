@@ -49,15 +49,19 @@
 
             <!-- Uji Kompetensi Section -->
             <div class="pt-6 border-t border-emerald-100">
-              <h2 class="text-xl font-semibold text-emerald-700 mb-4">Uji Kompetensi</h2>
+              <h2 class="text-xl font-semibold text-emerald-700 mb-4">Data Pemetaan Guru</h2>
               <div class="bg-emerald-50 p-6 rounded-2xl space-y-4">
                 <div>
-                  <p class="text-sm font-semibold text-emerald-700 uppercase tracking-wide">Nilai Final</p>
+                  <p class="text-sm font-semibold text-emerald-700 uppercase tracking-wide">
+                    {{ user?.is_verified ? 'Nilai Final' : 'Nilai Sementara' }}
+                  </p>
                   <p class="mt-2 text-xl font-medium text-gray-900">
                     {{ user?.nilai > 0 ? user.nilai : '-' }}
                   </p>
+                  <p v-if="user?.is_verified" class="mt-2 text-sm text-emerald-600">
+                    Nilai sudah diverifikasi oleh pihak IPBI
+                  </p>
                 </div>
-            
               </div>
             </div>
 
@@ -180,6 +184,7 @@ onMounted(async () => {
         Authorization: `Bearer ${authStore.accessToken}`
       }
     });
+    console.log('Data dari API:', response.data);
     user.value = response.data;
     authStore.setUser(response.data);
     editForm.value = {
