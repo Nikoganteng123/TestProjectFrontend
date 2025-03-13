@@ -37,6 +37,33 @@
             <RouterLink to="/users" class="nav-link">Profile</RouterLink>
             <button @click="logout" class="auth-button logout">Logout</button>
           </template>
+
+          <!-- Notification Bell -->
+          <div class="relative notification-wrapper">
+            <button 
+              @click.stop="toggleNotifications" 
+              class="nav-link notification-btn flex items-center focus:outline-none z-50"
+            >
+              <svg class="w-6 h-6 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6 6 0 00-12 0v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>
+              </svg>
+              <span v-if="unreadCount > 0" class="absolute top-0 right-0 w-2.5 h-2.5 bg-red-600 rounded-full"></span>
+            </button>
+            <!-- Notification Dropdown -->
+            <div 
+              v-if="notificationsOpen" 
+              class="dropdown absolute right-0 mt-2 w-72 bg-white shadow-lg rounded-lg p-2 z-50 animate__animated animate__fadeInDown"
+            >
+              <RouterLink 
+                to="/notifications" 
+                class="dropdown-item flex items-center justify-between"
+                @click="toggleNotifications"
+              >
+                <span>Lihat Semua Notifikasi</span>
+                <span v-if="unreadCount > 0" class="text-xs text-white bg-red-600 px-2 py-1 rounded-full">{{ unreadCount }}</span>
+              </RouterLink>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -47,6 +74,7 @@
       >
         <RouterLink to="/" class="dropdown-item" @click="toggleMenu">Home</RouterLink>
         <RouterLink to="/uji-kompetensi" class="dropdown-item" @click="toggleMenu">Pemetaan Data</RouterLink>
+        <RouterLink to="/notifications" class="dropdown-item" @click="toggleMenu">Notifikasi</RouterLink>
         <RouterLink to="/users" class="dropdown-item" v-if="authStore.isLoggedIn" @click="toggleMenu">Profile</RouterLink>
         <RouterLink to="/login" class="dropdown-item" v-if="!authStore.isLoggedIn" @click="toggleMenu">Login</RouterLink>
         <RouterLink to="/register" class="dropdown-item" v-if="!authStore.isLoggedIn" @click="toggleMenu">Register</RouterLink>
@@ -82,6 +110,7 @@
 import { useAuthStore } from "@/stores/auth";
 import { useRouter, useRoute } from "vue-router";
 import { computed, ref, onMounted, onUnmounted } from "vue";
+import axios from 'axios';
 
 const authStore = useAuthStore();
 const router = useRouter();
@@ -89,26 +118,50 @@ const route = useRoute();
 
 const hideNavAndFooter = computed(() => {
   const authRoutes = ["/login", "/register", "/forgot-password", "/reset-password"];
-  const adminRoutes = [
-    route.path.startsWith("/admin"),
-  ];
+  const adminRoutes = [route.path.startsWith("/admin")];
   return authRoutes.includes(route.path) || adminRoutes.some(condition => condition);
 });
 
 const menuOpen = ref(false);
+const notificationsOpen = ref(false);
+const notifications = ref([]);
+const unreadCount = ref(0);
 
 const toggleMenu = () => {
   menuOpen.value = !menuOpen.value;
+  if (notificationsOpen.value) notificationsOpen.value = false;
+};
+
+const toggleNotifications = () => {
+  console.log('Notification button clicked'); // Debugging
+  notificationsOpen.value = !notificationsOpen.value;
+  if (menuOpen.value) menuOpen.value = false;
 };
 
 const closeMenu = (event) => {
-  if (!event.target.closest(".dropdown") && !event.target.closest(".hamburger-icon")) {
+  if (!event.target.closest(".dropdown") && !event.target.closest(".hamburger-icon") && !event.target.closest(".notification-btn")) {
     menuOpen.value = false;
+    notificationsOpen.value = false;
+  }
+};
+
+const fetchNotifications = async () => {
+  if (!authStore.isLoggedIn || !authStore.accessToken) return;
+
+  try {
+    const response = await axios.get('http://localhost:8000/api/notifications', {
+      headers: { Authorization: `Bearer ${authStore.accessToken}` },
+    });
+    notifications.value = response.data.data || [];
+    unreadCount.value = notifications.value.filter(n => !n.read_at).length;
+  } catch (error) {
+    console.error('Error fetching notifications:', error.response || error);
   }
 };
 
 onMounted(() => {
   document.addEventListener("click", closeMenu);
+  fetchNotifications();
 });
 
 onUnmounted(() => {
@@ -119,12 +172,13 @@ const logout = () => {
   authStore.logout();
   router.push({ name: "home" });
   menuOpen.value = false;
+  notificationsOpen.value = false;
 };
 </script>
 
 <style scoped>
 @import 'animate.css/animate.min.css';
-/* App Container */
+
 #app {
   display: flex;
   flex-direction: column;
@@ -135,7 +189,6 @@ const logout = () => {
   flex-grow: 1;
 }
 
-/* Navbar */
 .navbar {
   position: fixed;
   top: 0;
@@ -144,7 +197,7 @@ const logout = () => {
   z-index: 1000;
   padding: 1rem 0;
   background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(10px); /* Modern glass effect */
+  backdrop-filter: blur(10px);
 }
 
 .logo-link {
@@ -188,6 +241,17 @@ const logout = () => {
   width: 100%;
 }
 
+.notification-btn {
+  pointer-events: auto; /* Pastikan bisa diklik */
+  padding: 0.5rem; /* Tambah padding untuk area klik yang lebih besar */
+  cursor: pointer; /* Tampilkan kursor tangan */
+}
+
+.notification-wrapper {
+  position: relative;
+  z-index: 1001; /* Pastikan di atas elemen lain */
+}
+
 .auth-button {
   padding: 0.5rem 1.5rem;
   border-radius: 9999px;
@@ -214,7 +278,6 @@ const logout = () => {
   color: #dc2626;
 }
 
-/* Hamburger Button */
 .hamburger-icon {
   display: inline-block;
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
@@ -227,7 +290,6 @@ const logout = () => {
   color: #34d399;
 }
 
-/* Dropdown */
 .dropdown {
   position: absolute;
   top: 100%;
@@ -238,12 +300,11 @@ const logout = () => {
   padding: 1rem;
   width: 220px;
   z-index: 200;
-  backdrop-filter: blur(8px); /* Glass effect */
+  backdrop-filter: blur(8px);
   transform-origin: top right;
   animation: slideIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* Custom Slide In Animation */
 @keyframes slideIn {
   0% {
     opacity: 0;
@@ -268,7 +329,6 @@ const logout = () => {
   margin: 0.25rem 0;
 }
 
-/* Modern Hover Effect */
 .dropdown-item::before {
   content: '';
   position: absolute;
@@ -302,7 +362,6 @@ const logout = () => {
   box-shadow: 0 4px 15px rgba(239, 68, 68, 0.2);
 }
 
-/* Footer */
 .footer {
   background: linear-gradient(135deg, #1f4d2b, #2d6a4f);
 }
@@ -335,12 +394,10 @@ const logout = () => {
   width: 100%;
 }
 
-/* Enhanced Animations */
 .animate__animated.animate__fadeInDown {
   --animate-duration: 0.4s;
 }
 
-/* Responsive */
 @media (max-width: 1024px) {
   .logo-text {
     display: none;

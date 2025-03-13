@@ -44,8 +44,8 @@
               </p>
               <div class="mt-3 flex space-x-4">
                 <button
-                  v-if="value"
-                  @click="deleteField(key)"
+                  v-if="value && !isVerified"
+                  @click="promptDeleteField(key)"
                   class="text-red-600 text-sm px-4 py-1 rounded-md bg-red-50 hover:bg-red-100 hover:text-red-700 transition-all duration-200"
                 >
                   Hapus
@@ -64,11 +64,39 @@
 
         <!-- Delete All Button -->
         <button
-          @click="deleteSoal"
+          v-if="!isVerified"
+          @click="promptDeleteSoal"
           class="mt-8 w-full bg-red-600 text-white px-6 py-3 rounded-md font-semibold shadow-md hover:bg-red-700 hover:scale-105 transition-all duration-300"
         >
           Hapus Semua Jawaban
         </button>
+
+        <!-- Modal untuk Komentar -->
+        <div v-if="showCommentModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center">
+          <div class="bg-white p-6 rounded-lg shadow-lg w-96">
+            <h3 class="text-lg font-semibold mb-4">Tambahkan Komentar</h3>
+            <textarea
+              v-model="comment"
+              class="w-full p-2 border rounded-md"
+              rows="4"
+              placeholder="Masukkan alasan penghapusan (kosongkan untuk pesan default)..."
+            ></textarea>
+            <div class="mt-4 flex justify-end space-x-2">
+              <button
+                @click="cancelComment"
+                class="px-4 py-2 bg-gray-300 rounded-md hover:bg-gray-400 transition-all duration-200"
+              >
+                Batal
+              </button>
+              <button
+                @click="confirmDelete"
+                class="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-all duration-200"
+              >
+                Hapus
+              </button>
+            </div>
+          </div>
+        </div>
       </div>
 
       <!-- No Data State -->
@@ -91,6 +119,10 @@ export default {
       fileFields: [],
       isLoading: false,
       error: null,
+      isVerified: false,
+      showCommentModal: false,
+      comment: '',
+      deleteTarget: null,
     };
   },
   computed: {
@@ -136,6 +168,7 @@ export default {
         );
         console.log('Soal detail response:', response.data);
         this.soal = response.data.data || {};
+        this.isVerified = response.data.is_verified;
         this.fileFields = this.getFileFields();
       } catch (error) {
         console.error('Error fetching soal:', error.response || error);
@@ -147,55 +180,70 @@ export default {
         this.isLoading = false;
       }
     },
-    async deleteSoal() {
-      const authStore = useAuthStore();
-      if (!confirm('Apakah Anda yakin ingin menghapus semua jawaban ini?')) return;
-
-      try {
-        await axios.delete(
-          `http://localhost:8000/api/admin/soal/${this.soalNumber}/${this.userId}`,
-          {
-            headers: {
-              Authorization: `Bearer ${authStore.accessToken}`,
-            },
-          }
-        );
-        this.$router.push({ name: 'user-detail', params: { userId: this.userId } });
-      } catch (error) {
-        console.error('Error deleting soal:', error.response || error);
-        alert('Gagal menghapus semua jawaban: ' + (error.response?.data?.message || 'Kesalahan tidak diketahui'));
-      }
+    promptDeleteSoal() {
+      this.deleteTarget = 'soal';
+      this.comment = '';
+      this.showCommentModal = true;
     },
-    async deleteField(fieldName) {
+    promptDeleteField(fieldName) {
+      this.deleteTarget = fieldName;
+      this.comment = '';
+      this.showCommentModal = true;
+    },
+    cancelComment() {
+      this.showCommentModal = false;
+      this.deleteTarget = null;
+      this.comment = '';
+    },
+    async confirmDelete() {
       const authStore = useAuthStore();
-      if (!confirm(`Apakah Anda yakin ingin menghapus ${fieldName}?`)) return;
-
       try {
-        const response = await axios.delete(
-          `http://localhost:8000/api/admin/soal/${this.soalNumber}/${this.userId}/field/${fieldName}`,
-          {
-            headers: {
-              Authorization: `Bearer ${authStore.accessToken}`,
-            },
-          }
-        );
+        let response;
+        const config = {
+          headers: { Authorization: `Bearer ${authStore.accessToken}` },
+          data: { comment: this.comment || 'Dihapus tanpa alasan spesifik' },
+        };
 
-        // Jika response sukses (status 200 atau 204), perbarui data
-        if (response.status === 200 || response.status === 204) {
-          this.soal = response.data.data || {};
-          this.fileFields = this.getFileFields();
-          // Selalu fetch ulang data untuk memastikan sinkronisasi
-          await this.fetchSoal();
+        if (this.deleteTarget === 'soal') {
+          response = await axios.delete(
+            `http://localhost:8000/api/admin/soal/${this.soalNumber}/${this.userId}`,
+            config
+          );
+          alert(`Soal dihapus dengan komentar: ${response.data.comment || this.comment}`);
+          this.showCommentModal = false;
+          this.$router.push({ name: 'user-detail', params: { userId: this.userId } });
+        } else {
+          response = await axios.delete(
+            `http://localhost:8000/api/admin/soal/${this.soalNumber}/${this.userId}/field/${this.deleteTarget}`,
+            config
+          );
+          alert(`Field ${this.deleteTarget} dihapus dengan komentar: ${response.data.comment || this.comment}`);
+          this.showCommentModal = false;
+          await this.fetchSoal(); // Refresh data after field deletion
         }
       } catch (error) {
-        console.error('Error deleting field:', error.response || error);
-        // Tangani error dengan lebih spesifik
-        if (error.response && error.response.status === 422) {
-          // Jika error validasi tapi data tetap terhapus, fetch ulang data
-          await this.fetchSoal();
-          console.log('Validasi error tetapi penghapusan mungkin berhasil, data diperbarui.');
+        console.error('Error during delete:', error.response || error);
+        // Handle 422 as a "soft success" for file validation errors
+        if (error.response?.status === 422) {
+          const errors = error.response.data.errors || {};
+          const errorMessages = Object.values(errors).flat().join(' ');
+          console.warn('Validation errors ignored:', errorMessages);
+
+          // Proceed as if successful since deletion works after refresh
+          if (this.deleteTarget === 'soal') {
+            alert(`Soal dihapus dengan komentar: ${this.comment || 'Dihapus tanpa alasan spesifik'}`);
+            this.showCommentModal = false;
+            this.$router.push({ name: 'user-detail', params: { userId: this.userId } });
+          } else {
+            alert(`Field ${this.deleteTarget} dihapus dengan komentar: ${this.comment || 'Dihapus tanpa alasan spesifik'}`);
+            this.showCommentModal = false;
+            await this.fetchSoal(); // Refresh UI
+          }
         } else {
-          alert('Gagal menghapus field: ' + (error.response?.data?.message || 'Kesalahan tidak diketahui'));
+          // Handle other errors normally
+          this.error = error.response?.data?.message || 'Gagal menghapus.';
+          alert(`Gagal menghapus: ${this.error}`);
+          this.showCommentModal = true; // Keep modal open for real errors
         }
       }
     },

@@ -4,6 +4,7 @@ import Profile from "@/components/Profile.vue";
 import Login from "@/components/Login.vue";
 import { useAuthStore } from "@/stores/auth";
 import Register from "@/components/Register.vue";
+import Notification from "@/components/Notification.vue";
 import ForgotPassword from "@/components/ForgotPassword.vue";
 import ResetPassword from "@/components/ResetPassword.vue";
 import UjiKompetensi from "@/components/UjiKompetensi.vue";
@@ -75,6 +76,7 @@ const router = createRouter({
         }
       },
     },
+    {path: '/notifications',name: 'notifications',component: Notification },
     { path: "/users", name: "userlist", component: Profile },
     { path: "/uji-kompetensi", name: "ujikompetensi", component: UjiKompetensi },
     { path: "/kumpul", name: "kumpul", component: kumpul },
