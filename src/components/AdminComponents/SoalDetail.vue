@@ -28,51 +28,57 @@
         </div>
 
         <!-- Answer Details Table -->
-        <div class="mt-6">
-          <h2 class="text-xl sm:text-2xl font-semibold text-emerald-900 mb-4 border-b border-gray-200 pb-2">
-            Detail Jawaban
-          </h2>
-          <div class="overflow-x-auto">
-            <table class="min-w-full bg-white rounded-xl shadow-md">
-              <thead class="bg-emerald-100 text-xs sm:text-sm">
-                <tr>
-                  <th class="py-2 px-2 sm:py-3 sm:px-4 text-left text-emerald-800 font-semibold">No</th>
-                  <th class="py-2 px-2 sm:py-3 sm:px-4 text-left text-emerald-800 font-semibold">Field</th>
-                  <th class="py-2 px-2 sm:py-3 sm:px-4 text-left text-emerald-800 font-semibold">Jawaban</th>
-                  <th class="py-2 px-2 sm:py-3 sm:px-4 text-left text-emerald-800 font-semibold">Aksi</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr
-                  v-for="(value, key, index) in filteredSoal"
-                  :key="key"
-                  class="border-b hover:bg-emerald-50 transition-colors duration-200 text-xs sm:text-sm"
-                >
-                  <td class="py-2 px-2 sm:py-3 sm:px-4">{{ index + 1 }}</td>
-                  <td class="py-2 px-2 sm:py-3 sm:px-4 capitalize">{{ key }}</td>
-                  <td class="py-2 px-2 sm:py-3 sm:px-4 text-gray-600">{{ value || 'Tidak ada data' }}</td>
-                  <td class="py-2 px-2 sm:py-3 sm:px-4 flex flex-col sm:flex-row gap-2">
-                    <!-- Tombol hapus per field hanya muncul jika bukan soal nomor 1 -->
-                    <button
-                      v-if="value && !isVerified && soalNumber !== '1'"
-                      @click="promptDeleteField(key)"
-                      class="text-red-600 text-xs px-2 py-1 rounded-md bg-red-50 hover:bg-red-100 hover:text-red-700 transition-all duration-200"
-                    >
-                      Hapus
-                    </button>
-                    <button
-                      v-if="shouldShowPdfButton(key, value)"
-                      @click="viewFile(key)"
-                      class="text-teal-600 text-xs px-2 py-1 rounded-md bg-teal-50 hover:bg-teal-100 hover:text-teal-700 transition-all duration-200"
-                    >
-                      Lihat PDF
-                    </button>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
+<div class="mt-6">
+  <h2 class="text-xl sm:text-2xl font-semibold text-emerald-900 mb-4 border-b border-gray-200 pb-2">
+    Detail Jawaban
+  </h2>
+  <div class="overflow-x-auto">
+    <table class="min-w-full bg-white rounded-xl shadow-md">
+      <thead class="bg-emerald-100 text-xs sm:text-sm">
+        <tr>
+          <th class="py-2 px-2 sm:py-3 sm:px-4 text-left text-emerald-800 font-semibold">No</th>
+          <th class="py-2 px-2 sm:py-3 sm:px-4 text-left text-emerald-800 font-semibold">Field</th>
+          <th class="py-2 px-2 sm:py-3 sm:px-4 text-left text-emerald-800 font-semibold">Jawaban</th>
+          <th class="py-2 px-2 sm:py-3 sm:px-4 text-left text-emerald-800 font-semibold">Aksi</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr
+          v-for="(value, key, index) in filteredSoal"
+          :key="key"
+          class="border-b hover:bg-emerald-50 transition-colors duration-200 text-xs sm:text-sm"
+        >
+          <td class="py-2 px-2 sm:py-3 sm:px-4">{{ index + 1 }}</td>
+          <td class="py-2 px-2 sm:py-3 sm:px-4 capitalize">{{ key }}</td>
+          <td class="py-2 px-2 sm:py-3 sm:px-4 text-gray-600">{{ value || 'Tidak ada data' }}</td>
+          <td class="py-2 px-2 sm:py-3 sm:px-4">
+            <div class="flex flex-col sm:flex-row gap-2">
+              <!-- Tombol hapus per field hanya muncul jika bukan soal nomor 1 -->
+              <button
+                v-if="value && !isVerified && soalNumber !== '1'"
+                @click="promptDeleteField(key)"
+                class="text-red-600 text-xs px-2 py-1 rounded-md bg-red-50 hover:bg-red-100 hover:text-red-700 transition-all duration-200"
+              >
+                Hapus
+              </button>
+              <button
+                v-if="shouldShowPdfButton(key, value)"
+                @click="viewFile(key)"
+                class="text-teal-600 text-xs px-2 py-1 rounded-md bg-teal-50 hover:bg-teal-100 hover:text-teal-700 transition-all duration-200"
+              >
+                Lihat PDF
+              </button>
+            </div>
+            <!-- Placeholder jika tidak ada aksi -->
+            <span v-if="!value || (!shouldShowPdfButton(key, value) && (isVerified || soalNumber === '1'))" class="text-gray-400 text-xs">
+              Tidak ada aksi
+            </span>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
 
         <!-- Delete All Button -->
         <button
