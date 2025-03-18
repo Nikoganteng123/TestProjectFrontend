@@ -1,8 +1,8 @@
 <template>
-  <div class="min-h-screen bg-gradient-to-br from-gray-100 to-emerald-50 py-10 px-4 sm:px-6 lg:px-8">
+  <div class="min-h-screen bg-gradient-to-br from-gray-100 to-emerald-50 py-6 px-4 sm:px-6 lg:px-8">
     <div class="max-w-4xl mx-auto">
       <!-- Header -->
-      <h1 class="text-4xl font-extrabold text-emerald-900 mb-10 text-center tracking-tight animate__animated animate__fadeInDown">
+      <h1 class="text-2xl sm:text-4xl font-extrabold text-emerald-900 mb-8 text-center tracking-tight animate__animated animate__fadeInDown">
         Soal {{ soalNumber }} - Detail Jawaban
       </h1>
 
@@ -17,48 +17,60 @@
       </div>
 
       <!-- Soal Detail -->
-      <div v-if="!isLoading && !error && soal && Object.keys(soal).length > 0" class="bg-white p-8 rounded-xl shadow-lg transition-all duration-300 hover:shadow-xl">
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-          <p class="text-lg text-gray-600">
+      <div v-if="!isLoading && !error && soal && Object.keys(soal).length > 0" class="bg-white p-6 rounded-xl shadow-lg transition-all duration-300 hover:shadow-xl">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+          <p class="text-base sm:text-lg text-gray-600">
             <strong class="text-emerald-800">Status:</strong> {{ soal.status }}
           </p>
-          <p class="text-lg text-gray-600">
+          <p class="text-base sm:text-lg text-gray-600">
             <strong class="text-emerald-800">Nilai:</strong> {{ soal.nilai || 0 }}
           </p>
         </div>
 
-        <!-- Answer Details -->
-        <div class="mt-8">
-          <h2 class="text-2xl font-semibold text-emerald-900 mb-6 border-b border-gray-200 pb-2">
+        <!-- Answer Details Table -->
+        <div class="mt-6">
+          <h2 class="text-xl sm:text-2xl font-semibold text-emerald-900 mb-4 border-b border-gray-200 pb-2">
             Detail Jawaban
           </h2>
-          <div class="space-y-6">
-            <div
-              v-for="(value, key) in filteredSoal"
-              :key="key"
-              class="p-5 bg-gray-50 rounded-lg transition-all duration-200 hover:bg-gray-100"
-            >
-              <p class="text-gray-700 text-base">
-                <strong class="font-medium text-emerald-800 capitalize">{{ key }}:</strong>
-                <span class="ml-2 text-gray-600">{{ value || 'Tidak ada data' }}</span>
-              </p>
-              <div class="mt-3 flex space-x-4">
-                <button
-                  v-if="value && !isVerified"
-                  @click="promptDeleteField(key)"
-                  class="text-red-600 text-sm px-4 py-1 rounded-md bg-red-50 hover:bg-red-100 hover:text-red-700 transition-all duration-200"
+          <div class="overflow-x-auto">
+            <table class="min-w-full bg-white rounded-xl shadow-md">
+              <thead class="bg-emerald-100 text-xs sm:text-sm">
+                <tr>
+                  <th class="py-2 px-2 sm:py-3 sm:px-4 text-left text-emerald-800 font-semibold">No</th>
+                  <th class="py-2 px-2 sm:py-3 sm:px-4 text-left text-emerald-800 font-semibold">Field</th>
+                  <th class="py-2 px-2 sm:py-3 sm:px-4 text-left text-emerald-800 font-semibold">Jawaban</th>
+                  <th class="py-2 px-2 sm:py-3 sm:px-4 text-left text-emerald-800 font-semibold">Aksi</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr
+                  v-for="(value, key, index) in filteredSoal"
+                  :key="key"
+                  class="border-b hover:bg-emerald-50 transition-colors duration-200 text-xs sm:text-sm"
                 >
-                  Hapus
-                </button>
-                <button
-                  v-if="shouldShowPdfButton(key, value)"
-                  @click="viewFile(key)"
-                  class="text-teal-600 text-sm px-4 py-1 rounded-md bg-teal-50 hover:bg-teal-100 hover:text-teal-700 transition-all duration-200"
-                >
-                  Lihat PDF
-                </button>
-              </div>
-            </div>
+                  <td class="py-2 px-2 sm:py-3 sm:px-4">{{ index + 1 }}</td>
+                  <td class="py-2 px-2 sm:py-3 sm:px-4 capitalize">{{ key }}</td>
+                  <td class="py-2 px-2 sm:py-3 sm:px-4 text-gray-600">{{ value || 'Tidak ada data' }}</td>
+                  <td class="py-2 px-2 sm:py-3 sm:px-4 flex flex-col sm:flex-row gap-2">
+                    <!-- Tombol hapus per field hanya muncul jika bukan soal nomor 1 -->
+                    <button
+                      v-if="value && !isVerified && soalNumber !== '1'"
+                      @click="promptDeleteField(key)"
+                      class="text-red-600 text-xs px-2 py-1 rounded-md bg-red-50 hover:bg-red-100 hover:text-red-700 transition-all duration-200"
+                    >
+                      Hapus
+                    </button>
+                    <button
+                      v-if="shouldShowPdfButton(key, value)"
+                      @click="viewFile(key)"
+                      class="text-teal-600 text-xs px-2 py-1 rounded-md bg-teal-50 hover:bg-teal-100 hover:text-teal-700 transition-all duration-200"
+                    >
+                      Lihat PDF
+                    </button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
           </div>
         </div>
 
@@ -66,20 +78,20 @@
         <button
           v-if="!isVerified"
           @click="promptDeleteSoal"
-          class="mt-8 w-full bg-red-600 text-white px-6 py-3 rounded-md font-semibold shadow-md hover:bg-red-700 hover:scale-105 transition-all duration-300"
+          class="mt-6 w-full bg-red-600 text-white px-4 py-2 rounded-md font-semibold shadow-md hover:bg-red-700 hover:scale-105 transition-all duration-300"
         >
           Hapus Semua Jawaban
         </button>
 
         <!-- Modal untuk Komentar -->
         <div v-if="showCommentModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center">
-          <div class="bg-white p-6 rounded-lg shadow-lg w-96">
+          <div class="bg-white p-6 rounded-lg shadow-lg w-full max-w-md">
             <h3 class="text-lg font-semibold mb-4">Tambahkan Komentar</h3>
             <textarea
               v-model="comment"
               class="w-full p-2 border rounded-md"
               rows="4"
-              placeholder="Masukkan alasan penghapusan (kosongkan untuk pesan default)..."
+              :placeholder="soalNumber === '1' ? 'Masukkan alasan penghapusan semua jawaban soal 1...' : 'Masukkan alasan penghapusan (kosongkan untuk pesan default)...'"
             ></textarea>
             <div class="mt-4 flex justify-end space-x-2">
               <button
@@ -100,7 +112,7 @@
       </div>
 
       <!-- No Data State -->
-      <div v-if="!isLoading && !error && (!soal || Object.keys(soal).length === 0)" class="text-center text-gray-600 p-8 bg-white rounded-xl shadow-lg">
+      <div v-if="!isLoading && !error && (!soal || Object.keys(soal).length === 0)" class="text-center text-gray-600 p-6 bg-white rounded-xl shadow-lg">
         Tidak ada data jawaban untuk soal ini.
       </div>
     </div>
@@ -204,7 +216,7 @@ export default {
           data: { comment: this.comment || 'Dihapus tanpa alasan spesifik' },
         };
 
-        if (this.deleteTarget === 'soal') {
+        if (this.deleteTarget === 'soal' || this.soalNumber === '1') {
           response = await axios.delete(
             `/api/admin/soal/${this.soalNumber}/${this.userId}`,
             config
@@ -223,14 +235,12 @@ export default {
         }
       } catch (error) {
         console.error('Error during delete:', error.response || error);
-        // Handle 422 as a "soft success" for file validation errors
         if (error.response?.status === 422) {
           const errors = error.response.data.errors || {};
           const errorMessages = Object.values(errors).flat().join(' ');
           console.warn('Validation errors ignored:', errorMessages);
 
-          // Proceed as if successful since deletion works after refresh
-          if (this.deleteTarget === 'soal') {
+          if (this.deleteTarget === 'soal' || this.soalNumber === '1') {
             alert(`Soal dihapus dengan komentar: ${this.comment || 'Dihapus tanpa alasan spesifik'}`);
             this.showCommentModal = false;
             this.$router.push({ name: 'user-detail', params: { userId: this.userId } });
@@ -240,7 +250,6 @@ export default {
             await this.fetchSoal(); // Refresh UI
           }
         } else {
-          // Handle other errors normally
           this.error = error.response?.data?.message || 'Gagal menghapus.';
           alert(`Gagal menghapus: ${this.error}`);
           this.showCommentModal = true; // Keep modal open for real errors
@@ -330,11 +339,40 @@ export default {
 </script>
 
 <style scoped>
-button {
-  transition: all 0.3s ease-in-out;
+table {
+  border-collapse: collapse;
 }
 
-.space-y-6 > div {
-  transition: all 0.2s ease-in-out;
+th,
+td {
+  border: 1px solid #d1d5db; /* Light gray border */
+}
+
+th {
+  background-color: #d1fae5; /* Light emerald background */
+}
+
+/* Responsive adjustments */
+@media (max-width: 640px) {
+  .min-h-screen {
+    padding: 1rem;
+  }
+
+  table {
+    font-size: 0.75rem; /* Smaller text on mobile */
+  }
+
+  th,
+  td {
+    padding: 0.5rem; /* Reduced padding on mobile */
+  }
+
+  .grid-cols-2 {
+    grid-template-columns: 1fr; /* Stack on mobile */
+  }
+
+  .flex-row {
+    flex-direction: column; /* Stack buttons on mobile */
+  }
 }
 </style>

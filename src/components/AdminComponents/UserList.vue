@@ -1,6 +1,6 @@
 <template>
-  <div class="container mx-auto px-6 py-10 max-w-5xl">
-    <h1 class="text-3xl font-bold text-gray-800 mb-8 text-center">Daftar Pengguna</h1>
+  <div class="container mx-auto px-4 py-6 max-w-5xl">
+    <h1 class="text-2xl sm:text-3xl font-bold text-gray-800 mb-6 text-center">Daftar Pengguna</h1>
 
     <!-- Loading Indicator -->
     <div v-if="isLoading" class="text-center text-gray-600 mb-6">
@@ -12,96 +12,121 @@
       <p class="text-sm font-medium text-red-600">{{ error }}</p>
     </div>
 
-    <!-- Filter Section -->
-    <div v-if="!isLoading && !error" class="mb-6 flex flex-wrap gap-4 justify-center">
-      <button
-        @click="setFilter('all')"
-        :class="[
-          'px-4 py-2 rounded-md font-medium transition-colors duration-200',
-          filter === 'all' ? 'bg-teal-600 text-white' : 'bg-gray-200 text-gray-800 hover:bg-gray-300'
-        ]"
-      >
-        Semua
-      </button>
-      <button
-        @click="setFilter('submitted')"
-        :class="[
-          'px-4 py-2 rounded-md font-medium transition-colors duration-200',
-          filter === 'submitted' ? 'bg-teal-600 text-white' : 'bg-gray-200 text-gray-800 hover:bg-gray-300'
-        ]"
-      >
-        Sudah Mengumpulkan
-      </button>
-      <button
-        @click="setFilter('in-progress')"
-        :class="[
-          'px-4 py-2 rounded-md font-medium transition-colors duration-200',
-          filter === 'in-progress' ? 'bg-teal-600 text-white' : 'bg-gray-200 text-gray-800 hover:bg-gray-300'
-        ]"
-      >
-        Dalam Progress
-      </button>
-      <button
-        @click="setFilter('not-checked')"
-        :class="[
-          'px-4 py-2 rounded-md font-medium transition-colors duration-200',
-          filter === 'not-checked' ? 'bg-teal-600 text-white' : 'bg-gray-200 text-gray-800 hover:bg-gray-300'
-        ]"
-      >
-        Belum Diperiksa
-      </button>
-      <button
-        @click="setFilter('verified')"
-        :class="[
-          'px-4 py-2 rounded-md font-medium transition-colors duration-200',
-          filter === 'verified' ? 'bg-teal-600 text-white' : 'bg-gray-200 text-gray-800 hover:bg-gray-300'
-        ]"
-      >
-        Sudah Dinilai
-      </button>
-    </div>
-
-    <!-- User List -->
-    <div v-if="!isLoading && !error" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-      <div
-        v-for="user in filteredUsers"
-        :key="user.id"
-        class="bg-white rounded-lg shadow-md p-6 transition-all duration-300 hover:shadow-lg hover:-translate-y-1"
-      >
-        <h2 class="text-xl font-semibold text-gray-800 mb-2">{{ user.name }}</h2>
-        <p class="text-gray-600 mb-1">
-          <strong>Email:</strong> {{ user.email }}
-        </p>
-        <p class="text-gray-600 mb-1">
-          <strong>Tanggal Daftar:</strong> {{ formatDate(user.created_at) }}
-        </p>
-        <p class="text-gray-600 mb-1">
-          <strong>Status:</strong>
-          <span :class="user.last_submission_date ? 'text-teal-600' : 'text-orange-600'">
-            {{ user.last_submission_date ? 'Sudah Mengumpulkan' : 'Dalam Progress' }}
-          </span>
-        </p>
-        <p class="text-gray-600 mb-3">
-          <strong>Nilai:</strong>
-          <span :class="user.is_verified ? 'text-green-600' : 'text-red-600'">
-            {{ user.is_verified ? 'Sudah Dinilai' : 'Belum Diperiksa' }}
-          </span>
-        </p>
-        <p class="text-gray-600 mb-4">
-          <strong>Nilai Akhir:</strong> {{ user.nilai || '-' }}
-        </p>
-        <router-link
-          :to="{ name: 'user-detail', params: { userId: user.id } }"
-          class="inline-block bg-teal-600 text-white px-4 py-2 rounded-md font-medium hover:bg-teal-700 transition-colors duration-200"
+    <!-- Filter and Search Section -->
+    <div v-if="!isLoading && !error" class="mb-6 flex flex-col gap-4">
+      <input
+        v-model="searchQuery"
+        type="text"
+        placeholder="Cari pengguna..."
+        class="w-full px-4 py-2 border rounded-md text-gray-700 focus:outline-none focus:ring-2 focus:ring-teal-600"
+      />
+      <div class="flex flex-col sm:flex-row gap-4">
+        <select
+          v-model="filter"
+          class="w-full sm:w-auto px-4 py-2 rounded-md border text-gray-700 focus:outline-none focus:ring-2 focus:ring-teal-600"
         >
-          Lihat Detail
-        </router-link>
+          <option value="all">Semua</option>
+          <option value="submitted">Sudah Mengumpulkan</option>
+          <option value="in-progress">Dalam Progress</option>
+          <option value="not-checked">Belum Diperiksa</option>
+          <option value="verified">Sudah Dinilai</option>
+        </select>
+        <select
+          v-model="sortBy"
+          class="w-full sm:w-auto px-4 py-2 rounded-md border text-gray-700 focus:outline-none focus:ring-2 focus:ring-teal-600"
+        >
+          <option value="name">Nama</option>
+          <option value="created_at">Tanggal Daftar</option>
+          <option value="nilai">Nilai Akhir</option>
+        </select>
       </div>
     </div>
 
+    <!-- User Table -->
+<div v-if="!isLoading && !error" class="overflow-x-auto">
+  <table class="min-w-full bg-white rounded-lg shadow-md">
+    <thead class="bg-gray-100 text-xs sm:text-sm">
+      <tr>
+        <th class="py-2 px-2 sm:py-3 sm:px-4 text-left text-gray-600 font-semibold">No</th>
+        <th class="py-2 px-2 sm:py-3 sm:px-4 text-left text-gray-600 font-semibold">Nama</th>
+        <th class="py-2 px-2 sm:py-3 sm:px-4 text-left text-gray-600 font-semibold">Email</th>
+        <th class="py-2 px-2 sm:py-3 sm:px-4 text-left text-gray-600 font-semibold hidden md:table-cell">Tanggal Daftar</th>
+        <th class="py-2 px-2 sm:py-3 sm:px-4 text-left text-gray-600 font-semibold hidden sm:table-cell">Status</th>
+        <th class="py-2 px-2 sm:py-3 sm:px-4 text-left text-gray-600 font-semibold hidden sm:table-cell">Status Penilaian</th>
+        <th class="py-2 px-2 sm:py-3 sm:px-4 text-left text-gray-600 font-semibold hidden md:table-cell">Nilai Akhir</th>
+        <th class="py-2 px-2 sm:py-3 sm:px-4 text-left text-gray-600 font-semibold">Aksi</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr
+        v-for="(user, index) in filteredAndSortedUsers"
+        :key="user.id"
+        class="border-b hover:bg-gray-50 transition-colors duration-200 text-xs sm:text-sm"
+      >
+        <td class="py-2 px-2 sm:py-3 sm:px-4">{{ index + 1 }}</td>
+        <td class="py-2 px-2 sm:py-3 sm:px-4">{{ user.name }}</td>
+        <td class="py-2 px-2 sm:py-3 sm:px-4">{{ user.email }}</td>
+        <td class="py-2 px-2 sm:py-3 sm:px-4 hidden md:table-cell">{{ formatDate(user.created_at) }}</td>
+        <td class="py-2 px-2 sm:py-3 sm:px-4 hidden sm:table-cell">
+          <span :class="user.last_submission_date ? 'text-teal-600' : 'text-orange-600'">
+            {{ user.last_submission_date ? 'Sudah Mengumpulkan' : 'Dalam Progress' }}
+          </span>
+        </td>
+        <td class="py-2 px-2 sm:py-3 sm:px-4 hidden sm:table-cell">
+          <span :class="user.is_verified ? 'text-green-600' : 'text-red-600'">
+            {{ user.is_verified ? 'Sudah Dinilai' : 'Belum Diperiksa' }}
+          </span>
+        </td>
+        <td class="py-2 px-2 sm:py-3 sm:px-4 hidden md:table-cell">{{ user.nilai || '-' }}</td>
+        <td class="py-2 px-2 sm:py-3 sm:px-4">
+          <router-link
+            @click="addToHistory(user)"
+            :to="{ name: 'user-detail', params: { userId: user.id } }"
+            class="inline-block bg-teal-600 text-white px-2 py-1 sm:px-3 sm:py-1 rounded-md text-xs sm:text-sm font-medium hover:bg-teal-700 transition-colors duration-200"
+          >
+            Periksa
+          </router-link>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
     <!-- No Data Message -->
-    <div v-if="!isLoading && !error && filteredUsers.length === 0" class="text-center text-gray-600">
-      Tidak ada data pengguna yang sesuai dengan filter saat ini.
+    <div v-if="!isLoading && !error && filteredAndSortedUsers.length === 0" class="text-center text-gray-600 mt-6">
+      Tidak ada data pengguna yang sesuai dengan pencarian atau filter saat ini.
+    </div>
+
+    <!-- History Section -->
+    <div v-if="!isLoading && !error" class="mt-8">
+      <h2 class="text-xl font-bold text-gray-800 mb-4">Riwayat Pemeriksaan Terakhir</h2>
+      <div v-if="checkHistory.length === 0" class="text-gray-600">
+        Belum ada pengguna yang diperiksa.
+      </div>
+      <div v-else class="overflow-x-auto">
+        <table class="min-w-full bg-white rounded-lg shadow-md">
+          <thead class="bg-gray-100 text-xs sm:text-sm">
+            <tr>
+              <th class="py-2 px-2 sm:py-3 sm:px-4 text-left text-gray-600 font-semibold">No</th>
+              <th class="py-2 px-2 sm:py-3 sm:px-4 text-left text-gray-600 font-semibold">Nama</th>
+              <th class="py-2 px-2 sm:py-3 sm:px-4 text-left text-gray-600 font-semibold">Email</th>
+              <th class="py-2 px-2 sm:py-3 sm:px-4 text-left text-gray-600 font-semibold hidden md:table-cell">Waktu Pemeriksaan</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr
+              v-for="(history, index) in checkHistory"
+              :key="index"
+              class="border-b hover:bg-gray-50 transition-colors duration-200 text-xs sm:text-sm"
+            >
+              <td class="py-2 px-2 sm:py-3 sm:px-4">{{ index + 1 }}</td>
+              <td class="py-2 px-2 sm:py-3 sm:px-4">{{ history.name }}</td>
+              <td class="py-2 px-2 sm:py-3 sm:px-4">{{ history.email }}</td>
+              <td class="py-2 px-2 sm:py-3 sm:px-4 hidden md:table-cell">{{ formatDateTime(history.checked_at) }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
   </div>
 </template>
@@ -114,35 +139,52 @@ export default {
   data() {
     return {
       users: [],
-      filter: 'all', // Default filter: tampilkan semua
+      filter: 'all',
+      sortBy: 'name',
+      searchQuery: '',
       isLoading: false,
       error: null,
+      checkHistory: [],
     };
   },
   computed: {
-    filteredUsers() {
-      if (this.filter === 'all') {
-        return this.users;
+    filteredAndSortedUsers() {
+      let result = this.users.filter(user => !user.is_admin);
+
+      // Filter
+      if (this.filter !== 'all') {
+        result = result.filter(user => {
+          if (this.filter === 'submitted') return user.last_submission_date;
+          if (this.filter === 'in-progress') return !user.last_submission_date;
+          if (this.filter === 'not-checked') return !user.is_verified;
+          if (this.filter === 'verified') return user.is_verified;
+          return true;
+        });
       }
-      return this.users.filter(user => {
-        if (this.filter === 'submitted') {
-          return user.last_submission_date;
-        }
-        if (this.filter === 'in-progress') {
-          return !user.last_submission_date;
-        }
-        if (this.filter === 'not-checked') {
-          return !user.is_verified;
-        }
-        if (this.filter === 'verified') {
-          return user.is_verified;
-        }
-        return true;
+
+      // Search
+      if (this.searchQuery) {
+        const query = this.searchQuery.toLowerCase();
+        result = result.filter(user =>
+          user.name.toLowerCase().includes(query) ||
+          user.email.toLowerCase().includes(query)
+        );
+      }
+
+      // Sort
+      result.sort((a, b) => {
+        if (this.sortBy === 'name') return a.name.localeCompare(b.name);
+        if (this.sortBy === 'created_at') return new Date(a.created_at) - new Date(b.created_at);
+        if (this.sortBy === 'nilai') return (a.nilai || 0) - (b.nilai || 0);
+        return 0;
       });
+
+      return result;
     },
   },
   created() {
     this.fetchUsers();
+    this.loadHistory();
   },
   methods: {
     async fetchUsers() {
@@ -150,7 +192,6 @@ export default {
       this.isLoading = true;
       this.error = null;
 
-      // Periksa apakah token tersedia
       if (!authStore.accessToken) {
         this.error = 'Silakan login terlebih dahulu.';
         this.isLoading = false;
@@ -164,8 +205,7 @@ export default {
             Authorization: `Bearer ${authStore.accessToken}`,
           },
         });
-        console.log('Response from API:', response.data); // Debugging
-        this.users = response.data.data || []; // Pastikan data ada, jika tidak set ke array kosong
+        this.users = response.data.data || [];
       } catch (error) {
         console.error('Error fetching users:', error.response ? error.response.data : error.message);
         if (error.response) {
@@ -189,23 +229,71 @@ export default {
       const date = new Date(dateString);
       return date.toLocaleDateString('id-ID', { day: '2-digit', month: '2-digit', year: 'numeric' });
     },
-    setFilter(filterType) {
-      this.filter = filterType;
+    formatDateTime(dateString) {
+      const date = new Date(dateString);
+      return date.toLocaleString('id-ID', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+      });
+    },
+    addToHistory(user) {
+      const historyItem = {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        checked_at: new Date(),
+      };
+      
+      // Tambahkan ke history dan batasi 5 terakhir
+      this.checkHistory.unshift(historyItem);
+      if (this.checkHistory.length > 5) {
+        this.checkHistory.pop();
+      }
+      
+      // Simpan ke localStorage
+      localStorage.setItem('checkHistory', JSON.stringify(this.checkHistory));
+    },
+    loadHistory() {
+      const savedHistory = localStorage.getItem('checkHistory');
+      if (savedHistory) {
+        this.checkHistory = JSON.parse(savedHistory);
+      }
     },
   },
 };
 </script>
 
 <style scoped>
-.container {
-  max-width: 1200px; /* Sudah ada di Tailwind container, tapi kita override dengan max-w-5xl */
+table {
+  border-collapse: collapse;
 }
 
-.shadow-md {
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+th,
+td {
+  border: 1px solid #e5e7eb;
 }
 
-.shadow-lg {
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+th {
+  background-color: #f3f4f6;
+}
+
+/* Responsive adjustments */
+@media (max-width: 640px) {
+  .container {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+
+  table {
+    font-size: 0.75rem;
+  }
+
+  th,
+  td {
+    padding: 0.5rem;
+  }
 }
 </style>

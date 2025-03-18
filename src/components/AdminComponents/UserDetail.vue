@@ -1,8 +1,8 @@
 <template>
-  <div class="min-h-screen bg-gradient-to-br from-gray-100 to-emerald-50 py-10 px-4 sm:px-6 lg:px-8">
+  <div class="min-h-screen bg-gradient-to-br from-gray-100 to-emerald-50 py-6 px-4 sm:px-6 lg:px-8">
     <div class="max-w-4xl mx-auto">
       <!-- Header -->
-      <h1 class="text-4xl font-extrabold text-emerald-900 mb-10 text-center tracking-tight animate__animated animate__fadeInDown">
+      <h1 class="text-2xl sm:text-4xl font-extrabold text-emerald-900 mb-8 text-center tracking-tight animate__animated animate__fadeInDown">
         Detail Pengguna: {{ user?.name || 'Memuat...' }}
       </h1>
 
@@ -17,18 +17,18 @@
       </div>
 
       <!-- User Info Card -->
-      <div v-if="!isLoading && !error && user" class="bg-white p-8 rounded-xl shadow-lg mb-10 transition-all duration-300 hover:shadow-xl">
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <p class="text-lg text-gray-700">
+      <div v-if="!isLoading && !error && user" class="bg-white p-6 rounded-xl shadow-lg mb-8 transition-all duration-300 hover:shadow-xl">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <p class="text-base sm:text-lg text-gray-700">
             <strong class="text-emerald-800">Email:</strong> {{ user.email }}
           </p>
-          <p class="text-lg text-gray-700">
+          <p class="text-base sm:text-lg text-gray-700">
             <strong class="text-emerald-800">Status:</strong>
             <span :class="user.is_verified ? 'text-emerald-600 font-medium' : 'text-red-600 font-medium'">
               {{ user.is_verified ? 'Sudah Dinilai' : 'Belum Dinilai' }}
             </span>
           </p>
-          <p class="text-lg text-gray-700">
+          <p class="text-base sm:text-lg text-gray-700">
             <strong class="text-emerald-800">Total Nilai:</strong>
             <span v-if="!isEditingTotal" class="font-semibold text-emerald-700">{{ totalNilai }}</span>
             <input
@@ -47,54 +47,67 @@
             </button>
           </p>
         </div>
-        <div class="mt-6 flex space-x-4">
+        <div class="mt-6 flex flex-col sm:flex-row space-y-4 sm:space-y-0 sm:space-x-4">
           <button
             v-if="!user.is_verified && !isEditingTotal"
             @click="verifyUser"
-            class="w-full bg-emerald-600 text-white px-6 py-3 rounded-lg font-semibold shadow-md hover:bg-emerald-700 hover:scale-105 transform transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+            class="w-full bg-emerald-600 text-white px-4 py-2 rounded-lg font-semibold shadow-md hover:bg-emerald-700 hover:scale-105 transform transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-emerald-500"
           >
             Verifikasi Uji Kompetensi
           </button>
           <button
             v-if="isEditingTotal"
             @click="confirmUpdateAndVerify"
-            class="w-full bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold shadow-md hover:bg-blue-700 hover:scale-105 transform transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            class="w-full bg-blue-600 text-white px-4 py-2 rounded-lg font-semibold shadow-md hover:bg-blue-700 hover:scale-105 transform transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
             Simpan & Verifikasi
           </button>
           <button
             v-if="user.is_verified"
             @click="unverifyUser"
-            class="w-full bg-red-600 text-white px-6 py-3 rounded-lg font-semibold shadow-md hover:bg-red-700 hover:scale-105 transform transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-red-500"
+            class="w-full bg-red-600 text-white px-4 py-2 rounded-lg font-semibold shadow-md hover:bg-red-700 hover:scale-105 transform transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-red-500"
           >
             Batalkan Verifikasi
           </button>
         </div>
       </div>
 
-      <!-- Submissions Section -->
+      <!-- Submissions Table -->
       <div v-if="!isLoading && !error">
-        <h2 class="text-3xl font-semibold text-emerald-900 mb-8 text-center tracking-tight animate__animated animate__fadeInUp">
+        <h2 class="text-xl sm:text-3xl font-semibold text-emerald-900 mb-6 text-center tracking-tight animate__animated animate__fadeInUp">
           Daftar Nilai Soal
         </h2>
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          <div
-            v-for="(soal, key) in soals"
-            :key="key"
-            class="bg-white p-6 rounded-xl shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-300"
-          >
-            <p class="font-semibold text-emerald-800 text-lg capitalize">{{ key }}</p>
-            <p class="text-gray-600">
-              Nilai: <span class="font-medium text-emerald-700">{{ soal?.nilai || 0 }}</span>
-            </p>
-            <router-link
-              v-if="soal"
-              :to="{ name: 'soal-detail', params: { userId: user.id, soalNumber: key.replace('soal', '') } }"
-              class="inline-block mt-3 bg-teal-500 text-white px-4 py-2 rounded-md font-medium hover:bg-teal-600 transition-all duration-300"
-            >
-              {{ user.is_verified ? 'Lihat Detail' : 'Periksa Soal' }}
-            </router-link>
-          </div>
+        <div class="overflow-x-auto">
+          <table class="min-w-full bg-white rounded-xl shadow-md">
+            <thead class="bg-emerald-100 text-xs sm:text-sm">
+              <tr>
+                <th class="py-2 px-2 sm:py-3 sm:px-4 text-left text-emerald-800 font-semibold">No</th>
+                <th class="py-2 px-2 sm:py-3 sm:px-4 text-left text-emerald-800 font-semibold">Soal</th>
+                <th class="py-2 px-2 sm:py-3 sm:px-4 text-left text-emerald-800 font-semibold">Nilai</th>
+                <th class="py-2 px-2 sm:py-3 sm:px-4 text-left text-emerald-800 font-semibold">Aksi</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr
+                v-for="(soal, key, index) in soals"
+                :key="key"
+                class="border-b hover:bg-emerald-50 transition-colors duration-200 text-xs sm:text-sm"
+              >
+                <td class="py-2 px-2 sm:py-3 sm:px-4">{{ index + 1 }}</td>
+                <td class="py-2 px-2 sm:py-3 sm:px-4 capitalize">{{ key }}</td>
+                <td class="py-2 px-2 sm:py-3 sm:px-4 font-medium text-emerald-700">{{ soal?.nilai || 0 }}</td>
+                <td class="py-2 px-2 sm:py-3 sm:px-4">
+                  <router-link
+                    v-if="soal"
+                    :to="{ name: 'soal-detail', params: { userId: user.id, soalNumber: key.replace('soal', '') } }"
+                    class="inline-block bg-teal-500 text-white px-2 py-1 sm:px-3 sm:py-2 rounded-md font-medium hover:bg-teal-600 transition-all duration-300"
+                  >
+                    {{ user.is_verified ? 'Lihat Detail' : 'Periksa' }}
+                  </router-link>
+                </td>
+              </tr>
+            </tbody>
+          </table>
         </div>
       </div>
     </div>
@@ -240,23 +253,36 @@ export default {
 </script>
 
 <style scoped>
-button,
-a {
-  transition: all 0.3s ease-in-out;
+table {
+  border-collapse: collapse;
 }
 
-.grid > div {
-  transition: all 0.3s ease-in-out;
+th,
+td {
+  border: 1px solid #d1d5db; /* Light gray border */
 }
 
-input[type="number"] {
-  appearance: textfield;
-  -moz-appearance: textfield;
+th {
+  background-color: #d1fae5; /* Light emerald background */
 }
 
-input[type="number"]::-webkit-outer-spin-button,
-input[type="number"]::-webkit-inner-spin-button {
-  -webkit-appearance: none;
-  margin: 0;
+/* Responsive adjustments */
+@media (max-width: 640px) {
+  .min-h-screen {
+    padding: 1rem;
+  }
+
+  table {
+    font-size: 0.75rem; /* Smaller text on mobile */
+  }
+
+  th,
+  td {
+    padding: 0.5rem; /* Reduced padding on mobile */
+  }
+
+  .grid-cols-2 {
+    grid-template-columns: 1fr; /* Stack on mobile */
+  }
 }
 </style>

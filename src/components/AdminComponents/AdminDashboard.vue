@@ -30,22 +30,25 @@
           </button>
         </div>
         <nav class="space-y-4">
-          <router-link
-            to="/admin"
-            class="flex items-center p-4 rounded-xl bg-opacity-20 hover:bg-emerald-700 hover:bg-opacity-70 hover:shadow-lg transition-all duration-300 group"
-            active-class="bg-emerald-800 shadow-inner"
-          >
-            <i class="fas fa-users mr-3 text-lg group-hover:text-emerald-300 transition-colors duration-300"></i>
-            <span class="font-medium group-hover:ml-1 transition-all duration-300">Periksa Jawaban</span>
-          </router-link>
-          <router-link
-            to="/admin/dataguru"
-            class="flex items-center p-4 rounded-xl bg-opacity-20 hover:bg-emerald-700 hover:bg-opacity-70 hover:shadow-lg transition-all duration-300 group"
-            active-class="bg-emerald-800 shadow-inner"
-          >
-            <i class="fas fa-cog mr-3 text-lg group-hover:text-emerald-300 transition-colors duration-300"></i>
-            <span class="font-medium group-hover:ml-1 transition-all duration-300">Data Guru</span>
-          </router-link>
+          <!-- Periksa Jawaban - Ikon Kertas -->
+<router-link
+  to="/admin"
+  class="flex items-center p-4 rounded-xl bg-opacity-20 hover:bg-emerald-700 hover:bg-opacity-70 hover:shadow-lg transition-all duration-300 group"
+  active-class="bg-emerald-800 shadow-inner"
+>
+  <i class="fas fa-file-alt mr-3 text-lg group-hover:text-emerald-300 transition-colors duration-300"></i>
+  <span class="font-medium group-hover:ml-1 transition-all duration-300">Periksa Jawaban</span>
+</router-link>
+
+<!-- Data Guru - Ikon Profil -->
+<router-link
+  to="/admin/dataguru"
+  class="flex items-center p-4 rounded-xl bg-opacity-20 hover:bg-emerald-700 hover:bg-opacity-70 hover:shadow-lg transition-all duration-300 group"
+  active-class="bg-emerald-800 shadow-inner"
+>
+  <i class="fas fa-user mr-3 text-lg group-hover:text-emerald-300 transition-colors duration-300"></i>
+  <span class="font-medium group-hover:ml-1 transition-all duration-300">Data Guru</span>
+</router-link>
           <!-- Tombol Kembali ke Home -->
           <router-link
             to="/"
@@ -73,7 +76,6 @@
       @click="toggleSidebar"
     ></div>
 
-    <!-- Main Content -->
     <!-- Main Content -->
 <div class="flex-1 px-2 py-4 lg:pl-0 bg-gradient-to-br from-gray-100 to-emerald-50 overflow-y-auto">
   <!-- Header untuk mobile -->
