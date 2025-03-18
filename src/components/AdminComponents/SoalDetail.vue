@@ -159,7 +159,7 @@ export default {
 
       try {
         const response = await axios.get(
-          `http://localhost:8000/api/admin/soal/${this.soalNumber}/${this.userId}`,
+          `/api/admin/soal/${this.soalNumber}/${this.userId}`,
           {
             headers: {
               Authorization: `Bearer ${authStore.accessToken}`,
@@ -206,7 +206,7 @@ export default {
 
         if (this.deleteTarget === 'soal') {
           response = await axios.delete(
-            `http://localhost:8000/api/admin/soal/${this.soalNumber}/${this.userId}`,
+            `/api/admin/soal/${this.soalNumber}/${this.userId}`,
             config
           );
           alert(`Soal dihapus dengan komentar: ${response.data.comment || this.comment}`);
@@ -214,7 +214,7 @@ export default {
           this.$router.push({ name: 'user-detail', params: { userId: this.userId } });
         } else {
           response = await axios.delete(
-            `http://localhost:8000/api/admin/soal/${this.soalNumber}/${this.userId}/field/${this.deleteTarget}`,
+            `/api/admin/soal/${this.soalNumber}/${this.userId}/field/${this.deleteTarget}`,
             config
           );
           alert(`Field ${this.deleteTarget} dihapus dengan komentar: ${response.data.comment || this.comment}`);
@@ -250,7 +250,7 @@ export default {
     async viewFile(fieldName) {
       const authStore = useAuthStore();
       try {
-        const url = `http://localhost:8000/api/admin/soal/${this.soalNumber}/${this.userId}/file/${fieldName}`;
+        const url = `/api/admin/soal/${this.soalNumber}/${this.userId}/file/${fieldName}`;
         const response = await axios.get(url, {
           responseType: 'blob',
           headers: {

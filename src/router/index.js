@@ -30,6 +30,7 @@ import AdminDashboard from "@/components/AdminComponents/AdminDashboard.vue";
 import UserList from '@/components/AdminComponents/UserList.vue';
 import UserDetail from '@/components/AdminComponents/UserDetail.vue';
 import SoalDetail from '@/components/AdminComponents/SoalDetail.vue';
+import DataGuru from "@/components/AdminComponents/DataGuru.vue";
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -43,6 +44,7 @@ const router = createRouter({
         { path: '', component: UserList, name: 'user-list' },
         { path: 'users/:userId', component: UserDetail, name: 'user-detail' },
         { path: 'soal/:soalNumber/:userId', component: SoalDetail, name: 'soal-detail' },
+        { path: 'dataguru', component: DataGuru, name: 'dataguru' },
       ]
     },
     // Other routes

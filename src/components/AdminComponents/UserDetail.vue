@@ -135,7 +135,7 @@ export default {
       }
 
       try {
-        const response = await axios.get(`http://localhost:8000/api/admin/users/${this.$route.params.userId}`, {
+        const response = await axios.get(`/api/admin/users/${this.$route.params.userId}`, {
           headers: {
             Authorization: `Bearer ${authStore.accessToken}`,
           },
@@ -161,7 +161,7 @@ export default {
 
       try {
         await axios.post(
-          `http://localhost:8000/api/admin/users/${this.$route.params.userId}/verify`,
+          `/api/admin/users/${this.$route.params.userId}/verify`,
           {},
           {
             headers: {
@@ -194,7 +194,7 @@ export default {
       const authStore = useAuthStore();
       try {
         const response = await axios.post(
-          `http://localhost:8000/api/admin/users/${this.$route.params.userId}/verify`,
+          `/api/admin/users/${this.$route.params.userId}/verify`,
           {
             total_nilai: this.editedTotalNilai, // Kirim nilai yang diinput admin
           },
@@ -220,7 +220,7 @@ export default {
 
       try {
         await axios.post(
-          `http://localhost:8000/api/admin/users/${this.$route.params.userId}/unverify`,
+          `/api/admin/users/${this.$route.params.userId}/unverify`,
           {},
           {
             headers: {

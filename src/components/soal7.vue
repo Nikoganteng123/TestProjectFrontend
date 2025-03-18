@@ -140,7 +140,7 @@ onMounted(async () => {
 const fetchAnswer = async () => {
   try {
     loading.value = true;
-    const response = await axios.get('http://localhost:8000/api/soal7', {
+    const response = await axios.get('/api/soal7', {
       headers: { Authorization: `Bearer ${authStore.accessToken}` },
     });
     
@@ -167,7 +167,7 @@ const deleteAllFiles = async () => {
   
   try {
     loading.value = true;
-    await axios.delete('http://localhost:8000/api/soal7', {
+    await axios.delete('/api/soal7', {
       headers: { Authorization: `Bearer ${authStore.accessToken}` },
     });
     
@@ -204,8 +204,8 @@ const submitAnswer = async () => {
     }
 
     const endpoint = Object.keys(savedFiles.value).length > 0 
-      ? 'http://localhost:8000/api/update7'
-      : 'http://localhost:8000/api/soal7';
+      ? '/api/update7'
+      : '/api/soal7';
 
     const response = await axios.post(endpoint, formData, {
       headers: { 

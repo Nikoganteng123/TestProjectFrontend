@@ -175,7 +175,7 @@ onMounted(async () => {
 
 const fetchAnswer = async () => {
   try {
-    const response = await axios.get('http://localhost:8000/api/soal1', {
+    const response = await axios.get('/api/soal1', {
       headers: {
         Authorization: `Bearer ${authStore.accessToken}`
       }
@@ -211,7 +211,7 @@ const submitAnswer = async () => {
     formData.append('tingkat_pendidikan', selectedAnswer.value)
     formData.append('tingkat_pendidikan_file', selectedFile.value)
 
-    const response = await axios.post('http://localhost:8000/api/soal1', formData, {
+    const response = await axios.post('/api/soal1', formData, {
       headers: {
         Authorization: `Bearer ${authStore.accessToken}`,
         'Content-Type': 'multipart/form-data'
@@ -231,7 +231,7 @@ const deleteAnswer = async () => {
   if (!confirm('Apakah Anda yakin ingin menghapus jawaban?')) return
 
   try {
-    await axios.delete('http://localhost:8000/api/soal1', {
+    await axios.delete('/api/soal1', {
       headers: {
         Authorization: `Bearer ${authStore.accessToken}`
       }

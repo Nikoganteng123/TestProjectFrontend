@@ -114,8 +114,8 @@ async function onSubmit() {
   isLoading.value = true;
 
   try {
-    await axios.get("http://localhost:8000/sanctum/csrf-cookie");
-    const response = await axios.post("http://localhost:8000/api/login", {
+    await axios.get("/sanctum/csrf-cookie");
+    const response = await axios.post("/api/login", {
       email: email.value,
       password: password.value,
     });

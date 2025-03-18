@@ -25,9 +25,19 @@
 
         <!-- Desktop Menu -->
         <div class="hidden lg:flex items-center space-x-8">
+          <!-- Admin Page Link (hanya untuk admin) -->
+          <RouterLink 
+            v-if="authStore.isUserAdmin" 
+            to="/admin" 
+            class="admin-link"
+          >
+            Admin Page
+          </RouterLink>
           <RouterLink to="/" class="nav-link">Home</RouterLink>
           <RouterLink to="/uji-kompetensi" class="nav-link">Pemetaan Data</RouterLink>
           
+          
+
           <!-- Auth Links -->
           <template v-if="!authStore.isLoggedIn">
             <RouterLink to="/login" class="nav-link">Login</RouterLink>
@@ -76,6 +86,15 @@
         <RouterLink to="/uji-kompetensi" class="dropdown-item" @click="toggleMenu">Pemetaan Data</RouterLink>
         <RouterLink to="/notifications" class="dropdown-item" @click="toggleMenu">Notifikasi</RouterLink>
         <RouterLink to="/users" class="dropdown-item" v-if="authStore.isLoggedIn" @click="toggleMenu">Profile</RouterLink>
+        <!-- Admin Page di Mobile Dropdown -->
+        <RouterLink 
+          v-if="authStore.isUserAdmin" 
+          to="/admin" 
+          class="dropdown-item admin-dropdown-item" 
+          @click="toggleMenu"
+        >
+          Admin Page
+        </RouterLink>
         <RouterLink to="/login" class="dropdown-item" v-if="!authStore.isLoggedIn" @click="toggleMenu">Login</RouterLink>
         <RouterLink to="/register" class="dropdown-item" v-if="!authStore.isLoggedIn" @click="toggleMenu">Register</RouterLink>
         <button v-if="authStore.isLoggedIn" @click="logout" class="dropdown-item logout">Logout</button>
@@ -133,7 +152,7 @@ const toggleMenu = () => {
 };
 
 const toggleNotifications = () => {
-  console.log('Notification button clicked'); // Debugging
+  console.log('Notification button clicked');
   notificationsOpen.value = !notificationsOpen.value;
   if (menuOpen.value) menuOpen.value = false;
 };
@@ -149,7 +168,7 @@ const fetchNotifications = async () => {
   if (!authStore.isLoggedIn || !authStore.accessToken) return;
 
   try {
-    const response = await axios.get('http://localhost:8000/api/notifications', {
+    const response = await axios.get('/api/notifications', {
       headers: { Authorization: `Bearer ${authStore.accessToken}` },
     });
     notifications.value = response.data.data || [];
@@ -241,15 +260,46 @@ const logout = () => {
   width: 100%;
 }
 
+/* Admin Link untuk Desktop */
+.admin-link {
+  color: #1e3a8a; /* Warna biru tua */
+  font-weight: 600;
+  font-size: 1.1rem;
+  position: relative;
+  padding-bottom: 0.25rem;
+  transition: all 0.3s ease;
+}
+
+.admin-link::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  width: 0;
+  height: 2px;
+  background: #3b82f6; /* Biru cerah */
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  transform: translateX(-50%);
+}
+
+.admin-link:hover {
+  color: #3b82f6;
+  transform: translateY(-2px);
+}
+
+.admin-link:hover::after {
+  width: 100%;
+}
+
 .notification-btn {
-  pointer-events: auto; /* Pastikan bisa diklik */
-  padding: 0.5rem; /* Tambah padding untuk area klik yang lebih besar */
-  cursor: pointer; /* Tampilkan kursor tangan */
+  pointer-events: auto;
+  padding: 0.5rem;
+  cursor: pointer;
 }
 
 .notification-wrapper {
   position: relative;
-  z-index: 1001; /* Pastikan di atas elemen lain */
+  z-index: 1001;
 }
 
 .auth-button {
@@ -350,6 +400,23 @@ const logout = () => {
   color: #34d399;
   background: rgba(240, 253, 244, 0.5);
   box-shadow: 0 4px 15px rgba(52, 211, 153, 0.2);
+}
+
+/* Admin Link untuk Mobile Dropdown */
+.admin-dropdown-item {
+  color: #1e3a8a;
+  font-weight: 600;
+}
+
+.admin-dropdown-item::before {
+  background: linear-gradient(120deg, transparent, rgba(59, 130, 246, 0.2), transparent);
+}
+
+.admin-dropdown-item:hover {
+  color: #3b82f6;
+  background: rgba(219, 234, 254, 0.5);
+  box-shadow: 0 4px 15px rgba(59, 130, 246, 0.2);
+  transform: translateX(8px);
 }
 
 .dropdown-item.logout {

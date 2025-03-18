@@ -117,7 +117,7 @@ onMounted(async () => {
 
 const fetchAnswer = async () => {
   try {
-    const response = await axios.get('http://localhost:8000/api/soal9', {
+    const response = await axios.get('/api/soal9', {
       headers: { Authorization: `Bearer ${authStore.accessToken}` },
     });
     
@@ -141,7 +141,7 @@ const handleFileUpload = (event, field) => {
 
 const deleteAllFiles = async () => {
   try {
-    await axios.delete('http://localhost:8000/api/soal9', {
+    await axios.delete('/api/soal9', {
       headers: { Authorization: `Bearer ${authStore.accessToken}` },
     });
 
@@ -170,8 +170,8 @@ const submitAnswer = async () => {
     }
 
     const endpoint = Object.keys(savedFiles.value).length > 0 
-      ? 'http://localhost:8000/api/update9'
-      : 'http://localhost:8000/api/soal9';
+      ? '/api/update9'
+      : '/api/soal9';
 
     const response = await axios.post(endpoint, formData, {
       headers: { 

@@ -179,7 +179,7 @@ const editForm = ref({
 onMounted(async () => {
   isLoading.value = true;
   try {
-    const response = await axios.get('http://localhost:8000/api/profile', {
+    const response = await axios.get('/api/profile', {
       headers: {
         Authorization: `Bearer ${authStore.accessToken}`
       }
@@ -215,7 +215,7 @@ const cancelEditing = () => {
 const updateProfile = async () => {
   try {
     const response = await axios.post(
-      'http://localhost:8000/api/updateprofile',
+      '/api/updateprofile',
       editForm.value,
       {
         headers: {
@@ -236,7 +236,7 @@ const updateProfile = async () => {
 
 const deleteAccount = async () => {
   try {
-    await axios.delete('http://localhost:8000/api/profile', {
+    await axios.delete('/api/profile', {
       headers: {
         Authorization: `Bearer ${authStore.accessToken}`
       }

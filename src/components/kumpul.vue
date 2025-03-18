@@ -122,7 +122,7 @@ onMounted(async () => {
 
 const fetchSoalStatus = async () => {
   try {
-    const response = await axios.get('http://localhost:8000/api/overview', {
+    const response = await axios.get('/api/overview', {
       headers: { Authorization: `Bearer ${authStore.accessToken}` }
     });
 
@@ -147,14 +147,14 @@ const submitFinal = async () => {
   try {
     // Kirim totalNilai sebagai temporary_score ke endpoint submit-competency
     await axios.post(
-      'http://localhost:8000/api/submit-competency',
+      '/api/submit-competency',
       { temporary_score: totalNilai.value },
       { headers: { Authorization: `Bearer ${authStore.accessToken}` } }
     );
 
     // Setelah sukses, lanjutkan ke endpoint kumpul jika ada logika tambahan
     await axios.post(
-      'http://localhost:8000/api/kumpul',
+      '/api/kumpul',
       {},
       { headers: { Authorization: `Bearer ${authStore.accessToken}` } }
     );

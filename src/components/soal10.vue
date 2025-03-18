@@ -135,7 +135,7 @@
   
   const fetchAnswer = async () => {
     try {
-      const response = await axios.get('http://localhost:8000/api/soal10', {
+      const response = await axios.get('/api/soal10', {
         headers: { Authorization: `Bearer ${authStore.accessToken}` },
       });
       
@@ -159,7 +159,7 @@
   
   const deleteAllFiles = async () => {
     try {
-      await axios.delete('http://localhost:8000/api/soal10', {
+      await axios.delete('/api/soal10', {
         headers: { Authorization: `Bearer ${authStore.accessToken}` },
       });
   
@@ -188,8 +188,8 @@
       }
   
       const endpoint = Object.keys(savedFiles.value).length > 0 
-        ? 'http://localhost:8000/api/update10'
-        : 'http://localhost:8000/api/soal10';
+        ? '/api/update10'
+        : '/api/soal10';
   
       const response = await axios.post(endpoint, formData, {
         headers: { 

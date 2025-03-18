@@ -121,7 +121,7 @@ onMounted(async () => {
 
 const fetchAnswer = async () => {
   try {
-    const response = await axios.get('http://localhost:8000/api/soal3', {
+    const response = await axios.get('/api/soal3', {
       headers: { Authorization: `Bearer ${authStore.accessToken}` }
     });
     console.log('API Response:', response.data); // Debugging
@@ -165,7 +165,7 @@ const fetchAnswer = async () => {
 
 const submitAnswer = async () => {
   try {
-    const endpoint = 'http://localhost:8000/api/soal3';
+    const endpoint = '/api/soal3';
     const method = hasExistingData.value ? 'put' : 'post';
     const response = await axios[method](endpoint, inputData.value, {
       headers: { Authorization: `Bearer ${authStore.accessToken}` }
@@ -180,7 +180,7 @@ const submitAnswer = async () => {
 
 const deleteAnswer = async () => {
   try {
-    await axios.delete('http://localhost:8000/api/soal3', {
+    await axios.delete('/api/soal3', {
       headers: { Authorization: `Bearer ${authStore.accessToken}` }
     });
     inputData.value = {

@@ -36,16 +36,25 @@
             active-class="bg-emerald-800 shadow-inner"
           >
             <i class="fas fa-users mr-3 text-lg group-hover:text-emerald-300 transition-colors duration-300"></i>
-            <span class="font-medium group-hover:ml-1 transition-all duration-300">Daftar Guru</span>
+            <span class="font-medium group-hover:ml-1 transition-all duration-300">Periksa Jawaban</span>
           </router-link>
           <router-link
-            to="/admin/settings"
+            to="/admin/dataguru"
             class="flex items-center p-4 rounded-xl bg-opacity-20 hover:bg-emerald-700 hover:bg-opacity-70 hover:shadow-lg transition-all duration-300 group"
             active-class="bg-emerald-800 shadow-inner"
           >
             <i class="fas fa-cog mr-3 text-lg group-hover:text-emerald-300 transition-colors duration-300"></i>
-            <span class="font-medium group-hover:ml-1 transition-all duration-300">Pengaturan</span>
+            <span class="font-medium group-hover:ml-1 transition-all duration-300">Data Guru</span>
           </router-link>
+          <!-- Tombol Kembali ke Home -->
+          <router-link
+            to="/"
+            class="flex items-center p-4 rounded-xl bg-emerald-1000 hover:bg-emerald-500 hover:shadow-lg transition-all duration-300 group"
+          >
+            <i class="fas fa-home mr-3 text-lg group-hover:text-white transition-colors duration-300"></i>
+            <span class="font-medium group-hover:ml-1 transition-all duration-300">Kembali ke Home</span>
+          </router-link>
+          <!-- Tombol Logout -->
           <button
             @click="logout"
             class="w-full text-left flex items-center p-4 rounded-xl bg-opacity-20 hover:bg-red-700 hover:bg-opacity-70 hover:shadow-lg transition-all duration-300 group"
@@ -65,19 +74,20 @@
     ></div>
 
     <!-- Main Content -->
-    <div class="flex-1 p-6 lg:ml-72 bg-gradient-to-br from-gray-100 to-emerald-50 overflow-y-auto">
-      <div class="max-w-5xl mx-auto bg-white rounded-2xl shadow-lg p-8 transition-all duration-300 hover:shadow-xl">
-        <div class="flex justify-between items-center mb-6 lg:hidden">
-          <h1 class="text-3xl font-extrabold text-emerald-900 animate__animated animate__fadeInDown">
-            Dashboard Admin
-          </h1>
-          <button class="text-emerald-900 focus:outline-none" @click="toggleSidebar">
-            <i class="fas fa-bars text-2xl hover:text-emerald-600 transition-colors duration-300"></i>
-          </button>
-        </div>
-        <router-view />
-      </div>
-    </div>
+    <!-- Main Content -->
+<div class="flex-1 px-2 py-4 lg:pl-0 bg-gradient-to-br from-gray-100 to-emerald-50 overflow-y-auto">
+  <!-- Header untuk mobile -->
+  <div class="flex justify-between items-center mb-4 lg:hidden">
+    <h1 class="text-2xl font-extrabold text-emerald-900 animate__animated animate__fadeInDown">
+      Dashboard Admin
+    </h1>
+    <button class="text-emerald-900 focus:outline-none" @click="toggleSidebar">
+      <i class="fas fa-bars text-2xl hover:text-emerald-600 transition-colors duration-300"></i>
+    </button>
+  </div>
+  
+  <router-view />
+</div>
   </div>
 </template>
 

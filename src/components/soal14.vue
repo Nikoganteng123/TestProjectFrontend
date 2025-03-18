@@ -102,7 +102,7 @@
   
   const fetchAnswer = async () => {
     try {
-      const response = await axios.get('http://localhost:8000/api/soal14', {
+      const response = await axios.get('/api/soal14', {
         headers: { Authorization: `Bearer ${authStore.accessToken}` }
       });
       
@@ -122,8 +122,8 @@
     try {
       const payload = { ngajar_online: selectedNgajar.value };
       const endpoint = savedNgajar.value 
-        ? 'http://localhost:8000/api/update14' 
-        : 'http://localhost:8000/api/soal14';
+        ? '/api/update14' 
+        : '/api/soal14';
   
       console.log('Submitting to:', endpoint, 'with payload:', payload); // Debugging
   
@@ -140,7 +140,7 @@
   
   const deleteData = async () => {
     try {
-      await axios.delete('http://localhost:8000/api/soal14', {
+      await axios.delete('/api/soal14', {
         headers: { Authorization: `Bearer ${authStore.accessToken}` }
       });
   

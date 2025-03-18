@@ -47,7 +47,7 @@ export const useAuthStore = defineStore({
     async fetchUserProfile() {
       if (this.accessToken) {
         try {
-          const response = await axios.get("http://localhost:8000/api/users", {
+          const response = await axios.get("/api/users", {
             headers: {
               Authorization: `Bearer ${this.accessToken}`,
             },
@@ -73,7 +73,7 @@ export const useAuthStore = defineStore({
     logout() {
       try {
         axios.post(
-          "http://localhost:8000/api/logout",
+          "/api/logout",
           null,
           {
             headers: {

@@ -90,7 +90,7 @@ const dashOffset = computed(() => {
 
 const getParticipants = async () => {
   try {
-    const response = await axios.get('http://localhost:8000/api/users', {
+    const response = await axios.get('/api/users', {
       headers: { Authorization: `Bearer ${authStore.accessToken}` },
     });
     participants.value = response.data;
@@ -108,7 +108,7 @@ const checkAvailabilityAndRedirect = async () => {
 
   isChecking.value = true;
   try {
-    const response = await axios.get('http://localhost:8000/api/check-availability', {
+    const response = await axios.get('/api/check-availability', {
       headers: { Authorization: `Bearer ${authStore.accessToken}` },
     });
 

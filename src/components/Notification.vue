@@ -93,7 +93,7 @@
     }
   
     try {
-      const response = await axios.get('http://localhost:8000/api/notifications', {
+      const response = await axios.get('/api/notifications', {
         headers: { Authorization: `Bearer ${authStore.accessToken}` },
       });
       notifications.value = response.data.data || [];
@@ -107,7 +107,7 @@
   
   const markAsRead = async (id) => {
     try {
-      await axios.post(`http://localhost:8000/api/notifications/${id}/read`, {}, {
+      await axios.post(`/api/notifications/${id}/read`, {}, {
         headers: { Authorization: `Bearer ${authStore.accessToken}` },
       });
       const notification = notifications.value.find(n => n.id === id);

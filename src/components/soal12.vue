@@ -105,7 +105,7 @@
   
   const fetchAnswer = async () => {
     try {
-      const response = await axios.get('http://localhost:8000/api/soal12', {
+      const response = await axios.get('/api/soal12', {
         headers: { Authorization: `Bearer ${authStore.accessToken}` }
       });
       
@@ -125,8 +125,8 @@
     try {
       const payload = { jabatan: selectedJabatan.value };
       const endpoint = savedJabatan.value 
-        ? 'http://localhost:8000/api/update12' 
-        : 'http://localhost:8000/api/soal12';
+        ? '/api/update12' 
+        : '/api/soal12';
   
       const response = await axios.post(endpoint, payload, {
         headers: { Authorization: `Bearer ${authStore.accessToken}` }
@@ -141,7 +141,7 @@
   
   const deleteData = async () => {
     try {
-      await axios.delete('http://localhost:8000/api/soal12', {
+      await axios.delete('/api/soal12', {
         headers: { Authorization: `Bearer ${authStore.accessToken}` }
       });
   

@@ -65,7 +65,7 @@ export default {
       this.loading = true;
       this.message = '';
       try {
-        const response = await axios.post('http://localhost:8000/api/forgot-password', { email: this.email });
+        const response = await axios.post('/api/forgot-password', { email: this.email });
         this.message = response.data.message;
         this.status = true;
 
