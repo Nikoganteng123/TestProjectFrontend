@@ -70,25 +70,43 @@
               </div>
             </div>
 
-           <!-- Input PDF Bukti -->
-<div v-if="selectedAnswer && !isAnswerSaved" class="mt-6 bg-gray-50 p-4 rounded-lg border border-gray-200 shadow-sm transition-all duration-300">
-  <label for="tingkat_pendidikan_file" class="block text-sm font-medium text-gray-700 mb-2">
-    Unggah Bukti Pendidikan (PDF, maks 2MB)
-    <span class="text-red-500">*</span>
-  </label>
-  <div class="relative">
-    <input
-      type="file"
-      id="tingkat_pendidikan_file"
-      accept=".pdf"
-      @change="handleFileUpload"
-      class="file-input block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-green-50 file:text-green-700 hover:file:bg-green-100 cursor-pointer transition-all duration-200"
-    />
-    <span class="absolute right-0 top-1/2 transform -translate-y-1/2 text-xs text-gray-500">
-      {{ selectedFile ? selectedFile.name : 'Belum ada file dipilih' }}
-    </span>
-  </div>
-</div>
+            <!-- Input File Bukti (PDF atau Gambar) -->
+            <div v-if="selectedAnswer && !isAnswerSaved" class="mt-6">
+              <label for="tingkat_pendidikan_file" class="block text-sm font-medium text-gray-700 mb-2">
+                Unggah Bukti Pendidikan (PDF, JPG, PNG, dll., maks 2MB)
+                <span class="text-red-500">*</span>
+              </label>
+              <div
+                class="relative border-2 border-dashed border-green-400 rounded-lg p-6 text-center bg-gray-50 hover:bg-green-50 transition-all duration-300"
+                @dragover.prevent
+                @drop.prevent="handleDrop"
+              >
+                <input
+                  type="file"
+                  id="tingkat_pendidikan_file"
+                  accept=".pdf,image/*"
+                  @change="handleFileUpload"
+                  class="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                />
+                <div v-if="!selectedFile" class="space-y-2">
+                  <i class="fas fa-cloud-upload-alt text-green-600 text-3xl"></i>
+                  <p class="text-gray-600 text-sm">
+                    Seret dan lepaskan file di sini atau <span class="text-green-600 font-semibold">pilih file</span>
+                  </p>
+                  <p class="text-xs text-gray-500">Format: PDF, JPG, PNG, dll. (maks 2MB)</p>
+                </div>
+                <div v-else class="flex items-center justify-center space-x-2">
+                  <i class="fas fa-file-alt text-green-600 text-xl"></i>
+                  <span class="text-sm text-gray-700">{{ selectedFile.name }}</span>
+                  <button
+                    @click="clearFile"
+                    class="text-red-500 hover:text-red-700 text-sm font-medium"
+                  >
+                    Hapus
+                  </button>
+                </div>
+              </div>
+            </div>
 
             <!-- Tampilkan status file tersimpan -->
             <div v-if="isAnswerSaved" class="text-green-600 flex items-center gap-2 mt-4">
@@ -154,8 +172,8 @@ import { ref, onMounted, computed } from 'vue'
 import axios from 'axios'
 import { useAuthStore } from '@/stores/auth'
 import { useRoute } from 'vue-router'
-import 'animate.css';
-import '@fortawesome/fontawesome-free/css/all.min.css';
+import 'animate.css'
+import '@fortawesome/fontawesome-free/css/all.min.css'
 
 const route = useRoute()
 const authStore = useAuthStore()
@@ -191,13 +209,26 @@ const fetchAnswer = async () => {
 
 const handleFileUpload = (event) => {
   const file = event.target.files[0]
-  if (file && file.type === 'application/pdf' && file.size <= 2 * 1024 * 1024) {
+  validateAndSetFile(file)
+}
+
+const handleDrop = (event) => {
+  const file = event.dataTransfer.files[0]
+  validateAndSetFile(file)
+}
+
+const validateAndSetFile = (file) => {
+  const allowedTypes = ['application/pdf', 'image/jpeg', 'image/jpg', 'image/png']
+  if (file && allowedTypes.includes(file.type) && file.size <= 2 * 1024 * 1024) {
     selectedFile.value = file
   } else {
-    alert('File harus berupa PDF dan maksimum 2MB')
-    event.target.value = ''
+    alert('File harus berupa PDF atau gambar (JPG, PNG, dll.) dan maksimum 2MB')
     selectedFile.value = null
   }
+}
+
+const clearFile = () => {
+  selectedFile.value = null
 }
 
 const submitAnswer = async () => {
@@ -264,20 +295,6 @@ const deleteAnswer = async () => {
   transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
-/* Nonaktifkan backdrop-filter pada layar kecil */
-@media (max-width: 640px) {
-  .max-w-2xl {
-    backdrop-filter: none;
-  }
-}
-
-/* Aktifkan backdrop-filter pada layar sm ke atas */
-@media (min-width: 640px) {
-  .max-w-2xl {
-    backdrop-filter: blur(10px);
-  }
-}
-
 .max-w-2xl:hover {
   transform: translateY(-10px);
   box-shadow: 0 25px 50px rgba(45, 106, 79, 0.25);
@@ -295,103 +312,30 @@ const deleteAnswer = async () => {
   animation: fadeInDown 0.5s ease-out;
 }
 
-/* Form Styling */
-.space-y-4 {
-  padding: 0 1rem;
-}
-
-/* Label dan Radio Container */
-.flex.flex-col {
-  position: relative;
-}
-
-.text-lg {
-  color: #2d6a4f;
-  font-weight: 600;
-  margin-bottom: 1rem;
-  transition: color 0.3s ease;
-}
-
-.space-y-3 {
-  margin-top: 1rem;
-}
-
-/* Radio Buttons */
-.form-radio {
-  appearance: none;
-  width: 1.25rem;
-  height: 1.25rem;
-  border: 2px solid #34d399;
-  border-radius: 50%;
-  position: relative;
-  cursor: pointer;
+/* File Upload Area */
+.border-dashed {
+  border-color: #34d399;
   transition: all 0.3s ease;
 }
 
-.form-radio:checked {
-  background: #34d399;
+.border-dashed:hover {
+  border-color: #2d6a4f;
+  background: #ecfdf5;
+}
+
+.border-dashed.dragover {
+  background: #d1fae5;
   border-color: #2d6a4f;
 }
 
-.form-radio:checked::after {
-  content: '';
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 0.5rem;
-  height: 0.5rem;
-  background: white;
-  border-radius: 50%;
-  transform: translate(-50%, -50%);
-  animation: scaleIn 0.2s ease-out;
+/* Icons and Text */
+.fa-cloud-upload-alt,
+.fa-file-alt {
+  transition: transform 0.3s ease;
 }
 
-.form-radio:hover:not(:disabled) {
-  box-shadow: 0 0 10px rgba(52, 211, 153, 0.4);
-}
-
-.form-radio:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-/* File Input Styling */
-.file-input {
-  background: white;
-  border: 2px solid #34d399;
-  border-radius: 0.5rem;
-  padding: 0.5rem;
-  transition: all 0.3s ease;
-}
-
-.file-input:hover:not(:disabled) {
-  border-color: #2d6a4f;
-  box-shadow: 0 0 10px rgba(52, 211, 153, 0.2);
-}
-
-.file-input:focus {
-  outline: none;
-  box-shadow: 0 0 0 3px rgba(52, 211, 153, 0.3);
-}
-
-/* Label untuk Radio dan File */
-label.ml-2 {
-  font-size: 0.875rem;
-  font-weight: 500;
-  transition: all 0.3s ease;
-}
-
-label.text-green-600 {
-  text-shadow: 0 2px 4px rgba(52, 211, 153, 0.2);
-}
-
-.flex.items-center:hover label.ml-2:not(.text-green-600) {
-  color: #2d6a4f;
-}
-
-/* Buttons Container */
-.flex.flex-col {
-  margin-top: 2rem;
+.border-dashed:hover .fa-cloud-upload-alt {
+  transform: scale(1.1);
 }
 
 /* Buttons */
@@ -404,107 +348,19 @@ label.text-green-600 {
   text-transform: uppercase;
   letter-spacing: 0.05em;
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-  position: relative;
-  overflow: hidden;
 }
 
 .bg-green-600 {
   background: linear-gradient(135deg, #2d6a4f, #34d399);
 }
 
-.bg-red-500 {
-  background: linear-gradient(135deg, #ef4444, #dc2626);
-}
-
-.bg-blue-600 {
-  background: linear-gradient(135deg, #1e3a8a, #3b82f6);
-}
-
 .bg-green-600:hover:not(:disabled) {
   background: linear-gradient(135deg, #1f4d36, #22c55e);
-}
-
-.bg-red-500:hover {
-  background: linear-gradient(135deg, #dc2626, #b91c1c);
-}
-
-.bg-blue-600:hover {
-  background: linear-gradient(135deg, #1e40af, #2563eb);
-}
-
-.bg-green-600::before,
-.bg-red-500::before,
-.bg-blue-600::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(120deg, transparent, rgba(255, 255, 255, 0.3), transparent);
-  transition: all 0.6s ease;
-}
-
-.bg-green-600:hover::before,
-.bg-red-500:hover::before,
-.bg-blue-600:hover::before {
-  left: 100%;
 }
 
 .bg-green-600:disabled {
   opacity: 0.6;
   cursor: not-allowed;
-}
-
-/* Question Navigation */
-.border-t {
-  border-color: rgba(45, 106, 79, 0.2);
-}
-
-.text-lg.font-medium {
-  color: #2d6a4f;
-  animation: fadeInUp 0.5s ease-out 0.2s both;
-}
-
-.flex.flex-wrap {
-  gap: 0.75rem;
-}
-
-/* Navigation Buttons */
-.w-10.h-10 {
-  background: #f0fdf4;
-  color: #4a4a4a;
-  font-weight: 600;
-  border-radius: 0.75rem;
-  transition: all 0.3s ease;
-  position: relative;
-  overflow: hidden;
-}
-
-.bg-green-600.text-white {
-  background: linear-gradient(135deg, #2d6a4f, #34d399);
-}
-
-.w-10.h-10:hover:not(.bg-green-600) {
-  background: #34d399;
-  color: white;
-  transform: scale(1.1);
-}
-
-.w-10.h-10::after {
-  content: '';
-  position: absolute;
-  top: -50%;
-  left: -50%;
-  width: 200%;
-  height: 200%;
-  background: radial-gradient(circle, rgba(52, 211, 153, 0.2) 0%, transparent 70%);
-  opacity: 0;
-  transition: opacity 0.3s ease;
-}
-
-.w-10.h-10:hover::after {
-  opacity: 1;
 }
 
 /* Animations */
@@ -516,26 +372,6 @@ label.text-green-600 {
   to {
     opacity: 1;
     transform: translateY(0);
-  }
-}
-
-@keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes scaleIn {
-  from {
-    transform: translate(-50%, -50%) scale(0);
-  }
-  to {
-    transform: translate(-50%, -50%) scale(1);
   }
 }
 </style>

@@ -6,55 +6,65 @@
           Data 4: Apakah anda memiliki sertifikasi dari Lembaga Floristy Asing dan Dalam Negeri?
         </h1>
 
-        <form @submit.prevent="submitAnswer" class="space-y-4">
-          <!-- Section A: Organisasi Independent -->
+        <form @submit.prevent="submitAnswer" class="space-y-6 p-6">
           <div class="flex flex-col space-y-4">
-            <div class="flex flex-col gap-2 p-2">
-              <label for="independent_org" 
-                :class="[
-                  'text-sm font-medium',
-                  savedFiles.independent_org ? 'text-green-600' : 'text-gray-700'
-                ]">
-                a. Dari organisasi Independent (AIFD, CFD, dll)
-              </label>
-
-              <!-- Show when file is saved -->
-              <div v-if="savedFiles.independent_org" class="text-green-600 flex items-center gap-2">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                </svg>
-                <span>File sudah tersimpan</span>
+            <!-- Section A: Organisasi Independent -->
+            <div class="flex flex-col gap-2">
+              <div class="flex items-center justify-between gap-4 p-2 bg-gray-50 rounded-md hover:bg-gray-100 transition-all duration-200">
+                <label for="independent_org" 
+                  :class="[
+                    'text-sm font-medium flex-1',
+                    savedFiles.independent_org ? 'text-green-600' : 'text-gray-700'
+                  ]">
+                  a. Dari organisasi Independent (AIFD, CFD, dll)
+                </label>
+                <div class="flex items-center gap-2">
+                  <div v-if="savedFiles.independent_org" class="text-green-600 flex items-center gap-1 text-xs">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                    </svg>
+                    <span>Tersimpan</span>
+                  </div>
+                  <div v-else class="relative">
+                    <input type="file" id="independent_org" accept=".pdf,image/*"
+                      @change="handleFileUpload($event, 'independent_org')"
+                      class="hidden-file-input" />
+                    <label for="independent_org" class="upload-button">
+                      {{ uploadedFiles.independent_org ? truncateFileName(uploadedFiles.independent_org.name) : 'Upload' }}
+                    </label>
+                  </div>
+                </div>
               </div>
-
-              <!-- Show file input only when no file is saved -->
-              <input v-else type="file" id="independent_org" accept=".pdf"
-                @change="handleFileUpload($event, 'independent_org')" 
-                class="border p-2 rounded-md w-2/3 form-radio" />
             </div>
 
             <!-- Section B: Sekolah Luar Negeri dengan Gelar -->
             <hr class="border-t border-gray-300 my-4">
-            <div class="flex flex-col gap-2 p-2">
-              <label for="foreign_school_degree" 
-                :class="[
-                  'text-sm font-medium',
-                  savedFiles.foreign_school_degree ? 'text-green-600' : 'text-gray-700'
-                ]">
-                b. Dari sekolah merangkai bunga luar negeri (mendapat gelar-gelar)
-              </label>
-
-              <!-- Show when file is saved -->
-              <div v-if="savedFiles.foreign_school_degree" class="text-green-600 flex items-center gap-2">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                </svg>
-                <span>File sudah tersimpan</span>
+            <div class="flex flex-col gap-2">
+              <div class="flex items-center justify-between gap-4 p-2 bg-gray-50 rounded-md hover:bg-gray-100 transition-all duration-200">
+                <label for="foreign_school_degree" 
+                  :class="[
+                    'text-sm font-medium flex-1',
+                    savedFiles.foreign_school_degree ? 'text-green-600' : 'text-gray-700'
+                  ]">
+                  b. Dari sekolah merangkai bunga luar negeri (mendapat gelar-gelar)
+                </label>
+                <div class="flex items-center gap-2">
+                  <div v-if="savedFiles.foreign_school_degree" class="text-green-600 flex items-center gap-1 text-xs">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                    </svg>
+                    <span>Tersimpan</span>
+                  </div>
+                  <div v-else class="relative">
+                    <input type="file" id="foreign_school_degree" accept=".pdf,image/*"
+                      @change="handleFileUpload($event, 'foreign_school_degree')"
+                      class="hidden-file-input" />
+                    <label for="foreign_school_degree" class="upload-button">
+                      {{ uploadedFiles.foreign_school_degree ? truncateFileName(uploadedFiles.foreign_school_degree.name) : 'Upload' }}
+                    </label>
+                  </div>
+                </div>
               </div>
-
-              <!-- Show file input only when no file is saved -->
-              <input v-else type="file" id="foreign_school_degree" accept=".pdf"
-                @change="handleFileUpload($event, 'foreign_school_degree')" 
-                class="border p-2 rounded-md w-2/3 form-radio" />
             </div>
 
             <!-- Section C: Sekolah Luar Negeri tanpa Gelar -->
@@ -64,27 +74,31 @@
                 c. Dari sekolah merangkai bunga luar negeri (tidak mendapatkan gelar)
               </label>
               <div class="space-y-3">
-                <div v-for="i in 5" :key="`foreign_no_degree_${i}`" class="flex flex-col gap-2 p-2">
+                <div v-for="i in 5" :key="`foreign_no_degree_${i}`" 
+                  class="flex items-center justify-between gap-4 p-2 bg-gray-50 rounded-md hover:bg-gray-100 transition-all duration-200">
                   <label :for="`foreign_school_no_degree_${i}`" 
                     :class="[
-                      'text-sm font-medium',
+                      'text-sm font-medium flex-1',
                       savedFiles[`foreign_school_no_degree_${i}`] ? 'text-green-600' : 'text-gray-700'
                     ]">
                     File {{ i }}
                   </label>
-
-                  <!-- Show when file is saved -->
-                  <div v-if="savedFiles[`foreign_school_no_degree_${i}`]" class="text-green-600 flex items-center gap-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                    </svg>
-                    <span>File sudah tersimpan</span>
+                  <div class="flex items-center gap-2">
+                    <div v-if="savedFiles[`foreign_school_no_degree_${i}`]" class="text-green-600 flex items-center gap-1 text-xs">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                      </svg>
+                      <span>Tersimpan</span>
+                    </div>
+                    <div v-else class="relative">
+                      <input type="file" :id="`foreign_school_no_degree_${i}`" accept=".pdf,image/*"
+                        @change="handleFileUpload($event, `foreign_school_no_degree_${i}`)"
+                        class="hidden-file-input" />
+                      <label :for="`foreign_school_no_degree_${i}`" class="upload-button">
+                        {{ uploadedFiles[`foreign_school_no_degree_${i}`] ? truncateFileName(uploadedFiles[`foreign_school_no_degree_${i}`].name) : 'Upload' }}
+                      </label>
+                    </div>
                   </div>
-
-                  <!-- Show file input only when no file is saved -->
-                  <input v-else type="file" :id="`foreign_school_no_degree_${i}`" accept=".pdf"
-                    @change="handleFileUpload($event, `foreign_school_no_degree_${i}`)" 
-                    class="border p-2 rounded-md w-2/3 form-radio" />
                 </div>
               </div>
             </div>
@@ -96,53 +110,59 @@
                 d. Dari sekolah merangkai bunga dalam negeri (tidak mendapatkan gelar)
               </label>
               <div class="space-y-3">
-                <div v-for="i in 5" :key="`domestic_no_degree_${i}`" class="flex flex-col gap-2 p-2">
+                <div v-for="i in 5" :key="`domestic_no_degree_${i}`" 
+                  class="flex items-center justify-between gap-4 p-2 bg-gray-50 rounded-md hover:bg-gray-100 transition-all duration-200">
                   <label :for="`domestic_school_no_degree_${i}`" 
                     :class="[
-                      'text-sm font-medium',
+                      'text-sm font-medium flex-1',
                       savedFiles[`domestic_school_no_degree_${i}`] ? 'text-green-600' : 'text-gray-700'
                     ]">
                     File {{ i }}
                   </label>
-
-                  <!-- Show when file is saved -->
-                  <div v-if="savedFiles[`domestic_school_no_degree_${i}`]" class="text-green-600 flex items-center gap-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                    </svg>
-                    <span>File sudah tersimpan</span>
+                  <div class="flex items-center gap-2">
+                    <div v-if="savedFiles[`domestic_school_no_degree_${i}`]" class="text-green-600 flex items-center gap-1 text-xs">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                      </svg>
+                      <span>Tersimpan</span>
+                    </div>
+                    <div v-else class="relative">
+                      <input type="file" :id="`domestic_school_no_degree_${i}`" accept=".pdf,image/*"
+                        @change="handleFileUpload($event, `domestic_school_no_degree_${i}`)"
+                        class="hidden-file-input" />
+                      <label :for="`domestic_school_no_degree_${i}`" class="upload-button">
+                        {{ uploadedFiles[`domestic_school_no_degree_${i}`] ? truncateFileName(uploadedFiles[`domestic_school_no_degree_${i}`].name) : 'Upload' }}
+                      </label>
+                    </div>
                   </div>
-
-                  <!-- Show file input only when no file is saved -->
-                  <input v-else type="file" :id="`domestic_school_no_degree_${i}`" accept=".pdf"
-                    @change="handleFileUpload($event, `domestic_school_no_degree_${i}`)" 
-                    class="border p-2 rounded-md w-2/3 form-radio" />
                 </div>
               </div>
             </div>
           </div>
 
-          <!-- Button Section -->
-          <div class="flex flex-col space-y-4 sm:flex-row sm:space-y-0 sm:space-x-4 justify-center items-center mt-6">
+          <!-- Buttons -->
+          <div class="flex flex-col space-y-4 sm:flex-row sm:space-y-0 sm:space-x-4 sm:justify-between items-center mt-6">
             <router-link to="/soal-3" 
-              class="uniform-button bg-gray-500 text-white rounded-xl py-3 px-6 hover:bg-gray-600 transition-all duration-300 w-full sm:w-auto">
+              class="uniform-button bg-gray-500 text-white hover:bg-gray-600">
               Previous
             </router-link>
             
-            <button type="submit"
-              v-if="Object.keys(uploadedFiles).length > 0"
-              class="uniform-button bg-green-600 text-white rounded-xl py-3 px-6 hover:bg-green-700 transition-all duration-300 w-full sm:w-auto">
-              {{ Object.keys(savedFiles).length > 0 ? 'Tambah Jawaban' : 'Simpan Jawaban' }}
-            </button>
+            <div class="flex flex-col space-y-4 sm:flex-row sm:space-y-0 sm:space-x-4">
+              <button type="submit"
+                v-if="Object.keys(uploadedFiles).length > 0"
+                class="uniform-button bg-green-600 text-white hover:bg-green-700">
+                {{ Object.keys(savedFiles).length > 0 ? 'Tambah' : 'Simpan' }}
+              </button>
 
-            <button type="button" @click="deleteAllFiles"
-              v-if="Object.keys(savedFiles).length > 0"
-              class="uniform-button bg-red-600 text-white rounded-xl py-3 px-6 hover:bg-red-700 transition-all duration-300 w-full sm:w-auto">
-              Hapus
-            </button>
+              <button type="button" @click="deleteAllFiles"
+                v-if="Object.keys(savedFiles).length > 0"
+                class="uniform-button bg-red-600 text-white hover:bg-red-700">
+                Hapus
+              </button>
+            </div>
 
             <router-link to="/soal-5" 
-              class="uniform-button bg-blue-600 text-white rounded-xl py-3 px-6 hover:bg-blue-700 transition-all duration-300 w-full sm:w-auto">
+              class="uniform-button bg-blue-600 text-white hover:bg-blue-700">
               Next
             </router-link>
           </div>
@@ -184,22 +204,15 @@ const uploadedFiles = ref({});
 const savedFiles = ref({});
 const totalNilai = ref(0);
 
-// Mapping nama field di frontend dengan backend - PERBAIKAN MAPPING UNTUK SECTION A & D
+// Field mapping untuk frontend dan backend
 const fieldMapping = {
-  // Option A - pastikan mapping sudah benar
   'independent_org': 'independent_org',
-  
-  // Option B
   'foreign_school_degree': 'foreign_school_degree',
-  
-  // Option C
   'foreign_school_no_degree_1': 'foreign_school_no_degree_1',
   'foreign_school_no_degree_2': 'foreign_school_no_degree_2',
   'foreign_school_no_degree_3': 'foreign_school_no_degree_3',
   'foreign_school_no_degree_4': 'foreign_school_no_degree_4',
   'foreign_school_no_degree_5': 'foreign_school_no_degree_5',
-  
-  // Option D - pastikan mapping sudah benar
   'domestic_school_no_degree_1': 'domestic_school_no_degree_1',
   'domestic_school_no_degree_2': 'domestic_school_no_degree_2',
   'domestic_school_no_degree_3': 'domestic_school_no_degree_3',
@@ -213,13 +226,6 @@ const reverseFieldMapping = Object.entries(fieldMapping).reduce((acc, [key, valu
   return acc;
 }, {});
 
-// Helper untuk debug, menampilkan mapping lengkap
-const logFieldMappings = () => {
-  console.table(fieldMapping);
-  console.log('REVERSE MAPPINGS:');
-  console.table(reverseFieldMapping);
-};
-
 // Extract current question number from route
 const currentQuestionNumber = computed(() => {
   const match = route.path.match(/\/soal-(\d+)/);
@@ -227,7 +233,6 @@ const currentQuestionNumber = computed(() => {
 });
 
 onMounted(async () => {
-  logFieldMappings(); // Log semua field mappings ketika komponen di-mount
   await fetchAnswer();
 });
 
@@ -241,19 +246,12 @@ const fetchAnswer = async () => {
       const backendData = response.data.data;
       const mappedData = {};
       
-      console.log("Data from backend:", backendData);
-      
-      // Konversi nama field dari backend ke frontend
       Object.entries(backendData).forEach(([key, value]) => {
         if (reverseFieldMapping[key] && value) {
           mappedData[reverseFieldMapping[key]] = value;
-          console.log(`Mapped backend field '${key}' to frontend field '${reverseFieldMapping[key]}'`);
-        } else if (key !== 'nilai' && key !== 'id' && value) {
-          console.warn(`No mapping found for backend field: '${key}'`);
         }
       });
       
-      console.log("Final mapped data for frontend:", mappedData);
       savedFiles.value = mappedData;
       totalNilai.value = backendData.nilai || calculateNilai();
     } else {
@@ -262,9 +260,6 @@ const fetchAnswer = async () => {
     }
   } catch (error) {
     console.error('Error fetching answers:', error);
-    if (error.response) {
-      console.error('Server response:', error.response.data);
-    }
     savedFiles.value = {};
     totalNilai.value = 0;
   }
@@ -272,38 +267,24 @@ const fetchAnswer = async () => {
 
 const calculateNilai = () => {
   let nilai = 0;
-  
-  // Hitung sesuai aturan penilaian
   if (savedFiles.value.independent_org) nilai += 8;
   if (savedFiles.value.foreign_school_degree) nilai += 7;
-  
-  // Hitung untuk sekolah luar negeri tanpa gelar (3 poin per file)
   for (let i = 1; i <= 5; i++) {
     if (savedFiles.value[`foreign_school_no_degree_${i}`]) nilai += 3;
-  }
-  
-  // Hitung untuk sekolah dalam negeri tanpa gelar (3 poin per file)
-  for (let i = 1; i <= 5; i++) {
     if (savedFiles.value[`domestic_school_no_degree_${i}`]) nilai += 3;
   }
-  
   return nilai;
 };
 
 const handleFileUpload = (event, field) => {
   const file = event.target.files[0];
   if (file) {
-    uploadedFiles.value[field] = file;
-    
-    // Log file upload dengan mapping info
-    console.log(`File uploaded for field '${field}':`, file.name, 
-      `(Maps to backend field: '${fieldMapping[field] || "NO MAPPING FOUND!"}')`);
-    
-    // Extra checking for problematic fields
-    if (field === 'independent_org' || field.startsWith('domestic_school_no_degree_')) {
-      if (!fieldMapping[field]) {
-        console.error(`CRITICAL: No backend mapping found for ${field}!`);
-      }
+    const allowedTypes = ['application/pdf', 'image/jpeg', 'image/png', 'image/gif', 'image/bmp', 'image/webp'];
+    if (allowedTypes.includes(file.type) && file.size <= 2 * 1024 * 1024) {
+      uploadedFiles.value[field] = file;
+    } else {
+      alert('File harus berupa PDF atau gambar (JPG, PNG, GIF, BMP, WEBP) dan maksimum 2MB');
+      event.target.value = ''; // Reset input
     }
   }
 };
@@ -319,9 +300,7 @@ const deleteAllFiles = async () => {
     totalNilai.value = 0;
   } catch (error) {
     console.error('Failed to delete all files:', error);
-    if (error.response) {
-      console.error('Server response:', error.response.data);
-    }
+    alert('Gagal menghapus file: ' + (error.response?.data?.message || error.message));
   }
 };
 
@@ -330,52 +309,13 @@ const submitAnswer = async () => {
     const formData = new FormData();
     let hasFiles = false;
 
-    // Debug information for uploaded files
-    console.log("Files ready to upload:", Object.keys(uploadedFiles.value));
-    console.log("Option A field present:", uploadedFiles.value.hasOwnProperty('independent_org'));
-    console.log("Option D fields present:", Object.keys(uploadedFiles.value)
-      .filter(key => key.startsWith('domestic_school_no_degree_')));
-
-    // SPECIAL HANDLING FOR OPTION A - Ensure it's properly mapped and added
-    if (uploadedFiles.value.independent_org) {
-      const backendField = fieldMapping['independent_org'];
-      console.log(`CRITICAL CHECK - Mapping 'independent_org' to '${backendField}'`);
-      formData.append(backendField, uploadedFiles.value.independent_org);
-      hasFiles = true;
-    }
-
-    // SPECIAL HANDLING FOR OPTION D - Ensure they're properly mapped and added
-    Object.keys(uploadedFiles.value)
-      .filter(key => key.startsWith('domestic_school_no_degree_'))
-      .forEach(key => {
-        const backendField = fieldMapping[key];
-        console.log(`CRITICAL CHECK - Mapping '${key}' to '${backendField}'`);
-        if (backendField) {
-          formData.append(backendField, uploadedFiles.value[key]);
-          hasFiles = true;
-        } else {
-          console.error(`No mapping found for ${key}!`);
-        }
-      });
-
-    // Handle all remaining files (options B and C)
     Object.keys(uploadedFiles.value).forEach((key) => {
-      // Skip options A and D as we've already handled them
-      if (key !== 'independent_org' && !key.startsWith('domestic_school_no_degree_')) {
-        if (uploadedFiles.value[key]) {
-          const backendFieldName = fieldMapping[key] || key;
-          console.log(`Standard processing - Mapping '${key}' to '${backendFieldName}'`);
-          formData.append(backendFieldName, uploadedFiles.value[key]);
-          hasFiles = true;
-        }
+      if (uploadedFiles.value[key]) {
+        const backendFieldName = fieldMapping[key] || key;
+        formData.append(backendFieldName, uploadedFiles.value[key]);
+        hasFiles = true;
       }
     });
-
-    // Log all FormData entries for verification
-    console.log("FormData entries:");
-    for (let pair of formData.entries()) {
-      console.log(`${pair[0]}: ${pair[1] instanceof File ? pair[1].name : pair[1]}`);
-    }
 
     if (!hasFiles) {
       console.warn('No files selected');
@@ -386,48 +326,26 @@ const submitAnswer = async () => {
       ? '/api/update4'
       : '/api/soal4';
 
-    console.log("Submitting to endpoint:", endpoint);
-
     const response = await axios.post(endpoint, formData, {
       headers: { 
         Authorization: `Bearer ${authStore.accessToken}`,
         'Content-Type': 'multipart/form-data' 
       },
-      timeout: 60000 // Increase timeout to 60 seconds
+      timeout: 60000
     });
 
     console.log('Answer saved successfully:', response.data);
     uploadedFiles.value = {};
     await fetchAnswer();
   } catch (error) {
-    handleSubmissionError(error);
+    console.error('Failed to save answer:', error);
+    alert('Gagal menyimpan jawaban: ' + (error.response?.data?.message || error.message));
   }
 };
 
-// Separate function to handle submission errors
-const handleSubmissionError = (error) => {
-  console.error('Failed to save answer:', error);
-  
-  // More detailed error logging
-  if (error.response) {
-    console.error('Error response data:', error.response.data);
-    console.error('Error response status:', error.response.status);
-    console.error('Error response headers:', error.response.headers);
-  } else if (error.request) {
-    console.error('Error request:', error.request);
-  } else {
-    console.error('Error message:', error.message);
-  }
-  
-  // Alert user of error with specific details if available
-  let errorMessage = 'Failed to save answer.';
-  if (error.response && error.response.data && error.response.data.message) {
-    errorMessage += ` Server says: ${error.response.data.message}`;
-  } else if (error.message) {
-    errorMessage += ` Error: ${error.message}`;
-  }
-  
-  alert(errorMessage);
+// Fungsi untuk memotong nama file jika terlalu panjang
+const truncateFileName = (name) => {
+  return name.length > 15 ? `${name.substring(0, 12)}...` : name;
 };
 </script>
 
@@ -472,58 +390,72 @@ const handleSubmissionError = (error) => {
 }
 
 /* Form Styling */
-.space-y-4 {
+.space-y-6 {
   padding: 0 1rem;
 }
 
-/* Label dan Input Container */
-.flex.flex-col {
-  position: relative;
+/* Field Container */
+.bg-gray-50 {
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
 }
 
-.text-lg {
-  color: #2d6a4f;
-  font-weight: 600;
-  margin-bottom: 1rem;
+/* Label */
+.text-sm {
+  font-size: 0.875rem;
+  font-weight: 500;
   transition: color 0.3s ease;
 }
 
-/* File Input */
-.form-radio {
-  appearance: none;
+.text-green-600 {
+  text-shadow: 0 1px 2px rgba(52, 211, 153, 0.2);
+}
+
+/* Hidden File Input dan Upload Button */
+.hidden-file-input {
+  position: absolute;
+  width: 0;
+  height: 0;
+  opacity: 0;
+}
+
+.upload-button {
+  display: inline-block;
+  padding: 0.5rem 1rem;
+  background: #ecfdf5;
   border: 2px solid #34d399;
-  border-radius: 0.375rem;
+  border-radius: 0.5rem;
+  color: #2d6a4f;
+  font-weight: 500;
   cursor: pointer;
   transition: all 0.3s ease;
+  min-width: 100px;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-.form-radio:hover:not(:disabled) {
-  box-shadow: 0 0 10px rgba(52, 211, 153, 0.4);
-}
-
-/* Label untuk Input */
-label.text-sm {
-  font-size: 0.875rem;
-  font-weight: 500;
-  transition: all 0.3s ease;
-}
-
-label.text-green-600 {
-  text-shadow: 0 2px 4px rgba(52, 211, 153, 0.2);
+.upload-button:hover {
+  background: #d1fae5;
+  border-color: #2d6a4f;
+  color: #1f4d36;
+  transform: scale(1.05);
 }
 
 /* Uniform Button Styling */
 .uniform-button {
-  padding: 0.75rem 2rem;
+  padding: 0.5rem 1rem;
   border-radius: 9999px;
   font-weight: 600;
+  font-size: 0.875rem;
   text-transform: uppercase;
   letter-spacing: 0.05em;
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
   overflow: hidden;
-  min-width: 150px; /* Lebar minimal untuk semua button */
-  text-align: center; /* Teks rata tengah */
+  width: 100px;
+  text-align: center;
 }
 
 .uniform-button.bg-green-600 {
@@ -594,8 +526,6 @@ label.text-green-600 {
   font-weight: 600;
   border-radius: 0.75rem;
   transition: all 0.3s ease;
-  position: relative;
-  overflow: hidden;
 }
 
 .bg-green-600.text-white {
@@ -608,42 +538,14 @@ label.text-green-600 {
   transform: scale(1.1);
 }
 
-.w-10.h-10::after {
-  content: '';
-  position: absolute;
-  top: -50%;
-  left: -50%;
-  width: 200%;
-  height: 200%;
-  background: radial-gradient(circle, rgba(52, 211, 153, 0.2) 0%, transparent 70%);
-  opacity: 0;
-  transition: opacity 0.3s ease;
-}
-
-.w-10.h-10:hover::after {
-  opacity: 1;
-}
-
 /* Animations */
 @keyframes fadeInDown {
-  from {
-    opacity: 0;
-    transform: translateY(-20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(-20px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 @keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 </style>

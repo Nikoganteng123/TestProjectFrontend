@@ -110,16 +110,17 @@
   color: #2d6a4f;
   cursor: pointer;
   user-select: none;
+  text-shadow: 0 0 10px rgba(255, 255, 255, 0.8), 0 4px 15px rgba(45, 106, 79, 0.3); /* Shadow putih ditambahkan */
 }
 
 .desktop-title, .mobile-title {
   position: relative;
   display: block;
-  text-shadow: 0 4px 15px rgba(45, 106, 79, 0.3);
 }
 
 .desktop-title {
   display: block;
+  text-shadow: 0 0 10px rgba(255, 255, 255, 0.8), 0 4px 15px rgba(45, 106, 79, 0.3); /* Shadow putih ditambahkan */
 }
 
 .mobile-title {
@@ -148,24 +149,25 @@
   }
   
   .mobile-title {
-    display: block;
-    font-size: clamp(2.5rem, 10vw, 4rem);
-    letter-spacing: 0.1rem;
-    width: 100%;
-    padding: 0 0.5rem;
-    color: transparent;
-    background: linear-gradient(90deg, 
-      #2d6a4f 0%, 
-      #34d399 50%, 
-      #2d6a4f 100%);
-    background-size: 200% 100%;
-    -webkit-background-clip: text;
-    background-clip: text;
-    animation: shine 4s linear infinite;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
+  display: block;
+  font-size: clamp(2.5rem, 10vw, 4rem);
+  letter-spacing: 0.1rem;
+  width: 100%;
+  padding: 0 0.5rem;
+  color: transparent;
+  background: linear-gradient(90deg, 
+    #2d6a4f 0%, 
+    #34d399 50%, 
+    #2d6a4f 100%);
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  animation: shine 4s linear infinite;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-shadow: none; /* Pastikan tidak ada shadow */
+}
   
   .desktop-subtitle {
     display: none;
@@ -195,7 +197,7 @@
   margin-top: 1rem;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  text-shadow: 0 2px 10px rgba(31, 77, 43, 0.2);
+  text-shadow: 0 0 5px rgba(255, 255, 255, 0.5); /* Shadow putih sedikit */
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 

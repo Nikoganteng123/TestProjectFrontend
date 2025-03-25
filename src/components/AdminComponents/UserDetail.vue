@@ -35,6 +35,7 @@
               v-else
               v-model.number="editedTotalNilai"
               type="number"
+              min="0"
               class="font-semibold text-emerald-700 border rounded px-2 py-1 w-20"
               @keypress.enter="confirmUpdateAndVerify"
             >
@@ -149,18 +150,18 @@ export default {
 
       try {
         const response = await axios.get(`/api/admin/users/${this.$route.params.userId}`, {
-          headers: {
-            Authorization: `Bearer ${authStore.accessToken}`,
-          },
+          headers: { Authorization: `Bearer ${authStore.accessToken}` },
         });
         console.log('User detail response:', response.data);
         this.user = response.data.user;
         this.soals = response.data.soals;
         this.totalNilai = response.data.totalNilai;
-        this.editedTotalNilai = this.totalNilai; // Inisialisasi nilai edit
+        this.editedTotalNilai = this.totalNilai;
       } catch (error) {
         console.error('Error fetching user detail:', error.response || error);
-        this.error = error.response?.data?.message || 'Gagal memuat detail pengguna.';
+        this.error = error.response?.status === 401
+          ? 'Sesi Anda telah habis. Silakan login kembali.'
+          : error.response?.data?.message || 'Gagal memuat detail pengguna.';
         if (error.response?.status === 401) {
           this.$router.push({ name: 'login' });
         }
@@ -176,23 +177,22 @@ export default {
         await axios.post(
           `/api/admin/users/${this.$route.params.userId}/verify`,
           {},
-          {
-            headers: {
-              Authorization: `Bearer ${authStore.accessToken}`,
-            },
-          }
+          { headers: { Authorization: `Bearer ${authStore.accessToken}` } }
         );
-        this.fetchUserDetail(); // Refresh data setelah verifikasi
-        alert('Pengguna telah diverifikasi!');
+        this.fetchUserDetail();
+        alert('Pengguna telah diverifikasi! Silakan cek notifikasi untuk detail.');
       } catch (error) {
         console.error('Error verifying user:', error.response || error);
-        alert('Gagal memverifikasi pengguna: ' + (error.response?.data?.message || 'Kesalahan tidak diketahui'));
+        const message = error.response?.status === 401
+          ? 'Sesi Anda telah habis. Silakan login kembali.'
+          : error.response?.data?.message || 'Kesalahan tidak diketahui';
+        alert('Gagal memverifikasi pengguna: ' + message);
       }
     },
     toggleEditTotal() {
       this.isEditingTotal = !this.isEditingTotal;
       if (!this.isEditingTotal) {
-        this.editedTotalNilai = this.totalNilai; // Reset ke nilai awal jika batal
+        this.editedTotalNilai = this.totalNilai;
       }
     },
     confirmUpdateAndVerify() {
@@ -208,23 +208,20 @@ export default {
       try {
         const response = await axios.post(
           `/api/admin/users/${this.$route.params.userId}/verify`,
-          {
-            total_nilai: this.editedTotalNilai, // Kirim nilai yang diinput admin
-          },
-          {
-            headers: {
-              Authorization: `Bearer ${authStore.accessToken}`,
-            },
-          }
+          { total_nilai: this.editedTotalNilai },
+          { headers: { Authorization: `Bearer ${authStore.accessToken}` } }
         );
         console.log('Verification response:', response.data);
         this.totalNilai = response.data.totalNilai || this.editedTotalNilai;
         this.isEditingTotal = false;
-        this.fetchUserDetail(); // Refresh data dari server
-        alert('Nilai berhasil diperbarui dan pengguna telah diverifikasi!');
+        this.fetchUserDetail();
+        alert('Nilai berhasil diperbarui dan pengguna telah diverifikasi! Silakan cek notifikasi untuk detail.');
       } catch (error) {
         console.error('Error verifying user with custom score:', error.response || error);
-        alert('Gagal memperbarui nilai dan verifikasi: ' + (error.response?.data?.message || 'Kesalahan tidak diketahui'));
+        const message = error.response?.status === 401
+          ? 'Sesi Anda telah habis. Silakan login kembali.'
+          : error.response?.data?.message || 'Kesalahan tidak diketahui';
+        alert('Gagal memperbarui nilai dan verifikasi: ' + message);
       }
     },
     async unverifyUser() {
@@ -235,17 +232,16 @@ export default {
         await axios.post(
           `/api/admin/users/${this.$route.params.userId}/unverify`,
           {},
-          {
-            headers: {
-              Authorization: `Bearer ${authStore.accessToken}`,
-            },
-          }
+          { headers: { Authorization: `Bearer ${authStore.accessToken}` } }
         );
-        this.fetchUserDetail(); // Refresh data setelah pembatalan verifikasi
+        this.fetchUserDetail();
         alert('Verifikasi pengguna telah dibatalkan!');
       } catch (error) {
         console.error('Error unverifying user:', error.response || error);
-        alert('Gagal membatalkan verifikasi: ' + (error.response?.data?.message || 'Kesalahan tidak diketahui'));
+        const message = error.response?.status === 401
+          ? 'Sesi Anda telah habis. Silakan login kembali.'
+          : error.response?.data?.message || 'Kesalahan tidak diketahui';
+        alert('Gagal membatalkan verifikasi: ' + message);
       }
     },
   },
@@ -253,36 +249,14 @@ export default {
 </script>
 
 <style scoped>
-table {
-  border-collapse: collapse;
-}
+table { border-collapse: collapse; }
+th, td { border: 1px solid #d1d5db; }
+th { background-color: #d1fae5; }
 
-th,
-td {
-  border: 1px solid #d1d5db; /* Light gray border */
-}
-
-th {
-  background-color: #d1fae5; /* Light emerald background */
-}
-
-/* Responsive adjustments */
 @media (max-width: 640px) {
-  .min-h-screen {
-    padding: 1rem;
-  }
-
-  table {
-    font-size: 0.75rem; /* Smaller text on mobile */
-  }
-
-  th,
-  td {
-    padding: 0.5rem; /* Reduced padding on mobile */
-  }
-
-  .grid-cols-2 {
-    grid-template-columns: 1fr; /* Stack on mobile */
-  }
+  .min-h-screen { padding: 1rem; }
+  table { font-size: 0.75rem; }
+  th, td { padding: 0.5rem; }
+  .grid-cols-2 { grid-template-columns: 1fr; }
 }
 </style>

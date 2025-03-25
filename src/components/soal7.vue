@@ -14,40 +14,50 @@
           {{ errorMessage }}
         </div>
 
-        <form @submit.prevent="submitAnswer" class="space-y-4">
+        <form @submit.prevent="submitAnswer" class="space-y-6 p-6">
           <div class="flex flex-col space-y-4">
-            <div v-for="(field, index) in certificateFields" :key="index">
+            <div v-for="(field, index) in certificateFields" :key="index" class="flex flex-col gap-2">
               <hr v-if="['juara_non_dpp', 'juara_instansi_lain', 'juara_internasional', 'peserta_lomba_1', 'juri_lomba_1'].includes(field.key)" 
                 class="border-t border-gray-300 my-4">
               
-              <div class="flex flex-col gap-2 p-2">
+              <div class="flex items-center justify-between gap-4 p-2 bg-gray-50 rounded-md hover:bg-gray-100 transition-all duration-200">
+                <!-- Label -->
                 <label :for="field.key" 
                   :class="[
-                    'text-sm font-medium',
+                    'text-sm font-medium flex-1',
                     savedFiles[field.key] ? 'text-green-600' : 'text-gray-700'
                   ]">
                   {{ field.label }}
                 </label>
 
-                <!-- Show when file is saved -->
-                <div v-if="savedFiles[field.key]" class="text-green-600 flex items-center gap-2">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                  </svg>
-                  <span>File sudah tersimpan</span>
-                </div>
+                <!-- Status atau Input File -->
+                <div class="flex items-center gap-2">
+                  <!-- Status ketika file tersimpan -->
+                  <div v-if="savedFiles[field.key]" class="text-green-600 flex items-center gap-1 text-xs">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                    </svg>
+                    <span>Tersimpan</span>
+                  </div>
 
-                <!-- Show file input when no file is saved -->
-                <input v-else type="file" :id="field.key" accept=".pdf"
-                  @change="handleFileUpload($event, field.key)" 
-                  class="file-input block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-green-50 file:text-green-700 hover:file:bg-green-100 cursor-pointer transition-all duration-200" />
+                  <!-- Input File jika belum tersimpan -->
+                  <div v-else class="relative">
+                    <input type="file" :id="field.key" accept=".pdf,image/*"
+                      @change="handleFileUpload($event, field.key)"
+                      class="hidden-file-input" />
+                    <label :for="field.key" class="upload-button">
+                      {{ uploadedFiles[field.key] ? truncateFileName(uploadedFiles[field.key].name) : 'Upload' }}
+                    </label>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
 
+          <!-- Buttons -->
           <div class="flex flex-col space-y-4 sm:flex-row sm:space-y-0 sm:space-x-4 sm:justify-between items-center mt-6">
             <router-link to="/soal-6" 
-              class="uniform-button bg-gray-500 text-white rounded-xl py-3 px-6 hover:bg-gray-600 transition-all duration-300 w-full sm:w-auto">
+              class="uniform-button bg-gray-500 text-white hover:bg-gray-600">
               Previous
             </router-link>
             
@@ -55,7 +65,7 @@
               <button type="submit"
                 v-if="Object.keys(uploadedFiles).length > 0"
                 :disabled="loading"
-                class="uniform-button bg-green-600 text-white rounded-xl py-3 px-6 hover:bg-green-700 transition-all duration-300 w-full sm:w-auto">
+                class="uniform-button bg-green-600 text-white hover:bg-green-700">
                 {{ Object.keys(savedFiles).length > 0 ? 'Tambah' : 'Simpan' }}
                 <span v-if="loading" class="spinner ml-2"></span>
               </button>
@@ -63,14 +73,14 @@
               <button type="button" @click="deleteAllFiles"
                 v-if="Object.keys(savedFiles).length > 0"
                 :disabled="loading"
-                class="uniform-button bg-red-600 text-white rounded-xl py-3 px-6 hover:bg-red-700 transition-all duration-300 w-full sm:w-auto">
-                Hapus Semua
+                class="uniform-button bg-red-600 text-white hover:bg-red-700">
+                Hapus
                 <span v-if="loading" class="spinner ml-2"></span>
               </button>
             </div>
 
             <router-link to="/soal-8" 
-              class="uniform-button bg-blue-600 text-white rounded-xl py-3 px-6 hover:bg-blue-700 transition-all duration-300 w-full sm:w-auto">
+              class="uniform-button bg-blue-600 text-white hover:bg-blue-700">
               Next
             </router-link>
           </div>
@@ -115,19 +125,20 @@ const errorMessage = ref('');
 const loading = ref(false);
 
 const certificateFields = [
-  { key: 'juara_nasional_dpp', label: 'a. Juara tingkat Nasional yang diselenggarakan oleh DPP IPBI ' },
-  { key: 'juara_non_dpp', label: 'b. Juara lomba yang diselenggarakan oleh IPBI selain DPP ' },
-  { key: 'juara_instansi_lain', label: 'c. Juara lomba yang diselenggarakan oleh instansi lain ' },
-  { key: 'juara_internasional', label: 'd. Juara lomba merangkai bunga tingkat internasional ' },
-  { key: 'peserta_lomba_1', label: 'e. Menjadi Peserta Lomba Merangkai Bunga (1) ' },
-  { key: 'peserta_lomba_2', label: 'Menjadi Peserta Lomba Merangkai Bunga (2) ' },
-  { key: 'peserta_lomba_3', label: 'Menjadi Peserta Lomba Merangkai Bunga (3' },
+  { key: 'juara_nasional_dpp', label: 'a. Juara tingkat Nasional yang diselenggarakan oleh DPP IPBI' },
+  { key: 'juara_non_dpp', label: 'b. Juara lomba yang diselenggarakan oleh IPBI selain DPP' },
+  { key: 'juara_instansi_lain', label: 'c. Juara lomba yang diselenggarakan oleh instansi lain' },
+  { key: 'juara_internasional', label: 'd. Juara lomba merangkai bunga tingkat internasional' },
+  { key: 'peserta_lomba_1', label: 'e. Menjadi Peserta Lomba Merangkai Bunga (1)' },
+  { key: 'peserta_lomba_2', label: 'Menjadi Peserta Lomba Merangkai Bunga (2)' },
+  { key: 'peserta_lomba_3', label: 'Menjadi Peserta Lomba Merangkai Bunga (3)' },
   { key: 'peserta_lomba_4', label: 'Menjadi Peserta Lomba Merangkai Bunga (4)' },
   { key: 'peserta_lomba_5', label: 'Menjadi Peserta Lomba Merangkai Bunga (5)' },
   { key: 'juri_lomba_1', label: 'f. Menjadi Juri Lomba Merangkai Bunga (1)' },
   { key: 'juri_lomba_2', label: 'Menjadi Juri Lomba Merangkai Bunga (2)' },
 ];
 
+// Extract current question number from route
 const currentQuestionNumber = computed(() => {
   const match = route.path.match(/\/soal-(\d+)/);
   return match ? parseInt(match[1]) : 7;
@@ -141,7 +152,7 @@ const fetchAnswer = async () => {
   try {
     loading.value = true;
     const response = await axios.get('/api/soal7', {
-      headers: { Authorization: `Bearer ${authStore.accessToken}` },
+      headers: { Authorization: `Bearer ${authStore.accessToken}` }
     });
     
     savedFiles.value = response.data.data || {};
@@ -154,11 +165,14 @@ const fetchAnswer = async () => {
 
 const handleFileUpload = (event, field) => {
   const file = event.target.files[0];
-  if (file && file.type === 'application/pdf' && file.size <= 2 * 1024 * 1024) {
-    uploadedFiles.value[field] = file;
-  } else {
-    errorMessage.value = 'File harus berupa PDF dan maksimum 2MB';
-    event.target.value = '';
+  if (file) {
+    const allowedTypes = ['application/pdf', 'image/jpeg', 'image/png', 'image/gif', 'image/bmp', 'image/webp'];
+    if (allowedTypes.includes(file.type) && file.size <= 2 * 1024 * 1024) {
+      uploadedFiles.value[field] = file;
+    } else {
+      errorMessage.value = 'File harus berupa PDF atau gambar (JPG, PNG, GIF, BMP, WEBP) dan maksimum 2MB';
+      event.target.value = ''; // Reset input
+    }
   }
 };
 
@@ -168,7 +182,7 @@ const deleteAllFiles = async () => {
   try {
     loading.value = true;
     await axios.delete('/api/soal7', {
-      headers: { Authorization: `Bearer ${authStore.accessToken}` },
+      headers: { Authorization: `Bearer ${authStore.accessToken}` }
     });
     
     savedFiles.value = {};
@@ -210,8 +224,8 @@ const submitAnswer = async () => {
     const response = await axios.post(endpoint, formData, {
       headers: { 
         Authorization: `Bearer ${authStore.accessToken}`,
-        'Content-Type': 'multipart/form-data',
-      },
+        'Content-Type': 'multipart/form-data'
+      }
     });
 
     successMessage.value = response.data.message;
@@ -223,6 +237,11 @@ const submitAnswer = async () => {
   } finally {
     loading.value = false;
   }
+};
+
+// Fungsi untuk memotong nama file jika terlalu panjang
+const truncateFileName = (name) => {
+  return name.length > 15 ? `${name.substring(0, 12)}...` : name;
 };
 </script>
 
@@ -267,63 +286,73 @@ const submitAnswer = async () => {
 }
 
 /* Form Styling */
-.space-y-4 {
+.space-y-6 {
   padding: 0 1rem;
 }
 
-/* Label dan Input Container */
-.flex.flex-col {
-  position: relative;
+/* Field Container */
+.bg-gray-50 {
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
 }
 
-.text-lg {
-  color: #2d6a4f;
-  font-weight: 600;
-  margin-bottom: 1rem;
-  transition: color 0.3s ease;
-}
-
-/* File Input */
-.file-input {
-  background: white;
-  border: 2px solid #34d399;
-  border-radius: 0.5rem;
-  padding: 0.5rem;
-  transition: all 0.3s ease;
-}
-
-.file-input:hover:not(:disabled) {
-  border-color: #2d6a4f;
-  box-shadow: 0 0 10px rgba(52, 211, 153, 0.2);
-}
-
-.file-input:focus {
-  outline: none;
-  box-shadow: 0 0 0 3px rgba(52, 211, 153, 0.3);
-}
-
-/* Label untuk Input */
-label.text-sm {
+/* Label */
+.text-sm {
   font-size: 0.875rem;
   font-weight: 500;
-  transition: all 0.3s ease;
+  transition: color 0.3s ease;
+  white-space: normal; /* Memungkinkan teks membungkus */
+  word-break: break-word; /* Memastikan kata panjang terpecah jika perlu */
 }
 
-label.text-green-600 {
-  text-shadow: 0 2px 4px rgba(52, 211, 153, 0.2);
+.text-green-600 {
+  text-shadow: 0 1px 2px rgba(52, 211, 153, 0.2);
+}
+
+/* Hidden File Input dan Upload Button */
+.hidden-file-input {
+  position: absolute;
+  width: 0;
+  height: 0;
+  opacity: 0;
+}
+
+.upload-button {
+  display: inline-block;
+  padding: 0.5rem 1rem;
+  background: #ecfdf5;
+  border: 2px solid #34d399;
+  border-radius: 0.5rem;
+  color: #2d6a4f;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  min-width: 100px;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.upload-button:hover {
+  background: #d1fae5;
+  border-color: #2d6a4f;
+  color: #1f4d36;
+  transform: scale(1.05);
 }
 
 /* Uniform Button Styling */
 .uniform-button {
-  padding: 0.75rem 2rem;
+  padding: 0.5rem 1rem;
   border-radius: 9999px;
   font-weight: 600;
+  font-size: 0.875rem;
   text-transform: uppercase;
   letter-spacing: 0.05em;
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
   overflow: hidden;
-  min-width: 150px;
+  width: 100px;
   text-align: center;
 }
 
@@ -347,7 +376,7 @@ label.text-green-600 {
   background: linear-gradient(135deg, #1f4d36, #22c55e);
 }
 
-.uniform-button.bg-red-600:hover {
+.uniform-button.bg-red-600:hover:not(:disabled) {
   background: linear-gradient(135deg, #dc2626, #b91c1c);
 }
 
@@ -374,6 +403,11 @@ label.text-green-600 {
   left: 100%;
 }
 
+.uniform-button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
 /* Question Navigation */
 .border-t {
   border-color: rgba(45, 106, 79, 0.2);
@@ -395,8 +429,6 @@ label.text-green-600 {
   font-weight: 600;
   border-radius: 0.75rem;
   transition: all 0.3s ease;
-  position: relative;
-  overflow: hidden;
 }
 
 .bg-green-600.text-white {
@@ -409,63 +441,30 @@ label.text-green-600 {
   transform: scale(1.1);
 }
 
-.w-10.h-10::after {
-  content: '';
-  position: absolute;
-  top: -50%;
-  left: -50%;
-  width: 200%;
-  height: 200%;
-  background: radial-gradient(circle, rgba(52, 211, 153, 0.2) 0%, transparent 70%);
-  opacity: 0;
-  transition: opacity 0.3s ease;
-}
-
-.w-10.h-10:hover::after {
-  opacity: 1;
-}
-
 /* Spinner */
 .spinner {
   border: 2px solid #f3f3f3;
   border-top: 2px solid #34d399;
   border-radius: 50%;
-  width: 20px;
-  height: 20px;
+  width: 16px;
+  height: 16px;
   animation: spin 1s linear infinite;
   display: inline-block;
 }
 
 /* Animations */
 @keyframes fadeInDown {
-  from {
-    opacity: 0;
-    transform: translateY(-20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(-20px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 @keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 @keyframes spin {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
-}
-
-button:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
 }
 </style>

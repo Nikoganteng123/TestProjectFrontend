@@ -28,57 +28,55 @@
         </div>
 
         <!-- Answer Details Table -->
-<div class="mt-6">
-  <h2 class="text-xl sm:text-2xl font-semibold text-emerald-900 mb-4 border-b border-gray-200 pb-2">
-    Detail Jawaban
-  </h2>
-  <div class="overflow-x-auto">
-    <table class="min-w-full bg-white rounded-xl shadow-md">
-      <thead class="bg-emerald-100 text-xs sm:text-sm">
-        <tr>
-          <th class="py-2 px-2 sm:py-3 sm:px-4 text-left text-emerald-800 font-semibold">No</th>
-          <th class="py-2 px-2 sm:py-3 sm:px-4 text-left text-emerald-800 font-semibold">Field</th>
-          <th class="py-2 px-2 sm:py-3 sm:px-4 text-left text-emerald-800 font-semibold">Jawaban</th>
-          <th class="py-2 px-2 sm:py-3 sm:px-4 text-left text-emerald-800 font-semibold">Aksi</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr
-          v-for="(value, key, index) in filteredSoal"
-          :key="key"
-          class="border-b hover:bg-emerald-50 transition-colors duration-200 text-xs sm:text-sm"
-        >
-          <td class="py-2 px-2 sm:py-3 sm:px-4">{{ index + 1 }}</td>
-          <td class="py-2 px-2 sm:py-3 sm:px-4 capitalize">{{ key }}</td>
-          <td class="py-2 px-2 sm:py-3 sm:px-4 text-gray-600">{{ value || 'Tidak ada data' }}</td>
-          <td class="py-2 px-2 sm:py-3 sm:px-4">
-            <div class="flex flex-col sm:flex-row gap-2">
-              <!-- Tombol hapus per field hanya muncul jika bukan soal nomor 1 -->
-              <button
-                v-if="value && !isVerified && soalNumber !== '1'"
-                @click="promptDeleteField(key)"
-                class="text-red-600 text-xs px-2 py-1 rounded-md bg-red-50 hover:bg-red-100 hover:text-red-700 transition-all duration-200"
-              >
-                Hapus
-              </button>
-              <button
-                v-if="shouldShowPdfButton(key, value)"
-                @click="viewFile(key)"
-                class="text-teal-600 text-xs px-2 py-1 rounded-md bg-teal-50 hover:bg-teal-100 hover:text-teal-700 transition-all duration-200"
-              >
-                Lihat PDF
-              </button>
-            </div>
-            <!-- Placeholder jika tidak ada aksi -->
-            <span v-if="!value || (!shouldShowPdfButton(key, value) && (isVerified || soalNumber === '1'))" class="text-gray-400 text-xs">
-              Tidak ada aksi
-            </span>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
-</div>
+        <div class="mt-6">
+          <h2 class="text-xl sm:text-2xl font-semibold text-emerald-900 mb-4 border-b border-gray-200 pb-2">
+            Detail Jawaban
+          </h2>
+          <div class="overflow-x-auto">
+            <table class="min-w-full bg-white rounded-xl shadow-md">
+              <thead class="bg-emerald-100 text-xs sm:text-sm">
+                <tr>
+                  <th class="py-2 px-2 sm:py-3 sm:px-4 text-left text-emerald-800 font-semibold">No</th>
+                  <th class="py-2 px-2 sm:py-3 sm:px-4 text-left text-emerald-800 font-semibold">Field</th>
+                  <th class="py-2 px-2 sm:py-3 sm:px-4 text-left text-emerald-800 font-semibold">Jawaban</th>
+                  <th class="py-2 px-2 sm:py-3 sm:px-4 text-left text-emerald-800 font-semibold">Aksi</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr
+                  v-for="(value, key, index) in filteredSoal"
+                  :key="key"
+                  class="border-b hover:bg-emerald-50 transition-colors duration-200 text-xs sm:text-sm"
+                >
+                  <td class="py-2 px-2 sm:py-3 sm:px-4">{{ index + 1 }}</td>
+                  <td class="py-2 px-2 sm:py-3 sm:px-4 capitalize">{{ key }}</td>
+                  <td class="py-2 px-2 sm:py-3 sm:px-4 text-gray-600">{{ value || 'Tidak ada data' }}</td>
+                  <td class="py-2 px-2 sm:py-3 sm:px-4">
+                    <div class="flex flex-col sm:flex-row gap-2">
+                      <button
+                        v-if="value && !isVerified && soalNumber !== '1'"
+                        @click="promptDeleteField(key)"
+                        class="text-red-600 text-xs px-2 py-1 rounded-md bg-red-50 hover:bg-red-100 hover:text-red-700 transition-all duration-200"
+                      >
+                        Hapus
+                      </button>
+                      <button
+                        v-if="shouldShowFileButton(key, value)"
+                        @click="viewFile(key)"
+                        class="text-teal-600 text-xs px-2 py-1 rounded-md bg-teal-50 hover:bg-teal-100 hover:text-teal-700 transition-all duration-200"
+                      >
+                        Lihat File
+                      </button>
+                    </div>
+                    <span v-if="!value || (!shouldShowFileButton(key, value) && (isVerified || soalNumber === '1'))" class="text-gray-400 text-xs">
+                      Tidak ada aksi
+                    </span>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
 
         <!-- Delete All Button -->
         <button
@@ -272,24 +270,39 @@ export default {
             Authorization: `Bearer ${authStore.accessToken}`,
           },
         });
-        const blob = new Blob([response.data], { type: 'application/pdf' });
+
+        const contentType = response.headers['content-type'];
+        const blob = new Blob([response.data], { type: contentType });
         const blobUrl = window.URL.createObjectURL(blob);
-        window.open(blobUrl, '_blank');
+
+        if (contentType.includes('image')) {
+          const imgWindow = window.open('', '_blank');
+          imgWindow.document.write(`
+            <html>
+              <body style="margin: 0; display: flex; justify-content: center; align-items: center; height: 100vh; background: #f0f0f0;">
+                <img src="${blobUrl}" style="max-width: 100%; max-height: 100%; object-fit: contain;" />
+              </body>
+            </html>
+          `);
+        } else if (contentType.includes('pdf')) {
+          window.open(blobUrl, '_blank');
+        } else {
+          alert('Tipe file tidak didukung untuk ditampilkan.');
+        }
+
         setTimeout(() => window.URL.revokeObjectURL(blobUrl), 1000);
       } catch (error) {
-        console.error('Error fetching PDF:', error.response || error);
-        alert('Gagal membuka file PDF: ' + (error.response?.data?.message || 'File tidak ditemukan'));
+        console.error('Error fetching file:', error.response || error);
+        alert('Gagal membuka file: ' + (error.response?.data?.message || 'File tidak ditemukan'));
       }
     },
     isFileField(fieldName) {
       return this.fileFields.includes(fieldName);
     },
-    shouldShowPdfButton(key, value) {
+    shouldShowFileButton(key, value) {
       if (!value || !this.isFileField(key)) return false;
-      if (this.soalNumber === '1') {
-        return key === 'tingkat_pendidikan_file';
-      }
-      return !['3', '12', '14'].includes(this.soalNumber);
+      // Tampilkan tombol "Lihat File" untuk semua soal yang memiliki file field, kecuali jika user sudah verified
+      return true;
     },
     getFileFields() {
       const fileFieldsMap = {
@@ -317,7 +330,7 @@ export default {
         '10': [
           'ipbi_offline1', 'ipbi_offline2', 'ipbi_offline3',
           'ipbi_online1', 'ipbi_online2', 'ipbi_online3',
-          'non_ipbi_offline1', 'non_ipbi_offline2', 'non_ipbi_offline3',
+          'non_ipbi_offline1', 'noncrafted_ipbi_offline2', 'non_ipbi_offline3',
           'non_ipbi_online1', 'non_ipbi_online2', 'non_ipbi_online3',
           'international_offline1', 'international_offline2',
           'international_online1', 'international_online2',
@@ -332,7 +345,17 @@ export default {
         ],
         '14': ['ngajar_online'],
         '15': ['ikebana_murid', 'ikebana_guru', 'rangkaian_tradisional', 'lainnya'],
-        '16': ['aktif_merangkai', 'owner_berbadan_hukum', 'owner_tanpa_badan_hukum', 'freelance_designer'],
+        '16': [
+          'a_foto_lokasi1', 'a_foto_lokasi2', 'a_foto_lokasi3',
+          'a_foto_kegiatan1', 'a_foto_kegiatan2', 'a_foto_kegiatan3',
+          'b_bukti_akta1', 'b_bukti_akta2', 'b_bukti_akta3',
+          'b_bukti_akta4', 'b_bukti_akta5', 'b_bukti_akta6',
+          'c_foto_lokasi1', 'c_foto_lokasi2', 'c_foto_lokasi3',
+          'c_foto_lokasi4', 'c_foto_lokasi5', 'c_foto_lokasi6',
+          'd_foto_lokasi1', 'd_foto_lokasi2', 'd_foto_lokasi3', 'd_foto_lokasi4',
+          'd_foto_lokasi5', 'd_foto_lokasi6', 'd_foto_lokasi7', 'd_foto_lokasi8',
+          'd_foto_lokasi9', 'd_foto_lokasi10', 'd_foto_lokasi11', 'd_foto_lokasi12'
+        ],
         '17': [
           'media_cetak_nasional', 'media_cetak_internasional', 'buku_merangkai_bunga',
           'kontributor_buku1', 'kontributor_buku2', 'kontributor_tv1', 'kontributor_tv2'

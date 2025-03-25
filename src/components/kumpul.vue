@@ -100,6 +100,24 @@
         </div>
       </div>
     </div>
+
+    <!-- Popup Sukses -->
+    <div v-if="showSuccess" class="fixed inset-0 bg-black/70 flex items-center justify-center z-50 animate-fade-in">
+      <div class="bg-white rounded-2xl p-6 sm:p-8 max-w-md w-full shadow-2xl transform transition-all duration-300 scale-95 hover:scale-100">
+        <h3 class="text-lg sm:text-xl font-bold text-green-700 mb-4 animate-slide-in-down">Pengumpulan Berhasil!</h3>
+        <p class="text-gray-700 leading-relaxed animate-fade-in-up">
+          Ujian Anda telah berhasil dikumpulkan. Terima kasih atas kerja keras Anda!
+        </p>
+        <div class="flex justify-end mt-6">
+          <button
+            @click="closeSuccess"
+            class="action-button bg-gradient-to-r from-green-600 to-emerald-500 text-white hover:from-green-700 hover:to-emerald-600"
+          >
+            Tutup
+          </button>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -115,6 +133,7 @@ const overview = ref(null);
 const emptySoals = ref([]);
 const totalNilai = ref(0);
 const showPopup = ref(false);
+const showSuccess = ref(false); // State baru untuk popup sukses
 
 onMounted(async () => {
   await fetchSoalStatus();
@@ -145,14 +164,12 @@ const confirmSubmit = () => {
 
 const submitFinal = async () => {
   try {
-    // Kirim totalNilai sebagai temporary_score ke endpoint submit-competency
     await axios.post(
       '/api/submit-competency',
       { temporary_score: totalNilai.value },
       { headers: { Authorization: `Bearer ${authStore.accessToken}` } }
     );
 
-    // Setelah sukses, lanjutkan ke endpoint kumpul jika ada logika tambahan
     await axios.post(
       '/api/kumpul',
       {},
@@ -160,11 +177,16 @@ const submitFinal = async () => {
     );
 
     showPopup.value = false;
-    router.push('/');
+    showSuccess.value = true; // Tampilkan popup sukses setelah pengumpulan berhasil
   } catch (error) {
     console.error('Error submitting:', error.response ? error.response.data : error.message);
     showPopup.value = false;
   }
+};
+
+const closeSuccess = () => {
+  showSuccess.value = false;
+  router.push('/'); // Kembali ke halaman utama setelah menutup popup sukses
 };
 </script>
 
