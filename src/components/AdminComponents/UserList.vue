@@ -1,6 +1,26 @@
 <template>
   <div class="container mx-auto px-4 py-6 max-w-5xl">
-    <h1 class="text-2xl sm:text-3xl font-bold text-gray-800 mb-6 text-center">Daftar Pengguna</h1>
+    <div class="flex flex-col sm:flex-row justify-between items-center mb-6">
+      <h1 class="text-2xl sm:text-3xl font-bold text-gray-800 text-center">Daftar Pengguna</h1>
+      <!-- Export Button -->
+      <button 
+        @click="exportTeachersWithSoal"
+        class="mt-4 sm:mt-0 px-4 py-2 bg-teal-600 text-white rounded-md font-semibold hover:bg-teal-700 transition-colors flex items-center"
+        :disabled="isExporting"
+      >
+        <span v-if="isExporting" class="flex items-center">
+          <svg class="animate-spin -ml-1 mr-2 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
+          Exporting...
+        </span>
+        <span v-else class="flex items-center">
+          <i class="fas fa-download mr-2"></i>
+          Export Data & Soal
+        </span>
+      </button>
+    </div>
 
     <!-- Loading Indicator -->
     <div v-if="isLoading" class="text-center text-gray-600 mb-6">
@@ -22,16 +42,6 @@
       />
       <div class="flex flex-col sm:flex-row gap-4">
         <select
-          v-model="filter"
-          class="w-full sm:w-auto px-4 py-2 rounded-md border text-gray-700 focus:outline-none focus:ring-2 focus:ring-teal-600"
-        >
-          <option value="all">Semua</option>
-          <option value="submitted">Sudah Mengumpulkan</option>
-          <option value="in-progress">Dalam Progress</option>
-          <option value="not-checked">Belum Diperiksa</option>
-          <option value="verified">Sudah Dinilai</option>
-        </select>
-        <select
           v-model="sortBy"
           class="w-full sm:w-auto px-4 py-2 rounded-md border text-gray-700 focus:outline-none focus:ring-2 focus:ring-teal-600"
         >
@@ -42,59 +52,58 @@
       </div>
     </div>
 
+    <!-- Note -->
+    <div v-if="!isLoading && !error" class="mb-4 text-sm text-gray-600 italic text-center">
+      *Nama-nama di bawah adalah guru Perangkai Bunga yang sudah mengumpulkan pendataannya
+    </div>
+
     <!-- User Table -->
-<div v-if="!isLoading && !error" class="overflow-x-auto">
-  <table class="min-w-full bg-white rounded-lg shadow-md">
-    <thead class="bg-gray-100 text-xs sm:text-sm">
-      <tr>
-        <th class="py-2 px-2 sm:py-3 sm:px-4 text-left text-gray-600 font-semibold">No</th>
-        <th class="py-2 px-2 sm:py-3 sm:px-4 text-left text-gray-600 font-semibold">Nama</th>
-        <th class="py-2 px-2 sm:py-3 sm:px-4 text-left text-gray-600 font-semibold">Email</th>
-        <th class="py-2 px-2 sm:py-3 sm:px-4 text-left text-gray-600 font-semibold hidden md:table-cell">Tanggal Daftar</th>
-        <th class="py-2 px-2 sm:py-3 sm:px-4 text-left text-gray-600 font-semibold hidden sm:table-cell">Status</th>
-        <th class="py-2 px-2 sm:py-3 sm:px-4 text-left text-gray-600 font-semibold hidden sm:table-cell">Status Penilaian</th>
-        <th class="py-2 px-2 sm:py-3 sm:px-4 text-left text-gray-600 font-semibold hidden md:table-cell">Nilai Akhir</th>
-        <th class="py-2 px-2 sm:py-3 sm:px-4 text-left text-gray-600 font-semibold">Aksi</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr
-        v-for="(user, index) in filteredAndSortedUsers"
-        :key="user.id"
-        class="border-b hover:bg-gray-50 transition-colors duration-200 text-xs sm:text-sm"
-      >
-        <td class="py-2 px-2 sm:py-3 sm:px-4">{{ index + 1 }}</td>
-        <td class="py-2 px-2 sm:py-3 sm:px-4">{{ user.name }}</td>
-        <td class="py-2 px-2 sm:py-3 sm:px-4">{{ user.email }}</td>
-        <td class="py-2 px-2 sm:py-3 sm:px-4 hidden md:table-cell">{{ formatDate(user.created_at) }}</td>
-        <td class="py-2 px-2 sm:py-3 sm:px-4 hidden sm:table-cell">
-          <span :class="user.last_submission_date ? 'text-teal-600' : 'text-orange-600'">
-            {{ user.last_submission_date ? 'Sudah Mengumpulkan' : 'Dalam Progress' }}
-          </span>
-        </td>
-        <td class="py-2 px-2 sm:py-3 sm:px-4 hidden sm:table-cell">
-          <span :class="user.is_verified ? 'text-green-600' : 'text-red-600'">
-            {{ user.is_verified ? 'Sudah Dinilai' : 'Belum Diperiksa' }}
-          </span>
-        </td>
-        <td class="py-2 px-2 sm:py-3 sm:px-4 hidden md:table-cell">{{ user.nilai || '-' }}</td>
-        <td class="py-2 px-2 sm:py-3 sm:px-4">
-          <router-link
-            @click="addToHistory(user)"
-            :to="{ name: 'user-detail', params: { userId: user.id } }"
-            class="inline-block bg-teal-600 text-white px-2 py-1 sm:px-3 sm:py-1 rounded-md text-xs sm:text-sm font-medium hover:bg-teal-700 transition-colors duration-200"
+    <div v-if="!isLoading && !error" class="overflow-x-auto">
+      <table class="min-w-full bg-white rounded-lg shadow-md">
+        <thead class="bg-gray-100 text-xs sm:text-sm">
+          <tr>
+            <th class="py-2 px-2 sm:py-3 sm:px-4 text-left text-gray-600 font-semibold">No</th>
+            <th class="py-2 px-2 sm:py-3 sm:px-4 text-left text-gray-600 font-semibold">Nama</th>
+            <th class="py-2 px-2 sm:py-3 sm:px-4 text-left text-gray-600 font-semibold">Email</th>
+            <th class="py-2 px-2 sm:py-3 sm:px-4 text-left text-gray-600 font-semibold hidden md:table-cell">Tanggal Daftar</th>
+            <th class="py-2 px-2 sm:py-3 sm:px-4 text-left text-gray-600 font-semibold hidden sm:table-cell">Status Penilaian</th>
+            <th class="py-2 px-2 sm:py-3 sm:px-4 text-left text-gray-600 font-semibold hidden md:table-cell">Nilai Akhir</th>
+            <th class="py-2 px-2 sm:py-3 sm:px-4 text-left text-gray-600 font-semibold">Aksi</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr
+            v-for="(user, index) in filteredAndSortedUsers"
+            :key="user.id"
+            class="border-b hover:bg-gray-50 transition-colors duration-200 text-xs sm:text-sm"
           >
-            Periksa
-          </router-link>
-        </td>
-      </tr>
-    </tbody>
-  </table>
-</div>
+            <td class="py-2 px-2 sm:py-3 sm:px-4">{{ index + 1 }}</td>
+            <td class="py-2 px-2 sm:py-3 sm:px-4">{{ user.name }}</td>
+            <td class="py-2 px-2 sm:py-3 sm:px-4">{{ user.email }}</td>
+            <td class="py-2 px-2 sm:py-3 sm:px-4 hidden md:table-cell">{{ formatDate(user.created_at) }}</td>
+            <td class="py-2 px-2 sm:py-3 sm:px-4 hidden sm:table-cell">
+              <span :class="user.is_verified ? 'text-green-600' : 'text-red-600'">
+                {{ user.is_verified ? 'Sudah Dinilai' : 'Belum Diperiksa' }}
+              </span>
+            </td>
+            <td class="py-2 px-2 sm:py-3 sm:px-4 hidden md:table-cell">{{ user.nilai || '-' }}</td>
+            <td class="py-2 px-2 sm:py-3 sm:px-4">
+              <router-link
+                @click="addToHistory(user)"
+                :to="{ name: 'user-detail', params: { userId: user.id } }"
+                class="inline-block bg-teal-600 text-white px-2 py-1 sm:px-3 sm:py-1 rounded-md text-xs sm:text-sm font-medium hover:bg-teal-700 transition-colors duration-200"
+              >
+                Periksa
+              </router-link>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
 
     <!-- No Data Message -->
     <div v-if="!isLoading && !error && filteredAndSortedUsers.length === 0" class="text-center text-gray-600 mt-6">
-      Tidak ada data pengguna yang sesuai dengan pencarian atau filter saat ini.
+      Tidak ada data pengguna yang sudah mengumpulkan pendataan.
     </div>
 
     <!-- History Section -->
@@ -139,28 +148,17 @@ export default {
   data() {
     return {
       users: [],
-      filter: 'all',
       sortBy: 'name',
       searchQuery: '',
       isLoading: false,
+      isExporting: false, // New state for export
       error: null,
       checkHistory: [],
     };
   },
   computed: {
     filteredAndSortedUsers() {
-      let result = this.users.filter(user => !user.is_admin);
-
-      // Filter
-      if (this.filter !== 'all') {
-        result = result.filter(user => {
-          if (this.filter === 'submitted') return user.last_submission_date;
-          if (this.filter === 'in-progress') return !user.last_submission_date;
-          if (this.filter === 'not-checked') return !user.is_verified;
-          if (this.filter === 'verified') return user.is_verified;
-          return true;
-        });
-      }
+      let result = this.users.filter(user => !user.is_admin && user.last_submission_date);
 
       // Search
       if (this.searchQuery) {
@@ -247,19 +245,48 @@ export default {
         checked_at: new Date(),
       };
       
-      // Tambahkan ke history dan batasi 5 terakhir
       this.checkHistory.unshift(historyItem);
       if (this.checkHistory.length > 5) {
         this.checkHistory.pop();
       }
       
-      // Simpan ke localStorage
       localStorage.setItem('checkHistory', JSON.stringify(this.checkHistory));
     },
     loadHistory() {
       const savedHistory = localStorage.getItem('checkHistory');
       if (savedHistory) {
         this.checkHistory = JSON.parse(savedHistory);
+      }
+    },
+    async exportTeachersWithSoal() {
+      const authStore = useAuthStore();
+      this.isExporting = true;
+      this.error = null;
+
+      try {
+        const response = await axios.get('/api/admin/export/teachers-with-soal', {
+          headers: { Authorization: `Bearer ${authStore.accessToken}` },
+          responseType: 'blob',
+        });
+
+        const url = window.URL.createObjectURL(new Blob([response.data]));
+        const link = document.createElement('a');
+        link.href = url;
+        link.setAttribute('download', 'data_guru_dan_soal.xlsx');
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(url);
+      } catch (error) {
+        console.error('Error exporting teachers with soal:', error.response || error);
+        this.error = error.response?.status === 401
+          ? 'Sesi Anda telah habis. Silakan login kembali.'
+          : error.response?.data?.message || 'Gagal mengekspor data guru dan soal.';
+        if (error.response?.status === 401) {
+          this.$router.push({ name: 'login' });
+        }
+      } finally {
+        this.isExporting = false;
       }
     },
   },
@@ -280,7 +307,6 @@ th {
   background-color: #f3f4f6;
 }
 
-/* Responsive adjustments */
 @media (max-width: 640px) {
   .container {
     padding-left: 1rem;

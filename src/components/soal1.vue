@@ -138,7 +138,7 @@
               to="/soal-2"
               class="bg-blue-600 text-white rounded-xl py-3 px-6 hover:bg-blue-700 transition-all duration-300 w-full sm:w-auto text-center"
             >
-              Next
+              Lanjut
             </router-link>
           </div>
         </form>

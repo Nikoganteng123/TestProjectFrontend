@@ -53,7 +53,7 @@
           <div class="flex flex-col space-y-4 sm:flex-row sm:space-y-0 sm:space-x-4 sm:justify-between items-center mt-6">
             <router-link to="/soal-16" 
               class="uniform-button bg-gray-500 text-white hover:bg-gray-600">
-              Previous
+              Sebelumnya
             </router-link>
             
             <div class="flex flex-col space-y-4 sm:flex-row sm:space-y-0 sm:space-x-4">

@@ -1,6 +1,26 @@
 <template>
   <div class="data-guru">
-    <h1 class="text-3xl font-extrabold text-emerald-900 mb-6">Data Guru</h1>
+    <div class="flex justify-between items-center mb-6">
+      <h1 class="text-3xl font-extrabold text-emerald-900">Data Guru</h1>
+      <!-- Export Button -->
+      <button 
+        @click="exportTeachers"
+        class="px-4 py-2 bg-emerald-600 text-white rounded-md hover:bg-emerald-700 transition-colors flex items-center"
+        :disabled="loadingExport"
+      >
+        <span v-if="loadingExport" class="flex items-center">
+          <svg class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
+          Exporting...
+        </span>
+        <span v-else class="flex items-center">
+          <i class="fas fa-download mr-2"></i>
+          Export Data Guru
+        </span>
+      </button>
+    </div>
     
     <!-- Loading State -->
     <div v-if="loading" class="text-center py-8">
@@ -175,6 +195,7 @@ const error = ref(null);
 const sortBy = ref('name');
 const sortOrder = ref('asc');
 const searchQuery = ref('');
+const loadingExport = ref(false);
 
 const toggleSortOrder = () => {
   sortOrder.value = sortOrder.value === 'asc' ? 'desc' : 'asc';
@@ -224,6 +245,34 @@ const fetchUsers = async () => {
     console.error('Error fetching users:', err.response?.data);
   } finally {
     loading.value = false;
+  }
+};
+
+const exportTeachers = async () => {
+  try {
+    loadingExport.value = true;
+    
+    const response = await axios.get('/api/admin/export/teachers', {
+      headers: {
+        Authorization: `Bearer ${authStore.accessToken}`,
+      },
+      responseType: 'blob'
+    });
+
+    const url = window.URL.createObjectURL(new Blob([response.data]));
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', 'data_guru_terdaftar.xlsx');
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    window.URL.revokeObjectURL(url);
+
+  } catch (err) {
+    console.error('Error exporting teachers:', err);
+    error.value = err.response?.data?.message || 'Gagal mengekspor data guru';
+  } finally {
+    loadingExport.value = false;
   }
 };
 

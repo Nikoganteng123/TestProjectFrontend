@@ -1,4 +1,4 @@
-=<template>
+<template>
   <div class="min-h-screen bg-gradient-to-t from-green-400 to-white py-12 px-6 sm:px-8 lg:px-12">
     <div class="max-w-2xl mx-auto bg-white rounded-xl shadow-lg overflow-hidden mt-20">
       <div class="p-8 space-y-6">
@@ -161,15 +161,16 @@
           <!-- Buttons -->
           <div class="flex flex-col space-y-4 sm:flex-row sm:space-y-0 sm:space-x-4 sm:justify-between items-center mt-6">
             <router-link to="/soal-15" class="uniform-button bg-gray-500 text-white hover:bg-gray-600">
-              Previous
+              Sebelumnya
             </router-link>
             <div class="flex flex-col space-y-4 sm:flex-row sm:space-y-0 sm:space-x-4">
+              <!-- Button dengan teks dinamis -->
               <button type="submit" :disabled="loading" class="uniform-button bg-green-600 text-white hover:bg-green-700">
-                {{ savedFiles && Object.keys(savedFiles).length > 0 ? 'Update Jawaban' : 'Simpan Jawaban' }}
+                {{ submitButtonText }}
                 <span v-if="loading" class="spinner ml-2"></span>
               </button>
               <button type="button" @click="deleteAll" :disabled="loading || Object.keys(savedFiles).length === 0" class="uniform-button bg-red-600 text-white hover:bg-red-700">
-                Hapus Semua
+                Hapus
                 <span v-if="loading" class="spinner ml-2"></span>
               </button>
             </div>
@@ -257,6 +258,10 @@ const currentQuestionNumber = computed(() => {
   return match ? parseInt(match[1]) : 16;
 });
 
+const submitButtonText = computed(() => {
+  return Object.keys(savedFiles.value).length > 0 ? 'Perbarui Data' : 'Simpan Data';
+});
+
 onMounted(async () => {
   await fetchAnswer();
 });
@@ -286,7 +291,6 @@ const submitAnswer = async () => {
     return;
   }
 
-  // Validate text fields
   switch (activeSection.value) {
     case 'A':
       if (!form.value.nama_florist.trim() || !form.value.d_alamat_florist.trim()) {
@@ -320,7 +324,6 @@ const submitAnswer = async () => {
       break;
   }
 
-  // Validate file uploads
   const sectionFields = {
     'A': sectionAFields.map(f => f.key),
     'B': sectionBFields.map(f => f.key),
@@ -333,9 +336,9 @@ const submitAnswer = async () => {
 
   if (activeSection.value === 'D') {
     const projectFields = [
-      relevantFields.slice(0, 4),  // Project 1
-      relevantFields.slice(4, 8),  // Project 2
-      relevantFields.slice(8, 12), // Project 3
+      relevantFields.slice(0, 4),
+      relevantFields.slice(4, 8),
+      relevantFields.slice(8, 12),
     ];
 
     for (let i = 0; i < projectFields.length; i++) {
@@ -364,7 +367,6 @@ const submitAnswer = async () => {
     const formData = new FormData();
     formData.append('active_section', activeSection.value);
 
-    // Append relevant text fields
     switch (activeSection.value) {
       case 'A':
         formData.append('nama_florist', form.value.nama_florist.trim());
@@ -389,19 +391,13 @@ const submitAnswer = async () => {
         break;
     }
 
-    // Append uploaded files
     Object.keys(uploadedFiles.value).forEach((key) => {
       if (uploadedFiles.value[key] && relevantFields.includes(key)) {
         formData.append(key, uploadedFiles.value[key]);
       }
     });
 
-    // Debug formData
-    for (let [key, value] of formData.entries()) {
-      console.log(`${key}: ${typeof value === 'string' ? value : 'File'}`);
-    }
-
-    const endpoint = Object.keys(savedFiles.value).length > 0 ? 'Update Jawban' : 'Simpan Jawaban';
+    const endpoint = Object.keys(savedFiles.value).length > 0 ? '/api/soal16/update' : '/api/soal16';
     const response = await axios.post(endpoint, formData, {
       headers: {
         Authorization: `Bearer ${authStore.accessToken}`,
@@ -430,7 +426,6 @@ const fetchAnswer = async () => {
     const data = response.data.data || {};
     savedFiles.value = {};
 
-    // Populate text fields
     form.value.nama_florist = data.nama_florist || '';
     form.value.d_alamat_florist = data.d_alamat_florist || '';
     form.value.c_nama_florist = data.c_nama_florist || '';
@@ -438,7 +433,6 @@ const fetchAnswer = async () => {
     form.value.c2_nama_florist = data.c2_nama_florist || '';
     form.value.c2_alamat_florist = data.c2_alamat_florist || '';
 
-    // Populate projects for D
     form.value.projects = [
       {
         pemberi_order: data.d_pemberi_order1 || '',
@@ -460,7 +454,6 @@ const fetchAnswer = async () => {
       }
     ];
 
-    // Populate saved file fields
     sectionAFields.concat(sectionBFields, sectionCFields, sectionDFields).forEach(field => {
       if (data[field.key]) savedFiles.value[field.key] = data[field.key];
     });
@@ -486,7 +479,6 @@ const deleteAll = async () => {
       headers: { Authorization: `Bearer ${authStore.accessToken}` }
     });
 
-    // Reset form and state
     form.value = {
       nama_florist: '',
       d_alamat_florist: '',

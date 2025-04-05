@@ -30,7 +30,7 @@
             v-model="token"
             required
             class="mt-2 block w-full rounded-lg border border-emerald-200 p-3 text-gray-900 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all duration-300 group-hover:border-emerald-300"
-            placeholder="Enter the token you received"
+            placeholder="Masukkan Token yang dikirim ke e-mail"
             :disabled="loading"
           />
         </div>

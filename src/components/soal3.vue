@@ -52,16 +52,16 @@
           <!-- Button Section -->
           <div class="flex flex-col space-y-4 sm:flex-row sm:space-y-0 sm:space-x-4 justify-center items-center mt-6">
             <router-link to="/soal-2" class="uniform-button bg-gray-500 text-white rounded-xl py-3 px-6 hover:bg-gray-600 transition-all duration-300 w-full sm:w-auto">
-              Previous
+              Sebelumnya
             </router-link>
-            <button type="submit" class="uniform-button bg-green-600 text-white rounded-xl py-3 px-6 hover:bg-green-700 transition-all duration-300 w-full sm:w-auto">
-              {{ hasExistingData ? 'Update' : 'Simpan' }}
+            <button v-if="showSaveButton" type="submit" class="uniform-button bg-green-600 text-white rounded-xl py-3 px-6 hover:bg-green-700 transition-all duration-300 w-full sm:w-auto">
+              {{ hasExistingData ? 'Tambah' : 'Simpan' }}
             </button>
-            <button type="button" @click="deleteAnswer" v-if="hasExistingData" class="uniform-button bg-red-600 text-white rounded-xl py-3 px-6 hover:bg-red-700 transition-all duration-300 w-full sm:w-auto">
+            <button v-if="hasExistingData" type="button" @click="deleteAnswer" class="uniform-button bg-red-600 text-white rounded-xl py-3 px-6 hover:bg-red-700 transition-all duration-300 w-full sm:w-auto">
               Hapus
             </button>
             <router-link to="/soal-4" class="uniform-button bg-blue-600 text-white rounded-xl py-3 px-6 hover:bg-blue-700 transition-all duration-300 w-full sm:w-auto">
-              Next
+              Lanjut
             </router-link>
           </div>
         </form>
@@ -87,15 +87,13 @@ import { ref, computed, onMounted } from 'vue';
 import axios from 'axios';
 import { useAuthStore } from '@/stores/auth';
 import { useRoute } from 'vue-router';
-import 'animate.css';
-import '@fortawesome/fontawesome-free/css/all.min.css';
 
 const route = useRoute();
 const authStore = useAuthStore();
 const hasExistingData = ref(false);
 
 const inputData = ref({
-  bahasa_inggris: null,
+  bahasa_inggris: '',
   bahasa_lain1: '',
   bahasa_lain2: '',
   bahasa_lain3: '',
@@ -103,7 +101,7 @@ const inputData = ref({
 });
 
 const savedData = ref({
-  bahasa_inggris: null,
+  bahasa_inggris: '',
   bahasa_lain1: '',
   bahasa_lain2: '',
   bahasa_lain3: '',
@@ -115,6 +113,17 @@ const currentQuestionNumber = computed(() => {
   return match ? parseInt(match[1]) : 1;
 });
 
+const showSaveButton = computed(() => {
+  if (!hasExistingData.value) {
+    return Object.values(inputData.value).some(val => val !== '');
+  }
+  
+  return Object.keys(inputData.value).some(key => 
+    inputData.value[key] !== savedData.value[key] && 
+    inputData.value[key] !== ''
+  );
+});
+
 onMounted(async () => {
   await fetchAnswer();
 });
@@ -124,42 +133,20 @@ const fetchAnswer = async () => {
     const response = await axios.get('/api/soal3', {
       headers: { Authorization: `Bearer ${authStore.accessToken}` }
     });
-    console.log('API Response:', response.data); // Debugging
     
     if (response.data && response.data.data) {
       savedData.value = {
-        bahasa_inggris: response.data.data.bahasa_inggris || null,
+        bahasa_inggris: response.data.data.bahasa_inggris || '',
         bahasa_lain1: response.data.data.bahasa_lain1 || '',
         bahasa_lain2: response.data.data.bahasa_lain2 || '',
         bahasa_lain3: response.data.data.bahasa_lain3 || '',
         bahasa_lain4: response.data.data.bahasa_lain4 || ''
       };
-      inputData.value = { ...savedData.value }; // Sinkronkan inputData dengan savedData
-      hasExistingData.value = Object.values(savedData.value).some(val => val !== null && val !== '');
-    } else {
-      savedData.value = {
-        bahasa_inggris: null,
-        bahasa_lain1: '',
-        bahasa_lain2: '',
-        bahasa_lain3: '',
-        bahasa_lain4: ''
-      };
       inputData.value = { ...savedData.value };
-      hasExistingData.value = false;
+      hasExistingData.value = Object.values(savedData.value).some(val => val !== '');
     }
-    console.log('Updated savedData:', savedData.value); // Debugging
-    console.log('Updated inputData:', inputData.value); // Debugging
   } catch (error) {
     console.error('Error fetching answer:', error.response?.data || error.message);
-    savedData.value = {
-      bahasa_inggris: null,
-      bahasa_lain1: '',
-      bahasa_lain2: '',
-      bahasa_lain3: '',
-      bahasa_lain4: ''
-    };
-    inputData.value = { ...savedData.value };
-    hasExistingData.value = false;
   }
 };
 
@@ -170,7 +157,6 @@ const submitAnswer = async () => {
     const response = await axios[method](endpoint, inputData.value, {
       headers: { Authorization: `Bearer ${authStore.accessToken}` }
     });
-    console.log('Answer saved successfully:', response.data);
     savedData.value = { ...inputData.value };
     hasExistingData.value = true;
   } catch (error) {
@@ -184,7 +170,7 @@ const deleteAnswer = async () => {
       headers: { Authorization: `Bearer ${authStore.accessToken}` }
     });
     inputData.value = {
-      bahasa_inggris: null,
+      bahasa_inggris: '',
       bahasa_lain1: '',
       bahasa_lain2: '',
       bahasa_lain3: '',
@@ -199,7 +185,6 @@ const deleteAnswer = async () => {
 </script>
 
 <style scoped>
-/* Container Utama */
 .min-h-screen {
   background: linear-gradient(to top, #2d6a4f, #f0fdf4);
   padding: 3rem 1.5rem;
@@ -207,7 +192,6 @@ const deleteAnswer = async () => {
   overflow: hidden;
 }
 
-/* Card Container */
 .max-w-2xl {
   background: rgba(255, 255, 255, 0.95);
   border-radius: 1.5rem;
@@ -226,7 +210,6 @@ const deleteAnswer = async () => {
   box-shadow: 0 25px 50px rgba(45, 106, 79, 0.25);
 }
 
-/* Heading */
 .text-3xl {
   font-size: 2.25rem;
   font-weight: 800;
@@ -235,15 +218,12 @@ const deleteAnswer = async () => {
   background: linear-gradient(135deg, #2d6a4f, #34d399);
   -webkit-background-clip: text;
   background-clip: text;
-  animation: fadeInDown 0.5s ease-out;
 }
 
-/* Form Styling */
 .space-y-6 {
   padding: 0 1rem;
 }
 
-/* Label dan Input Container */
 .text-lg {
   color: #2d6a4f;
   font-weight: 600;
@@ -251,7 +231,6 @@ const deleteAnswer = async () => {
   transition: color 0.3s ease;
 }
 
-/* Radio Input */
 .form-radio {
   appearance: none;
   border: 2px solid #34d399;
@@ -269,7 +248,6 @@ const deleteAnswer = async () => {
   box-shadow: 0 0 10px rgba(52, 211, 153, 0.4);
 }
 
-/* Label untuk Input */
 label.text-sm {
   font-size: 0.875rem;
   font-weight: 500;
@@ -280,7 +258,6 @@ label.text-green-600 {
   text-shadow: 0 2px 4px rgba(52, 211, 153, 0.2);
 }
 
-/* Text Input */
 input[type="text"] {
   transition: all 0.3s ease;
 }
@@ -289,7 +266,6 @@ input[type="text"]:hover:not(:disabled) {
   box-shadow: 0 0 10px rgba(52, 211, 153, 0.4);
 }
 
-/* Uniform Button Styling */
 .uniform-button {
   padding: 0.75rem 2rem;
   border-radius: 9999px;
@@ -350,21 +326,18 @@ input[type="text"]:hover:not(:disabled) {
   left: 100%;
 }
 
-/* Question Navigation */
 .border-t {
   border-color: rgba(45, 106, 79, 0.2);
 }
 
 .text-lg.font-medium {
   color: #2d6a4f;
-  animation: fadeInUp 0.5s ease-out 0.2s both;
 }
 
 .flex.flex-wrap {
   gap: 0.75rem;
 }
 
-/* Navigation Buttons */
 .w-10.h-10 {
   background: #f0fdf4;
   color: #4a4a4a;
@@ -399,28 +372,5 @@ input[type="text"]:hover:not(:disabled) {
 
 .w-10.h-10:hover::after {
   opacity: 1;
-}
-
-/* Animations */
-@keyframes fadeInDown {
-  from {
-    opacity: 0;
-    transform: translateY(-20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
 }
 </style>

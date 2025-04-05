@@ -42,7 +42,7 @@
           <div class="flex flex-col space-y-4 sm:flex-row sm:space-y-0 sm:space-x-4 sm:justify-between items-center mt-6">
             <router-link to="/soal-11" 
               class="uniform-button bg-gray-500 text-white hover:bg-gray-600">
-              Previous
+              Sebelumnya
             </router-link>
             
             <div class="flex flex-col space-y-4 sm:flex-row sm:space-y-0 sm:space-x-4">
@@ -65,7 +65,7 @@
 
             <router-link to="/soal-13" 
               class="uniform-button bg-blue-600 text-white hover:bg-blue-700">
-              Next
+              Lanjut
             </router-link>
           </div>
         </form>
