@@ -87,7 +87,7 @@
                 {{ user.is_verified ? 'Sudah Dinilai' : 'Belum Diperiksa' }}
               </span>
             </td>
-            <td class="py-2 px-2 sm:py-3 sm:px-4 hidden md:table-cell text-center font-semibold text-blue-600">{{ user.temporary_score !== undefined ? user.temporary_score : '-' }}</td>
+            <td class="py-2 px-2 sm:py-3 sm:px-4 hidden md:table-cell text-center font-semibold text-blue-600">{{ (user.nilai ? '-' : (user.temporary_score !== undefined ? user.temporary_score : '-')) }}</td>
             <td class="py-2 px-2 sm:py-3 sm:px-4 hidden sm:table-cell text-center font-semibold">{{ user.nilai || '-' }}</td>
             <td class="py-2 px-2 sm:py-3 sm:px-4">
               <router-link
@@ -233,19 +233,21 @@ export default {
       this.isLoadingScores = true;
       
       try {
-        // Fetch nilai sementara untuk setiap user secara paralel
-        const promises = this.users.map(async (user) => {
-          try {
-            const response = await axios.get(`/api/admin/users/${user.id}`, {
-              headers: { Authorization: `Bearer ${authStore.accessToken}` },
-            });
-            // Update temporary_score dari response
-            user.temporary_score = response.data.totalNilai || 0;
-          } catch (error) {
-            console.error(`Error fetching temp score for user ${user.id}:`, error);
-            user.temporary_score = null;
-          }
-        });
+        // Fetch nilai sementara hanya untuk user yang belum memiliki nilai akhir
+        const promises = this.users
+          .filter(user => !user.nilai) // Hanya user yang belum punya nilai akhir
+          .map(async (user) => {
+            try {
+              const response = await axios.get(`/api/admin/users/${user.id}`, {
+                headers: { Authorization: `Bearer ${authStore.accessToken}` },
+              });
+              // Update temporary_score dari response
+              user.temporary_score = response.data.totalNilai || 0;
+            } catch (error) {
+              console.error(`Error fetching temp score for user ${user.id}:`, error);
+              user.temporary_score = null;
+            }
+          });
         
         await Promise.all(promises);
       } finally {

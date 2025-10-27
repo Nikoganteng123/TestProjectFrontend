@@ -112,6 +112,76 @@
         </div>
       </div>
     </div>
+
+    <!-- Popup Konfirmasi -->
+    <div v-if="showConfirmPopup" class="fixed inset-0 bg-black/70 flex items-center justify-center z-50 animate-fade-in">
+      <div class="bg-white rounded-2xl p-6 sm:p-8 max-w-md w-full shadow-2xl transform transition-all duration-300 scale-95 hover:scale-100 mx-4">
+        <h3 class="text-lg sm:text-xl font-bold text-gray-800 mb-4 animate-slide-in-down">Konfirmasi</h3>
+        <p class="text-gray-700 leading-relaxed animate-fade-in-up mb-6">
+          {{ confirmMessage }}
+        </p>
+        <div class="flex justify-end space-x-4">
+          <button
+            @click="handleConfirmCancel"
+            class="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg font-semibold hover:bg-gray-300 transition-colors duration-200"
+          >
+            Batal
+          </button>
+          <button
+            @click="handleConfirmOk"
+            class="px-4 py-2 bg-emerald-600 text-white rounded-lg font-semibold hover:bg-emerald-700 transition-colors duration-200"
+          >
+            Ya, Lanjutkan
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Popup Success -->
+    <div v-if="showSuccessPopup" class="fixed inset-0 bg-black/70 flex items-center justify-center z-50 animate-fade-in">
+      <div class="bg-white rounded-2xl p-6 sm:p-8 max-w-md w-full shadow-2xl transform transition-all duration-300 scale-95 hover:scale-100 mx-4">
+        <div class="text-center">
+          <div class="mb-4">
+            <svg class="mx-auto h-16 w-16 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+          </div>
+          <h3 class="text-lg sm:text-xl font-bold text-gray-800 mb-4 animate-slide-in-down">Berhasil!</h3>
+          <p class="text-gray-700 leading-relaxed animate-fade-in-up mb-6">
+            {{ successMessage }}
+          </p>
+          <button
+            @click="closeSuccessPopup"
+            class="px-6 py-2 bg-emerald-600 text-white rounded-lg font-semibold hover:bg-emerald-700 transition-colors duration-200"
+          >
+            OK
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Popup Error -->
+    <div v-if="showErrorPopup" class="fixed inset-0 bg-black/70 flex items-center justify-center z-50 animate-fade-in">
+      <div class="bg-white rounded-2xl p-6 sm:p-8 max-w-md w-full shadow-2xl transform transition-all duration-300 scale-95 hover:scale-100 mx-4">
+        <div class="text-center">
+          <div class="mb-4">
+            <svg class="mx-auto h-16 w-16 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+          </div>
+          <h3 class="text-lg sm:text-xl font-bold text-gray-800 mb-4 animate-slide-in-down">Terjadi Kesalahan</h3>
+          <p class="text-gray-700 leading-relaxed animate-fade-in-up mb-6">
+            {{ errorMessage }}
+          </p>
+          <button
+            @click="closeErrorPopup"
+            class="px-6 py-2 bg-red-600 text-white rounded-lg font-semibold hover:bg-red-700 transition-colors duration-200"
+          >
+            OK
+          </button>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -130,6 +200,15 @@ export default {
       isEditingTotal: false,
       isLoading: false,
       error: null,
+      // Popup states
+      showConfirmPopup: false,
+      showSuccessPopup: false,
+      showErrorPopup: false,
+      confirmMessage: '',
+      successMessage: '',
+      errorMessage: '',
+      confirmCallback: null,
+      confirmCancelCallback: null,
     };
   },
   created() {
@@ -169,25 +248,28 @@ export default {
         this.isLoading = false;
       }
     },
-    async verifyUser() {
-      const authStore = useAuthStore();
-      if (!confirm('Apakah Anda yakin ingin memverifikasi pengguna ini?')) return;
-
-      try {
-        await axios.post(
-          `/api/admin/users/${this.$route.params.userId}/verify`,
-          {},
-          { headers: { Authorization: `Bearer ${authStore.accessToken}` } }
-        );
-        this.fetchUserDetail();
-        alert('Pengguna telah diverifikasi! Silakan cek notifikasi untuk detail.');
-      } catch (error) {
-        console.error('Error verifying user:', error.response || error);
-        const message = error.response?.status === 401
-          ? 'Sesi Anda telah habis. Silakan login kembali.'
-          : error.response?.data?.message || 'Kesalahan tidak diketahui';
-        alert('Gagal memverifikasi pengguna: ' + message);
-      }
+    verifyUser() {
+      this.showConfirmDialog(
+        'Apakah Anda yakin ingin memverifikasi pengguna ini?',
+        async () => {
+          const authStore = useAuthStore();
+          try {
+            await axios.post(
+              `/api/admin/users/${this.$route.params.userId}/verify`,
+              {},
+              { headers: { Authorization: `Bearer ${authStore.accessToken}` } }
+            );
+            this.fetchUserDetail();
+            this.showSuccessDialog('Pengguna telah diverifikasi! Silakan cek notifikasi untuk detail.');
+          } catch (error) {
+            console.error('Error verifying user:', error.response || error);
+            const message = error.response?.status === 401
+              ? 'Sesi Anda telah habis. Silakan login kembali.'
+              : error.response?.data?.message || 'Kesalahan tidak diketahui';
+            this.showErrorDialog('Gagal memverifikasi pengguna: ' + message);
+          }
+        }
+      );
     },
     toggleEditTotal() {
       this.isEditingTotal = !this.isEditingTotal;
@@ -196,12 +278,12 @@ export default {
       }
     },
     confirmUpdateAndVerify() {
-      const confirmation = confirm(
-        'Anda akan mengubah nilai Guru secara manual (Tidak berdasarkan perhitungan pemeriksaan). Pastikan anda memberikan nilai yang tepat!'
+      this.showConfirmDialog(
+        'Anda akan mengubah nilai Guru secara manual (Tidak berdasarkan perhitungan pemeriksaan). Pastikan anda memberikan nilai yang tepat!',
+        () => {
+          this.verifyUserWithCustomScore();
+        }
       );
-      if (confirmation) {
-        this.verifyUserWithCustomScore();
-      }
     },
     async verifyUserWithCustomScore() {
       const authStore = useAuthStore();
@@ -215,34 +297,74 @@ export default {
         this.totalNilai = response.data.totalNilai || this.editedTotalNilai;
         this.isEditingTotal = false;
         this.fetchUserDetail();
-        alert('Nilai berhasil diperbarui dan pengguna telah diverifikasi! Silakan cek notifikasi untuk detail.');
+        this.showSuccessDialog('Nilai berhasil diperbarui dan pengguna telah diverifikasi! Silakan cek notifikasi untuk detail.');
       } catch (error) {
         console.error('Error verifying user with custom score:', error.response || error);
         const message = error.response?.status === 401
           ? 'Sesi Anda telah habis. Silakan login kembali.'
           : error.response?.data?.message || 'Kesalahan tidak diketahui';
-        alert('Gagal memperbarui nilai dan verifikasi: ' + message);
+        this.showErrorDialog('Gagal memperbarui nilai dan verifikasi: ' + message);
       }
     },
-    async unverifyUser() {
-      const authStore = useAuthStore();
-      if (!confirm('Apakah Anda yakin ingin membatalkan verifikasi pengguna ini? Nilai dan status verifikasi akan direset.')) return;
-
-      try {
-        await axios.post(
-          `/api/admin/users/${this.$route.params.userId}/unverify`,
-          {},
-          { headers: { Authorization: `Bearer ${authStore.accessToken}` } }
-        );
-        this.fetchUserDetail();
-        alert('Verifikasi pengguna telah dibatalkan!');
-      } catch (error) {
-        console.error('Error unverifying user:', error.response || error);
-        const message = error.response?.status === 401
-          ? 'Sesi Anda telah habis. Silakan login kembali.'
-          : error.response?.data?.message || 'Kesalahan tidak diketahui';
-        alert('Gagal membatalkan verifikasi: ' + message);
+    unverifyUser() {
+      this.showConfirmDialog(
+        'Apakah Anda yakin ingin membatalkan verifikasi pengguna ini? Nilai dan status verifikasi akan direset.',
+        async () => {
+          const authStore = useAuthStore();
+          try {
+            await axios.post(
+              `/api/admin/users/${this.$route.params.userId}/unverify`,
+              {},
+              { headers: { Authorization: `Bearer ${authStore.accessToken}` } }
+            );
+            this.fetchUserDetail();
+            this.showSuccessDialog('Verifikasi pengguna telah dibatalkan!');
+          } catch (error) {
+            console.error('Error unverifying user:', error.response || error);
+            const message = error.response?.status === 401
+              ? 'Sesi Anda telah habis. Silakan login kembali.'
+              : error.response?.data?.message || 'Kesalahan tidak diketahui';
+            this.showErrorDialog('Gagal membatalkan verifikasi: ' + message);
+          }
+        }
+      );
+    },
+    showConfirmDialog(message, okCallback) {
+      this.confirmMessage = message;
+      this.confirmCallback = okCallback;
+      this.showConfirmPopup = true;
+    },
+    handleConfirmOk() {
+      if (this.confirmCallback) {
+        this.confirmCallback();
       }
+      this.showConfirmPopup = false;
+      this.confirmCallback = null;
+      this.confirmCancelCallback = null;
+    },
+    handleConfirmCancel() {
+      if (this.confirmCancelCallback) {
+        this.confirmCancelCallback();
+      }
+      this.showConfirmPopup = false;
+      this.confirmCallback = null;
+      this.confirmCancelCallback = null;
+    },
+    showSuccessDialog(message) {
+      this.successMessage = message;
+      this.showSuccessPopup = true;
+    },
+    closeSuccessPopup() {
+      this.showSuccessPopup = false;
+      this.successMessage = '';
+    },
+    showErrorDialog(message) {
+      this.errorMessage = message;
+      this.showErrorPopup = true;
+    },
+    closeErrorPopup() {
+      this.showErrorPopup = false;
+      this.errorMessage = '';
     },
     getDescriptiveSoalName(soalKey) {
       const soalNameMap = {
@@ -280,5 +402,47 @@ th { background-color: #d1fae5; }
   table { font-size: 0.75rem; }
   th, td { padding: 0.5rem; }
   .grid-cols-2 { grid-template-columns: 1fr; }
+}
+</style>
+
+<style>
+/* Popup Animations */
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slide-in-down {
+  from { 
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to { 
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fade-in-up {
+  from { 
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to { 
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.3s ease-out;
+}
+
+.animate-slide-in-down {
+  animation: slide-in-down 0.4s ease-out;
+}
+
+.animate-fade-in-up {
+  animation: fade-in-up 0.4s ease-out;
 }
 </style>
