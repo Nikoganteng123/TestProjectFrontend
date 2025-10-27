@@ -22,6 +22,28 @@
       </p>
     </div>
 
+    <!-- Maps Section -->
+    <section class="content-section bg-gradient-to-br from-emerald-50 to-white" ref="section0">
+      <div class="container mx-auto py-20 px-6">
+        <h2 class="section-title text-emerald-800 text-center">Lokasi Guru Perangkai Bunga Indonesia</h2>
+        <p class="section-text mb-8 text-center">
+          Lihat lokasi domisili guru-guru perangkai bunga dari seluruh Indonesia
+        </p>
+        
+        <div class="bg-white rounded-lg shadow-lg p-4 map-wrapper">
+          <div id="map-container" ref="mapContainer" class="map-container">
+            <!-- Maps akan dirender di sini -->
+            <div v-if="mapLoading" class="flex items-center justify-center h-full">
+              <div class="text-center">
+                <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-emerald-600 mx-auto mb-4"></div>
+                <p class="text-gray-600">Memuat peta...</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
     <!-- Sections with Scroll Animation -->
     <section class="content-section bg-white" ref="section1">
       <div class="container mx-auto py-20 px-6 text-center">
@@ -327,21 +349,61 @@
 
 /* Animations */
 @import url('https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css');
+
+/* Custom Marker */
+.custom-marker {
+  background: transparent;
+  border: none;
+}
+
+/* Map Wrapper */
+.map-wrapper {
+  height: 600px;
+}
+
+.map-container {
+  height: 100%;
+  border-radius: 8px;
+}
+
+/* Responsive Map */
+@media (max-width: 768px) {
+  .map-wrapper {
+    height: 400px;
+  }
+}
+
+@media (max-width: 480px) {
+  .map-wrapper {
+    height: 350px;
+  }
+}
 </style>
 
 <script>
+import axios from 'axios';
+
 export default {
   name: 'HomePage',
+  data() {
+    return {
+      mapLoading: false,
+      map: null,
+      teachers: [],
+      markers: []
+    };
+  },
   mounted() {
     this.handleScrollAnimations();
     window.addEventListener('scroll', this.handleScrollAnimations);
+    this.initMap();
   },
   beforeUnmount() {
     window.removeEventListener('scroll', this.handleScrollAnimations);
   },
   methods: {
     handleScrollAnimations() {
-      const sections = [this.$refs.section1, this.$refs.section2, this.$refs.section3];
+      const sections = [this.$refs.section0, this.$refs.section1, this.$refs.section2, this.$refs.section3];
       
       sections.forEach(section => {
         if (!section) return;
@@ -354,6 +416,136 @@ export default {
         } else {
           section.classList.remove('visible');
         }
+      });
+    },
+    async initMap() {
+      this.mapLoading = true;
+      
+      try {
+        // Load Leaflet Maps library
+        await this.loadLeafletScript();
+        
+        // Fetch data guru dari API public
+        try {
+          const response = await axios.get('/api/public/teachers');
+          this.teachers = response.data?.data || [];
+          console.log('Data guru loaded:', this.teachers.length, 'guru');
+        } catch (apiError) {
+          console.warn('API endpoint tidak tersedia, menggunakan sample data:', apiError);
+          // Fallback sample data
+          this.teachers = [
+            { name: 'Guru Jakarta', domisili: 'Jakarta, Indonesia' },
+            { name: 'Guru Bandung', domisili: 'Bandung, Jawa Barat' },
+            { name: 'Guru Surabaya', domisili: 'Surabaya, Jawa Timur' },
+            { name: 'Guru Yogyakarta', domisili: 'Yogyakarta, Indonesia' },
+            { name: 'Guru Medan', domisili: 'Medan, Sumatera Utara' }
+          ];
+        }
+        
+        // Initialize Leaflet map centered di Indonesia
+        this.map = L.map(this.$refs.mapContainer).setView([-2.5, 118.0], 5);
+        
+        // Add OpenStreetMap tiles
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+          attribution: '© OpenStreetMap contributors | © IPBI'
+        }).addTo(this.map);
+        
+        // Plot markers untuk setiap guru
+        this.plotTeachersOnMap();
+        
+      } catch (error) {
+        console.error('Error initializing map:', error);
+        this.$refs.mapContainer.innerHTML = '<div class="flex items-center justify-center h-full text-red-600 p-4 text-center">Gagal memuat peta. Silakan refresh halaman.</div>';
+      } finally {
+        this.mapLoading = false;
+      }
+    },
+    async plotTeachersOnMap() {
+      // Group teachers by city untuk clustering
+      const cityGroups = {};
+      
+      this.teachers.forEach(teacher => {
+        if (!teacher.domisili) return;
+        
+        const city = teacher.domisili.split(',')[0] || teacher.domisili;
+        if (!cityGroups[city]) {
+          cityGroups[city] = [];
+        }
+        cityGroups[city].push(teacher);
+      });
+      
+      // Geocode setiap kota dan tambahkan marker
+      for (const city of Object.keys(cityGroups)) {
+        try {
+          const response = await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(city + ', Indonesia')}&format=json&limit=1`);
+          const data = await response.json();
+          
+          if (data && data[0]) {
+            const lat = parseFloat(data[0].lat);
+            const lon = parseFloat(data[0].lon);
+            const teachers = cityGroups[city];
+            
+            // Create custom icon with number
+            const customIcon = L.divIcon({
+              className: 'custom-marker',
+              html: `<div style="background-color: #34d399; border: 2px solid #1f4d2b; border-radius: 50%; width: 35px; height: 35px; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 14px; box-shadow: 0 2px 4px rgba(0,0,0,0.3);">${teachers.length}</div>`,
+              iconSize: [35, 35],
+              iconAnchor: [17.5, 17.5]
+            });
+            
+            // Add marker
+            const marker = L.marker([lat, lon], { icon: customIcon }).addTo(this.map);
+            
+            // Create popup content
+            const popupContent = this.createPopupContent(city, teachers);
+            marker.bindPopup(popupContent);
+            
+            this.markers.push(marker);
+          }
+        } catch (error) {
+          console.error(`Error geocoding ${city}:`, error);
+        }
+      }
+    },
+    createPopupContent(city, teachers) {
+      let html = `<div style="padding: 8px; max-width: 280px;">`;
+      html += `<h3 style="font-weight: bold; margin-bottom: 6px; color: #1f4d2b; font-size: 16px;">${city}</h3>`;
+      html += `<p style="margin-bottom: 8px; color: #34d399; font-size: 14px;">👥 ${teachers.length} Guru</p>`;
+      html += `<ul style="list-style: none; padding: 0; max-height: 150px; overflow-y: auto; margin: 0;">`;
+      
+      teachers.forEach((teacher, index) => {
+        if (index < 8) {
+          html += `<li style="padding: 3px 0; border-bottom: 1px solid #e5e7eb; font-size: 13px;">📌 ${teacher.name || 'N/A'}</li>`;
+        }
+      });
+      
+      if (teachers.length > 8) {
+        html += `<li style="padding: 3px 0; color: #34d399; font-size: 13px;">... dan ${teachers.length - 8} guru lainnya</li>`;
+      }
+      
+      html += `</ul></div>`;
+      return html;
+    },
+    async loadLeafletScript() {
+      return new Promise((resolve) => {
+        if (window.L) {
+          resolve();
+          return;
+        }
+        
+        // Load Leaflet CSS
+        const link = document.createElement('link');
+        link.rel = 'stylesheet';
+        link.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
+        document.head.appendChild(link);
+        
+        // Load Leaflet JS
+        const script = document.createElement('script');
+        script.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
+        script.async = true;
+        document.head.appendChild(script);
+        
+        script.onload = resolve;
       });
     }
   }
