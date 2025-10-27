@@ -67,7 +67,8 @@
             <th class="py-2 px-2 sm:py-3 sm:px-4 text-left text-gray-600 font-semibold">Email</th>
             <th class="py-2 px-2 sm:py-3 sm:px-4 text-left text-gray-600 font-semibold hidden md:table-cell">Tanggal Daftar</th>
             <th class="py-2 px-2 sm:py-3 sm:px-4 text-left text-gray-600 font-semibold hidden sm:table-cell">Status Penilaian</th>
-            <th class="py-2 px-2 sm:py-3 sm:px-4 text-left text-gray-600 font-semibold hidden md:table-cell">Nilai Akhir</th>
+            <th class="py-2 px-2 sm:py-3 sm:px-4 text-left text-gray-600 font-semibold hidden md:table-cell">Nilai Sementara</th>
+            <th class="py-2 px-2 sm:py-3 sm:px-4 text-left text-gray-600 font-semibold hidden sm:table-cell">Nilai Akhir</th>
             <th class="py-2 px-2 sm:py-3 sm:px-4 text-left text-gray-600 font-semibold">Aksi</th>
           </tr>
         </thead>
@@ -86,7 +87,8 @@
                 {{ user.is_verified ? 'Sudah Dinilai' : 'Belum Diperiksa' }}
               </span>
             </td>
-            <td class="py-2 px-2 sm:py-3 sm:px-4 hidden md:table-cell">{{ user.nilai || '-' }}</td>
+            <td class="py-2 px-2 sm:py-3 sm:px-4 hidden md:table-cell text-center font-semibold text-blue-600">{{ user.temporary_score !== undefined ? user.temporary_score : '-' }}</td>
+            <td class="py-2 px-2 sm:py-3 sm:px-4 hidden sm:table-cell text-center font-semibold">{{ user.nilai || '-' }}</td>
             <td class="py-2 px-2 sm:py-3 sm:px-4">
               <router-link
                 @click="addToHistory(user)"
@@ -154,6 +156,7 @@ export default {
       isExporting: false, // New state for export
       error: null,
       checkHistory: [],
+      isLoadingScores: false, // State for loading temporary scores
     };
   },
   computed: {
@@ -204,6 +207,9 @@ export default {
           },
         });
         this.users = response.data.data || [];
+        
+        // Fetch nilai sementara untuk setiap user
+        await this.fetchTemporaryScores();
       } catch (error) {
         console.error('Error fetching users:', error.response ? error.response.data : error.message);
         if (error.response) {
@@ -220,6 +226,30 @@ export default {
         }
       } finally {
         this.isLoading = false;
+      }
+    },
+    async fetchTemporaryScores() {
+      const authStore = useAuthStore();
+      this.isLoadingScores = true;
+      
+      try {
+        // Fetch nilai sementara untuk setiap user secara paralel
+        const promises = this.users.map(async (user) => {
+          try {
+            const response = await axios.get(`/api/admin/users/${user.id}`, {
+              headers: { Authorization: `Bearer ${authStore.accessToken}` },
+            });
+            // Update temporary_score dari response
+            user.temporary_score = response.data.totalNilai || 0;
+          } catch (error) {
+            console.error(`Error fetching temp score for user ${user.id}:`, error);
+            user.temporary_score = null;
+          }
+        });
+        
+        await Promise.all(promises);
+      } finally {
+        this.isLoadingScores = false;
       }
     },
     formatDate(dateString) {
