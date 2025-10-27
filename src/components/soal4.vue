@@ -6,7 +6,7 @@
           Data 4: Apakah anda memiliki sertifikasi dari Lembaga Floristy Asing dan Dalam Negeri?
         </h1>
 
-        <form @submit.prevent="submitAnswer" class="space-y-6 p-6">
+        <div class="space-y-6 p-6">
           <div class="flex flex-col space-y-4">
             <!-- Section A: Organisasi Independent -->
             <div class="flex flex-col gap-2">
@@ -19,11 +19,16 @@
                   a. Dari organisasi Independent (AIFD, CFD, dll)
                 </label>
                 <div class="flex items-center gap-2">
-                  <div v-if="savedFiles.independent_org" class="text-green-600 flex items-center gap-1 text-xs">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                    </svg>
-                    <span>Tersimpan</span>
+                  <div v-if="savedFiles.independent_org" class="flex items-center gap-2">
+                    <div class="text-green-600 flex items-center gap-1 text-xs">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                      </svg>
+                      <span>Tersimpan</span>
+                    </div>
+                    <button @click="viewFile('independent_org')" class="view-file-button">
+                      Lihat File
+                    </button>
                   </div>
                   <div v-else class="relative">
                     <input type="file" id="independent_org" accept=".pdf,image/*"
@@ -49,11 +54,16 @@
                   b. Dari sekolah merangkai bunga luar negeri (mendapat gelar-gelar)
                 </label>
                 <div class="flex items-center gap-2">
-                  <div v-if="savedFiles.foreign_school_degree" class="text-green-600 flex items-center gap-1 text-xs">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                    </svg>
-                    <span>Tersimpan</span>
+                  <div v-if="savedFiles.foreign_school_degree" class="flex items-center gap-2">
+                    <div class="text-green-600 flex items-center gap-1 text-xs">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                      </svg>
+                      <span>Tersimpan</span>
+                    </div>
+                    <button @click="viewFile('foreign_school_degree')" class="view-file-button">
+                      Lihat File
+                    </button>
                   </div>
                   <div v-else class="relative">
                     <input type="file" id="foreign_school_degree" accept=".pdf,image/*"
@@ -84,11 +94,16 @@
                     File {{ i }}
                   </label>
                   <div class="flex items-center gap-2">
-                    <div v-if="savedFiles[`foreign_school_no_degree_${i}`]" class="text-green-600 flex items-center gap-1 text-xs">
-                      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                      </svg>
-                      <span>Tersimpan</span>
+                    <div v-if="savedFiles[`foreign_school_no_degree_${i}`]" class="flex items-center gap-2">
+                      <div class="text-green-600 flex items-center gap-1 text-xs">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                        </svg>
+                        <span>Tersimpan</span>
+                      </div>
+                      <button @click="viewFile(`foreign_school_no_degree_${i}`)" class="view-file-button">
+                        Lihat File
+                      </button>
                     </div>
                     <div v-else class="relative">
                       <input type="file" :id="`foreign_school_no_degree_${i}`" accept=".pdf,image/*"
@@ -120,11 +135,16 @@
                     File {{ i }}
                   </label>
                   <div class="flex items-center gap-2">
-                    <div v-if="savedFiles[`domestic_school_no_degree_${i}`]" class="text-green-600 flex items-center gap-1 text-xs">
-                      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                      </svg>
-                      <span>Tersimpan</span>
+                    <div v-if="savedFiles[`domestic_school_no_degree_${i}`]" class="flex items-center gap-2">
+                      <div class="text-green-600 flex items-center gap-1 text-xs">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                        </svg>
+                        <span>Tersimpan</span>
+                      </div>
+                      <button @click="viewFile(`domestic_school_no_degree_${i}`)" class="view-file-button">
+                        Lihat File
+                      </button>
                     </div>
                     <div v-else class="relative">
                       <input type="file" :id="`domestic_school_no_degree_${i}`" accept=".pdf,image/*"
@@ -143,30 +163,28 @@
           <!-- Buttons -->
           <div class="flex flex-col space-y-4 sm:flex-row sm:space-y-0 sm:space-x-4 sm:justify-between items-center mt-6">
             <router-link to="/soal-3" 
-              class="uniform-button bg-gray-500 text-white hover:bg-gray-600">
-              Sebelumnya
+              class="uniform-button bg-gray-500 text-white hover:bg-gray-600"
+              @click.prevent="handleNavigation('/soal-3')">
+              Kembali
             </router-link>
             
-            <div class="flex flex-col space-y-4 sm:flex-row sm:space-y-0 sm:space-x-4">
-              <button type="submit"
-                v-if="Object.keys(uploadedFiles).length > 0"
-                class="uniform-button bg-green-600 text-white hover:bg-green-700">
-                {{ Object.keys(savedFiles).length > 0 ? 'Tambah' : 'Simpan' }}
-              </button>
-
-              <button type="button" @click="deleteAllFiles"
-                v-if="Object.keys(savedFiles).length > 0"
-                class="uniform-button bg-red-600 text-white hover:bg-red-700">
-                Hapus
-              </button>
-            </div>
+            <button type="button" @click="deleteAllFiles"
+              v-if="Object.keys(savedFiles).length > 0"
+              class="uniform-button bg-red-600 text-white hover:bg-red-700">
+              Hapus
+            </button>
 
             <router-link to="/soal-5" 
-              class="uniform-button bg-blue-600 text-white hover:bg-blue-700">
+              class="uniform-button bg-blue-600 text-white hover:bg-blue-700"
+              @click.prevent="handleNavigation('/soal-5')">
               Lanjut
             </router-link>
           </div>
-        </form>
+        </div>
+
+        <p class="text-red-500 text-sm text-center mt-4 opacity-50">
+          *Data akan otomatis tersimpan saat berpindah halaman!
+        </p>
 
         <!-- Question Navigation Bar -->
         <div class="mt-8 pt-6 border-t border-gray-200">
@@ -196,9 +214,10 @@
 import { ref, computed, onMounted } from 'vue';
 import axios from 'axios';
 import { useAuthStore } from '@/stores/auth';
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 
 const route = useRoute();
+const router = useRouter();
 const authStore = useAuthStore();
 const uploadedFiles = ref({});
 const savedFiles = ref({});
@@ -289,38 +308,17 @@ const handleFileUpload = (event, field) => {
   }
 };
 
-const deleteAllFiles = async () => {
+const saveOrUpdateFiles = async () => {
   try {
-    await axios.delete('/api/soal4', {
-      headers: { Authorization: `Bearer ${authStore.accessToken}` }
-    });
+    if (Object.keys(uploadedFiles.value).length === 0) return;
 
-    savedFiles.value = {};
-    uploadedFiles.value = {};
-    totalNilai.value = 0;
-  } catch (error) {
-    console.error('Failed to delete all files:', error);
-    alert('Gagal menghapus file: ' + (error.response?.data?.message || error.message));
-  }
-};
-
-const submitAnswer = async () => {
-  try {
     const formData = new FormData();
-    let hasFiles = false;
-
     Object.keys(uploadedFiles.value).forEach((key) => {
       if (uploadedFiles.value[key]) {
         const backendFieldName = fieldMapping[key] || key;
         formData.append(backendFieldName, uploadedFiles.value[key]);
-        hasFiles = true;
       }
     });
-
-    if (!hasFiles) {
-      console.warn('No files selected');
-      return;
-    }
 
     const endpoint = Object.keys(savedFiles.value).length > 0 
       ? '/api/update4'
@@ -334,18 +332,72 @@ const submitAnswer = async () => {
       timeout: 60000
     });
 
-    console.log('Answer saved successfully:', response.data);
+    console.log('Files saved/updated successfully:', response.data);
     uploadedFiles.value = {};
     await fetchAnswer();
   } catch (error) {
-    console.error('Failed to save answer:', error);
-    alert('Gagal menyimpan jawaban: ' + (error.response?.data?.message || error.message));
+    console.error('Failed to save/update files:', error);
+    alert('Gagal menyimpan data: ' + (error.response?.data?.message || error.message));
   }
 };
 
-// Fungsi untuk memotong nama file jika terlalu panjang
+const deleteAllFiles = async () => {
+  try {
+    await axios.delete('/api/soal4', {
+      headers: { Authorization: `Bearer ${authStore.accessToken}` }
+    });
+    savedFiles.value = {};
+    uploadedFiles.value = {};
+    totalNilai.value = 0;
+  } catch (error) {
+    console.error('Failed to delete files:', error);
+    alert('Gagal menghapus file: ' + (error.response?.data?.message || error.message));
+  }
+};
+
+const handleNavigation = async (path) => {
+  await saveOrUpdateFiles();
+  router.push(path);
+};
+
 const truncateFileName = (name) => {
   return name.length > 15 ? `${name.substring(0, 12)}...` : name;
+};
+
+const viewFile = async (fieldName) => {
+  try {
+    const url = `/api/admin/soal/4/${authStore.user.id}/file/${fieldName}`;
+    const response = await axios.get(url, {
+      responseType: 'blob',
+      headers: {
+        Authorization: `Bearer ${authStore.accessToken}`,
+      },
+    });
+
+    const contentType = response.headers['content-type'];
+    const blob = new Blob([response.data], { type: contentType });
+    const blobUrl = window.URL.createObjectURL(blob);
+
+    if (contentType.includes('image')) {
+      const imgWindow = window.open('', '_blank');
+      imgWindow.document.write(`
+        <html>
+          <body style="margin: 0; display: flex; justify-content: center; align-items: center; height: 100vh; background: #f0f0f0;">
+            <img src="${blobUrl}" style="max-width: 100%; max-height: 100%; object-fit: contain;" />
+          </body>
+        </html>
+      `);
+    } else if (contentType.includes('pdf')) {
+      window.open(blobUrl, '_blank');
+    } else {
+      alert('Tipe file tidak didukung untuk ditampilkan.');
+    }
+
+    setTimeout(() => window.URL.revokeObjectURL(blobUrl), 1000);
+  } catch (error) {
+    console.error('Error fetching file:', error.response || error);
+    alert('Gagal membuka file: ' + (error.response?.data?.message || 'File tidak ditemukan'));
+  }
 };
 </script>
 
@@ -443,6 +495,28 @@ const truncateFileName = (name) => {
   transform: scale(1.05);
 }
 
+/* View File Button */
+.view-file-button {
+  display: inline-block;
+  padding: 0.5rem 1rem;
+  background: #e0f2fe;
+  border: 2px solid #3b82f6;
+  border-radius: 0.5rem;
+  color: #1e3a8a;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.view-file-button:hover {
+  background: #bfdbfe;
+  border-color: #1e40af;
+  color: #1e3a8a;
+  transform: scale(1.05);
+}
+
 /* Uniform Button Styling */
 .uniform-button {
   padding: 0.5rem 1rem;
@@ -534,7 +608,6 @@ const truncateFileName = (name) => {
 
 .w-10.h-10:hover:not(.bg-green-600) {
   background: #34d399;
-  
   color: white;
   transform: scale(1.1);
 }

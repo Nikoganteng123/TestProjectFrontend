@@ -14,7 +14,7 @@
           {{ errorMessage }}
         </div>
 
-        <form @submit.prevent="submitAnswer" class="space-y-4">
+        <div class="space-y-4">
           <div class="flex flex-col space-y-4">
             <div class="flex flex-col gap-2 p-2 bg-gray-50 rounded-md hover:bg-gray-100 transition-all duration-200">
               <label class="text-sm font-medium text-gray-700">
@@ -41,34 +41,30 @@
 
           <div class="flex flex-col space-y-4 sm:flex-row sm:space-y-0 sm:space-x-4 sm:justify-between items-center mt-6">
             <router-link to="/soal-11" 
-              class="uniform-button bg-gray-500 text-white hover:bg-gray-600">
-              Sebelumnya
+              class="uniform-button bg-gray-500 text-white hover:bg-gray-600"
+              @click.prevent="handleNavigation('/soal-11')">
+              Kembali
             </router-link>
             
-            <div class="flex flex-col space-y-4 sm:flex-row sm:space-y-0 sm:space-x-4">
-              <button type="submit"
-                v-if="selectedJabatan && (!savedJabatan || selectedJabatan !== savedJabatan)"
-                :disabled="loading"
-                class="uniform-button bg-green-600 text-white hover:bg-green-700">
-                {{ savedJabatan ? 'Update' : 'Simpan' }}
-                <span v-if="loading" class="spinner ml-2"></span>
-              </button>
-
-              <button type="button" @click="deleteData"
-                v-if="savedJabatan"
-                :disabled="loading"
-                class="uniform-button bg-red-600 text-white hover:bg-red-700">
-                Hapus
-                <span v-if="loading" class="spinner ml-2"></span>
-              </button>
-            </div>
+            <button type="button" @click="deleteData"
+              v-if="savedJabatan"
+              :disabled="loading"
+              class="uniform-button bg-red-600 text-white hover:bg-red-700">
+              Hapus
+              <span v-if="loading" class="spinner ml-2"></span>
+            </button>
 
             <router-link to="/soal-13" 
-              class="uniform-button bg-blue-600 text-white hover:bg-blue-700">
+              class="uniform-button bg-blue-600 text-white hover:bg-blue-700"
+              @click.prevent="handleNavigation('/soal-13')">
               Lanjut
             </router-link>
           </div>
-        </form>
+        </div>
+
+        <p class="text-red-500 text-sm text-center mt-4 opacity-50">
+          *Data akan otomatis tersimpan saat berpindah halaman!
+        </p>
 
         <!-- Question Navigation Bar -->
         <div class="mt-8 pt-6 border-t border-gray-200">
@@ -98,9 +94,10 @@
 import { ref, onMounted, computed } from 'vue';
 import axios from 'axios';
 import { useAuthStore } from '@/stores/auth';
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 
 const route = useRoute();
+const router = useRouter();
 const authStore = useAuthStore();
 const selectedJabatan = ref('');
 const savedJabatan = ref('');
@@ -138,11 +135,8 @@ const fetchAnswer = async () => {
   }
 };
 
-const submitAnswer = async () => {
-  if (!selectedJabatan.value) {
-    errorMessage.value = 'Silakan pilih jabatan terlebih dahulu';
-    return;
-  }
+const saveOrUpdateData = async () => {
+  if (!selectedJabatan.value || selectedJabatan.value === savedJabatan.value) return;
 
   try {
     loading.value = true;
@@ -167,7 +161,7 @@ const submitAnswer = async () => {
 };
 
 const deleteData = async () => {
-  if (!confirm('Apakah Anda yakin ingin menghapus data jabatan?')) return;
+  if (!confirm('Apakah Anda yakin ingin menghapus data jabatan nomor 12?')) return;
 
   try {
     loading.value = true;
@@ -184,6 +178,11 @@ const deleteData = async () => {
   } finally {
     loading.value = false;
   }
+};
+
+const handleNavigation = async (path) => {
+  await saveOrUpdateData();
+  router.push(path);
 };
 </script>
 
@@ -283,10 +282,6 @@ const deleteData = async () => {
   text-align: center;
 }
 
-.uniform-button.bg-green-600 {
-  background: linear-gradient(135deg, #2d6a4f, #34d399);
-}
-
 .uniform-button.bg-red-600 {
   background: linear-gradient(135deg, #ef4444, #dc2626);
 }
@@ -297,10 +292,6 @@ const deleteData = async () => {
 
 .uniform-button.bg-gray-500 {
   background: linear-gradient(135deg, #6b7280, #4b5563);
-}
-
-.uniform-button.bg-green-600:hover:not(:disabled) {
-  background: linear-gradient(135deg, #1f4d36, #22c55e);
 }
 
 .uniform-button.bg-red-600:hover:not(:disabled) {

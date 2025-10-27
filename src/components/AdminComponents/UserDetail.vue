@@ -95,7 +95,7 @@
                 class="border-b hover:bg-emerald-50 transition-colors duration-200 text-xs sm:text-sm"
               >
                 <td class="py-2 px-2 sm:py-3 sm:px-4">{{ index + 1 }}</td>
-                <td class="py-2 px-2 sm:py-3 sm:px-4 capitalize">{{ key }}</td>
+                <td class="py-2 px-2 sm:py-3 sm:px-4">{{ getDescriptiveSoalName(key) }}</td>
                 <td class="py-2 px-2 sm:py-3 sm:px-4 font-medium text-emerald-700">{{ soal?.nilai || 0 }}</td>
                 <td class="py-2 px-2 sm:py-3 sm:px-4">
                   <router-link
@@ -243,6 +243,28 @@ export default {
           : error.response?.data?.message || 'Kesalahan tidak diketahui';
         alert('Gagal membatalkan verifikasi: ' + message);
       }
+    },
+    getDescriptiveSoalName(soalKey) {
+      const soalNameMap = {
+        'soal1': 'Data 1: Pendidikan Formal Terakhir Anda',
+        'soal2': 'Data 2: Apakah kamu punya sertifikat Pendidikan Guru Merangkai Bunga?',
+        'soal3': 'Data 3: Apakah anda memiliki kemampuan mengajar dalam bahasa asing?',
+        'soal4': 'Data 4: Apakah anda memiliki sertifikasi dari Lembaga Floristy Asing dan Dalam Negeri?',
+        'soal5': 'Data 5: Sertifikasi Kompetensi di Bidang Merangkai Bunga',
+        'soal6': 'Data 6: Penghargaan dalam Bidang Floristry',
+        'soal7': 'Data 7: Kejuaraan/Lomba Merangkai Bunga',
+        'soal8': 'Data 8: Sertifikat Pelatihan/Seminar/Keikutsertaan Acara',
+        'soal9': 'Data 9: Simposium Ikatan Perangkai Bunga Indonesia (IPBI)',
+        'soal10': 'Data 10: Sebagai Demonstrator/Guru/Nara Sumber Bersertifikat',
+        'soal11': 'Data 11: Penguji / Juri',
+        'soal12': 'Data 12: Kepengurusan di Organisasi Ikatan Perangkai Bunga Indonesia (IPBI)',
+        'soal13': 'Data 13: Sekolah Merangkai Bunga / Perguruan Tinggi',
+        'soal14': 'Data 14: Kemampuan Mengajar Secara Online',
+        'soal15': 'Data 15: Memiliki Kemampuan Floristry di Gaya Merangkai Bunga Lainnya',
+        'soal16': 'Data 16: Informasi Florist dan Proyek',
+        'soal17': 'Data 17: Publikasi - Mengisi Artikel / Tampil pada Media Cetak',
+      };
+      return soalNameMap[soalKey] || soalKey.replace('soal', 'Soal ').replace(/\b\w/g, char => char.toUpperCase());
     },
   },
 };

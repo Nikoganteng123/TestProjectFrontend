@@ -19,152 +19,187 @@
           <div class="space-y-4">
             <h2 class="text-xl font-semibold text-gray-800">Pilih Kategori:</h2>
             <div class="flex flex-col gap-2">
-              <button type="button" @click="toggleSection('A')" class="text-left p-2 bg-gray-100 rounded-md hover:bg-gray-200">
+              <button type="button" @click="toggleSection('A')" class="section-button">
                 A. Aktif Merangkai Bunga di Florist (Staff/Owner)
               </button>
-              <div v-if="activeSection === 'A'" class="space-y-4 p-4 bg-gray-50 rounded-md">
-                <div class="flex flex-col gap-2">
-                  <label for="nama_florist" class="text-sm font-medium text-gray-700">a. Nama Florist *</label>
-                  <input v-model="form.nama_florist" id="nama_florist" type="text" class="p-2 border rounded-md" required />
-                </div>
-                <div class="flex flex-col gap-2">
-                  <label for="d_alamat_florist" class="text-sm font-medium text-gray-700">b. Alamat Florist *</label>
-                  <textarea v-model="form.d_alamat_florist" id="d_alamat_florist" class="p-2 border rounded-md" required></textarea>
-                </div>
-                <div v-for="(field, index) in sectionAFields" :key="index" class="flex flex-col gap-2">
-                  <label :for="field.key" :class="savedFiles[field.key] ? 'text-green-600' : 'text-gray-700'">
-                    {{ field.label }}
-                  </label>
-                  <div v-if="savedFiles[field.key]" class="text-green-600 flex items-center gap-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                    </svg>
-                    <span>File sudah tersimpan</span>
+              <transition name="expand">
+                <div v-if="activeSection === 'A'" class="section-content">
+                  <div class="flex flex-col gap-2">
+                    <label for="nama_florist" class="text-sm font-medium text-gray-700">a. Nama Florist *</label>
+                    <input v-model="form.nama_florist" id="nama_florist" type="text" class="input-field" required />
                   </div>
-                  <div v-else class="relative">
-                    <input type="file" :id="field.key" accept=".pdf,image/*" @change="handleFileUpload($event, field.key)" class="hidden" />
-                    <label :for="field.key" class="upload-button">
-                      {{ uploadedFiles[field.key] ? truncateFileName(uploadedFiles[field.key].name) : 'Upload' }}
+                  <div class="flex flex-col gap-2">
+                    <label for="d_alamat_florist" class="text-sm font-medium text-gray-700">b. Alamat Florist *</label>
+                    <textarea v-model="form.d_alamat_florist" id="d_alamat_florist" class="input-field" required></textarea>
+                  </div>
+                  <div v-for="(field, index) in sectionAFields" :key="index" class="flex flex-col gap-2">
+                    <label :for="field.key" :class="savedFiles[field.key] ? 'text-green-600' : 'text-gray-700'">
+                      {{ field.label }}
                     </label>
-                  </div>
-                </div>
-              </div>
-
-              <button type="button" @click="toggleSection('B')" class="text-left p-2 bg-gray-100 rounded-md hover:bg-gray-200">
-                B. Owner Florist Berbadan Hukum
-              </button>
-              <div v-if="activeSection === 'B'" class="space-y-4 p-4 bg-gray-50 rounded-md">
-                <div class="flex flex-col gap-2">
-                  <label for="c_nama_florist" class="text-sm font-medium text-gray-700">a. Nama Florist *</label>
-                  <input v-model="form.c_nama_florist" id="c_nama_florist" type="text" class="p-2 border rounded-md" required />
-                </div>
-                <div class="flex flex-col gap-2">
-                  <label for="b_alamat_florist" class="text-sm font-medium text-gray-700">b. Alamat Florist *</label>
-                  <textarea v-model="form.b_alamat_florist" id="b_alamat_florist" class="p-2 border rounded-md" required></textarea>
-                </div>
-                <div v-for="(field, index) in sectionBFields" :key="index" class="flex flex-col gap-2">
-                  <label :for="field.key" :class="savedFiles[field.key] ? 'text-green-600' : 'text-gray-700'">
-                    {{ field.label }}
-                  </label>
-                  <div v-if="savedFiles[field.key]" class="text-green-600 flex items-center gap-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                    </svg>
-                    <span>File sudah tersimpan</span>
-                  </div>
-                  <div v-else class="relative">
-                    <input type="file" :id="field.key" accept=".pdf,image/*" @change="handleFileUpload($event, field.key)" class="hidden" />
-                    <label :for="field.key" class="upload-button">
-                      {{ uploadedFiles[field.key] ? truncateFileName(uploadedFiles[field.key].name) : 'Upload' }}
-                    </label>
-                  </div>
-                </div>
-              </div>
-
-              <button type="button" @click="toggleSection('C')" class="text-left p-2 bg-gray-100 rounded-md hover:bg-gray-200">
-                C. Owner Florist Tidak Berbadan Hukum
-              </button>
-              <div v-if="activeSection === 'C'" class="space-y-4 p-4 bg-gray-50 rounded-md">
-                <div class="flex flex-col gap-2">
-                  <label for="c2_nama_florist" class="text-sm font-medium text-gray-700">a. Nama Florist *</label>
-                  <input v-model="form.c2_nama_florist" id="c2_nama_florist" type="text" class="p-2 border rounded-md" required />
-                </div>
-                <div class="flex flex-col gap-2">
-                  <label for="c2_alamat_florist" class="text-sm font-medium text-gray-700">b. Alamat Florist *</label>
-                  <textarea v-model="form.c2_alamat_florist" id="c2_alamat_florist" class="p-2 border rounded-md" required></textarea>
-                </div>
-                <div v-for="(field, index) in sectionCFields" :key="index" class="flex flex-col gap-2">
-                  <label :for="field.key" :class="savedFiles[field.key] ? 'text-green-600' : 'text-gray-700'">
-                    {{ field.label }}
-                  </label>
-                  <div v-if="savedFiles[field.key]" class="text-green-600 flex items-center gap-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                    </svg>
-                    <span>File sudah tersimpan</span>
-                  </div>
-                  <div v-else class="relative">
-                    <input type="file" :id="field.key" accept=".pdf,image/*" @change="handleFileUpload($event, field.key)" class="hidden" />
-                    <label :for="field.key" class="upload-button">
-                      {{ uploadedFiles[field.key] ? truncateFileName(uploadedFiles[field.key].name) : 'Upload' }}
-                    </label>
-                  </div>
-                </div>
-              </div>
-
-              <button type="button" @click="toggleSection('D')" class="text-left p-2 bg-gray-100 rounded-md hover:bg-gray-200">
-                D. Freelance Designer
-              </button>
-              <div v-if="activeSection === 'D'" class="space-y-4 p-4 bg-gray-50 rounded-md">
-                <div v-for="(project, index) in form.projects" :key="index" class="space-y-4">
-                  <h3 class="text-lg font-medium text-gray-800">Proyek {{ index + 1 }}</h3>
-                  <div class="flex flex-col gap-2">
-                    <label :for="`pemberi_order_${index}`" class="text-sm font-medium text-gray-700">a. Pemberi Order *</label>
-                    <input v-model="project.pemberi_order" :id="`pemberi_order_${index}`" type="text" class="p-2 border rounded-md" required />
-                  </div>
-                  <div class="flex flex-col gap-2">
-                    <label :for="`tempat_lokasi_${index}`" class="text-sm font-medium text-gray-700">b. Tempat/Lokasi *</label>
-                    <input v-model="project.tempat_lokasi" :id="`tempat_lokasi_${index}`" type="text" class="p-2 border rounded-md" required />
-                  </div>
-                  <div class="flex flex-col gap-2">
-                    <label :for="`tanggal_tahun_${index}`" class="text-sm font-medium text-gray-700">c. Tanggal/Tahun *</label>
-                    <input v-model="project.tanggal_tahun" :id="`tanggal_tahun_${index}`" type="text" class="p-2 border rounded-md" required />
-                  </div>
-                  <div class="flex flex-col gap-2">
-                    <label :for="`deskripsi_${index}`" class="text-sm font-medium text-gray-700">d. Deskripsi Proyek *</label>
-                    <textarea v-model="project.deskripsi" :id="`deskripsi_${index}`" class="p-2 border rounded-md" required></textarea>
-                  </div>
-                  <div class="grid grid-cols-2 gap-4">
-                    <div v-for="n in 4" :key="n" class="flex flex-col gap-2">
-                      <label :for="sectionDFields[index * 4 + n - 1].key" :class="savedFiles[sectionDFields[index * 4 + n - 1].key] ? 'text-green-600' : 'text-gray-700'">
-                        {{ sectionDFields[index * 4 + n - 1].label }} (Proyek {{ index + 1 }})
-                      </label>
-                      <div v-if="savedFiles[sectionDFields[index * 4 + n - 1].key]" class="text-green-600 flex items-center gap-2">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                        </svg>
-                        <span>File sudah tersimpan</span>
+                    <div class="flex items-center gap-2">
+                      <div v-if="savedFiles[field.key]" class="flex items-center gap-2">
+                        <div class="text-green-600 flex items-center gap-1 text-xs">
+                          <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                          </svg>
+                          <span>Tersimpan</span>
+                        </div>
+                        <button @click="viewFile(field.key)" class="view-file-button">
+                          Lihat File
+                        </button>
                       </div>
                       <div v-else class="relative">
-                        <input type="file" :id="sectionDFields[index * 4 + n - 1].key" accept=".pdf,image/*" @change="handleFileUpload($event, sectionDFields[index * 4 + n - 1].key)" class="hidden" />
-                        <label :for="sectionDFields[index * 4 + n - 1].key" class="upload-button">
-                          {{ uploadedFiles[sectionDFields[index * 4 + n - 1].key] ? truncateFileName(uploadedFiles[sectionDFields[index * 4 + n - 1].key].name) : 'Upload' }}
+                        <input type="file" :id="field.key" accept=".pdf,image/*" @change="handleFileUpload($event, field.key)" class="hidden" />
+                        <label :for="field.key" class="upload-button">
+                          {{ uploadedFiles[field.key] ? truncateFileName(uploadedFiles[field.key].name) : 'Upload' }}
                         </label>
                       </div>
                     </div>
                   </div>
                 </div>
-              </div>
+              </transition>
+
+              <button type="button" @click="toggleSection('B')" class="section-button">
+                B. Owner Florist Berbadan Hukum
+              </button>
+              <transition name="expand">
+                <div v-if="activeSection === 'B'" class="section-content">
+                  <div class="flex flex-col gap-2">
+                    <label for="c_nama_florist" class="text-sm font-medium text-gray-700">a. Nama Florist *</label>
+                    <input v-model="form.c_nama_florist" id="c_nama_florist" type="text" class="input-field" required />
+                  </div>
+                  <div class="flex flex-col gap-2">
+                    <label for="b_alamat_florist" class="text-sm font-medium text-gray-700">b. Alamat Florist *</label>
+                    <textarea v-model="form.b_alamat_florist" id="b_alamat_florist" class="input-field" required></textarea>
+                  </div>
+                  <div v-for="(field, index) in sectionBFields" :key="index" class="flex flex-col gap-2">
+                    <label :for="field.key" :class="savedFiles[field.key] ? 'text-green-600' : 'text-gray-700'">
+                      {{ field.label }}
+                    </label>
+                    <div class="flex items-center gap-2">
+                      <div v-if="savedFiles[field.key]" class="flex items-center gap-2">
+                        <div class="text-green-600 flex items-center gap-1 text-xs">
+                          <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                          </svg>
+                          <span>Tersimpan</span>
+                        </div>
+                        <button @click="viewFile(field.key)" class="view-file-button">
+                          Lihat File
+                        </button>
+                      </div>
+                      <div v-else class="relative">
+                        <input type="file" :id="field.key" accept=".pdf,image/*" @change="handleFileUpload($event, field.key)" class="hidden" />
+                        <label :for="field.key" class="upload-button">
+                          {{ uploadedFiles[field.key] ? truncateFileName(uploadedFiles[field.key].name) : 'Upload' }}
+                        </label>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </transition>
+
+              <button type="button" @click="toggleSection('C')" class="section-button">
+                C. Owner Florist Tidak Berbadan Hukum
+              </button>
+              <transition name="expand">
+                <div v-if="activeSection === 'C'" class="section-content">
+                  <div class="flex flex-col gap-2">
+                    <label for="c2_nama_florist" class="text-sm font-medium text-gray-700">a. Nama Florist *</label>
+                    <input v-model="form.c2_nama_florist" id="c2_nama_florist" type="text" class="input-field" required />
+                  </div>
+                  <div class="flex flex-col gap-2">
+                    <label for="c2_alamat_florist" class="text-sm font-medium text-gray-700">b. Alamat Florist *</label>
+                    <textarea v-model="form.c2_alamat_florist" id="c2_alamat_florist" class="input-field" required></textarea>
+                  </div>
+                  <div v-for="(field, index) in sectionCFields" :key="index" class="flex flex-col gap-2">
+                    <label :for="field.key" :class="savedFiles[field.key] ? 'text-green-600' : 'text-gray-700'">
+                      {{ field.label }}
+                    </label>
+                    <div class="flex items-center gap-2">
+                      <div v-if="savedFiles[field.key]" class="flex items-center gap-2">
+                        <div class="text-green-600 flex items-center gap-1 text-xs">
+                          <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                          </svg>
+                          <span>Tersimpan</span>
+                        </div>
+                        <button @click="viewFile(field.key)" class="view-file-button">
+                          Lihat File
+                        </button>
+                      </div>
+                      <div v-else class="relative">
+                        <input type="file" :id="field.key" accept=".pdf,image/*" @change="handleFileUpload($event, field.key)" class="hidden" />
+                        <label :for="field.key" class="upload-button">
+                          {{ uploadedFiles[field.key] ? truncateFileName(uploadedFiles[field.key].name) : 'Upload' }}
+                        </label>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </transition>
+
+              <button type="button" @click="toggleSection('D')" class="section-button">
+                D. Freelance Designer
+              </button>
+              <transition name="expand">
+                <div v-if="activeSection === 'D'" class="section-content">
+                  <div v-for="(project, index) in form.projects" :key="index" class="space-y-4">
+                    <h3 class="text-lg font-medium text-gray-800">Proyek {{ index + 1 }}</h3>
+                    <div class="flex flex-col gap-2">
+                      <label :for="`pemberi_order_${index}`" class="text-sm font-medium text-gray-700">a. Pemberi Order *</label>
+                      <input v-model="project.pemberi_order" :id="`pemberi_order_${index}`" type="text" class="input-field" required />
+                    </div>
+                    <div class="flex flex-col gap-2">
+                      <label :for="`tempat_lokasi_${index}`" class="text-sm font-medium text-gray-700">b. Tempat/Lokasi *</label>
+                      <input v-model="project.tempat_lokasi" :id="`tempat_lokasi_${index}`" type="text" class="input-field" required />
+                    </div>
+                    <div class="flex flex-col gap-2">
+                      <label :for="`tanggal_tahun_${index}`" class="text-sm font-medium text-gray-700">c. Tanggal/Tahun *</label>
+                      <input v-model="project.tanggal_tahun" :id="`tanggal_tahun_${index}`" type="text" class="input-field" required />
+                    </div>
+                    <div class="flex flex-col gap-2">
+                      <label :for="`deskripsi_${index}`" class="text-sm font-medium text-gray-700">d. Deskripsi Proyek *</label>
+                      <textarea v-model="project.deskripsi" :id="`deskripsi_${index}`" class="input-field" required></textarea>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                      <div v-for="n in 4" :key="n" class="flex flex-col gap-2">
+                        <label :for="sectionDFields[index * 4 + n - 1].key" :class="savedFiles[sectionDFields[index * 4 + n - 1].key] ? 'text-green-600' : 'text-gray-700'">
+                          {{ sectionDFields[index * 4 + n - 1].label }} (Proyek {{ index + 1 }})
+                        </label>
+                        <div class="flex items-center gap-2">
+                          <div v-if="savedFiles[sectionDFields[index * 4 + n - 1].key]" class="flex items-center gap-2">
+                            <div class="text-green-600 flex items-center gap-1 text-xs">
+                              <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                              </svg>
+                              <span>Tersimpan</span>
+                            </div>
+                            <button @click="viewFile(sectionDFields[index * 4 + n - 1].key)" class="view-file-button">
+                              Lihat File
+                            </button>
+                          </div>
+                          <div v-else class="relative">
+                            <input type="file" :id="sectionDFields[index * 4 + n - 1].key" accept=".pdf,image/*" @change="handleFileUpload($event, sectionDFields[index * 4 + n - 1].key)" class="hidden" />
+                            <label :for="sectionDFields[index * 4 + n - 1].key" class="upload-button">
+                              {{ uploadedFiles[sectionDFields[index * 4 + n - 1].key] ? truncateFileName(uploadedFiles[sectionDFields[index * 4 + n - 1].key].name) : 'Upload' }}
+                            </label>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </transition>
             </div>
           </div>
 
           <!-- Buttons -->
           <div class="flex flex-col space-y-4 sm:flex-row sm:space-y-0 sm:space-x-4 sm:justify-between items-center mt-6">
             <router-link to="/soal-15" class="uniform-button bg-gray-500 text-white hover:bg-gray-600">
-              Sebelumnya
+              Kembali
             </router-link>
             <div class="flex flex-col space-y-4 sm:flex-row sm:space-y-0 sm:space-x-4">
-              <!-- Button dengan teks dinamis -->
               <button type="submit" :disabled="loading" class="uniform-button bg-green-600 text-white hover:bg-green-700">
                 {{ submitButtonText }}
                 <span v-if="loading" class="spinner ml-2"></span>
@@ -175,20 +210,19 @@
               </button>
             </div>
             <router-link to="/soal-17" class="uniform-button bg-blue-600 text-white hover:bg-blue-700">
-              Next
+              Lanjut
             </router-link>
           </div>
         </form>
+        <p class="text-red-500 text-sm text-center mt-4 opacity-50">
+          *Jangan lupa menekan simpan/tambah agar data tersimpan!
+        </p>
 
         <!-- Navigation Bar -->
         <div class="mt-8 pt-6 border-t border-gray-200">
           <h3 class="text-lg font-medium text-gray-800 mb-4">Navigasi Soal</h3>
           <div class="flex flex-wrap gap-2">
-            <router-link v-for="n in 17" :key="n" :to="`/soal-${n}`"
-              class="w-10 h-10 flex items-center justify-center rounded-lg text-sm font-medium transition-all duration-200"
-              :class="[
-                currentQuestionNumber === n ? 'bg-green-600 text-white' : 'bg-gray-200 hover:bg-green-500 hover:text-white text-gray-700'
-              ]">
+            <router-link v-for="n in 17" :key="n" :to="`/soal-${n}`" class="w-10 h-10 flex items-center justify-center rounded-lg text-sm font-medium transition-all duration-200" :class="[currentQuestionNumber === n ? 'bg-green-600 text-white' : 'bg-gray-200 hover:bg-green-500 hover:text-white text-gray-700']">
               {{ n }}
             </router-link>
           </div>
@@ -259,7 +293,7 @@ const currentQuestionNumber = computed(() => {
 });
 
 const submitButtonText = computed(() => {
-  return Object.keys(savedFiles.value).length > 0 ? 'Perbarui Data' : 'Simpan Data';
+  return Object.keys(savedFiles.value).length > 0 ? 'Perbarui' : 'Simpan';
 });
 
 onMounted(async () => {
@@ -397,7 +431,7 @@ const submitAnswer = async () => {
       }
     });
 
-    const endpoint = Object.keys(savedFiles.value).length > 0 ? '/api/soal16/update' : '/api/soal16';
+    const endpoint = Object.keys(savedFiles.value).length > 0 ? '/api/update16' : '/api/soal16';
     const response = await axios.post(endpoint, formData, {
       headers: {
         Authorization: `Bearer ${authStore.accessToken}`,
@@ -468,7 +502,7 @@ const fetchAnswer = async () => {
 };
 
 const deleteAll = async () => {
-  if (!confirm('Apakah Anda yakin ingin menghapus semua data?')) return;
+  if (!confirm('Apakah Anda yakin ingin menghapus semua data nomor 16?')) return;
 
   try {
     loading.value = true;
@@ -509,9 +543,46 @@ const deleteAll = async () => {
 const truncateFileName = (name) => {
   return name.length > 15 ? `${name.substring(0, 12)}...` : name;
 };
+
+const viewFile = async (fieldName) => {
+  try {
+    const url = `/api/admin/soal/16/${authStore.user.id}/file/${fieldName}`;
+    const response = await axios.get(url, {
+      responseType: 'blob',
+      headers: {
+        Authorization: `Bearer ${authStore.accessToken}`,
+      },
+    });
+
+    const contentType = response.headers['content-type'];
+    const blob = new Blob([response.data], { type: contentType });
+    const blobUrl = window.URL.createObjectURL(blob);
+
+    if (contentType.includes('image')) {
+      const imgWindow = window.open('', '_blank');
+      imgWindow.document.write(`
+        <html>
+          <body style="margin: 0; display: flex; justify-content: center; align-items: center; height: 100vh; background: #f0f0f0;">
+            <img src="${blobUrl}" style="max-width: 100%; max-height: 100%; object-fit: contain;" />
+          </body>
+        </html>
+      `);
+    } else if (contentType.includes('pdf')) {
+      window.open(blobUrl, '_blank');
+    } else {
+      alert('Tipe file tidak didukung untuk ditampilkan.');
+    }
+
+    setTimeout(() => window.URL.revokeObjectURL(blobUrl), 1000);
+  } catch (error) {
+    console.error('Error fetching file:', error.response || error);
+    alert('Gagal membuka file: ' + (error.response?.data?.message || 'File tidak ditemukan'));
+  }
+};
 </script>
 
 <style scoped>
+/* Container Utama */
 .min-h-screen {
   background: linear-gradient(to top, #2d6a4f, #f0fdf4);
   padding: 3rem 1.5rem;
@@ -519,6 +590,7 @@ const truncateFileName = (name) => {
   overflow: hidden;
 }
 
+/* Card Container */
 .max-w-2xl {
   background: rgba(255, 255, 255, 0.95);
   border-radius: 1.5rem;
@@ -526,19 +598,103 @@ const truncateFileName = (name) => {
   transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
+@media (min-width: 640px) {
+  .max-w-2xl {
+    backdrop-filter: blur(10px);
+  }
+}
+
+.max-w-2xl:hover {
+  transform: translateY(-10px);
+  box-shadow: 0 25px 50px rgba(45, 106, 79, 0.25);
+}
+
+/* Heading */
 .text-3xl {
   font-size: 2.25rem;
   font-weight: 800;
   color: #1f4d2b;
   letter-spacing: -0.025em;
+  background: linear-gradient(135deg, #2d6a4f, #34d399);
+  -webkit-background-clip: text;
+  background-clip: text;
+  animation: fadeInDown 0.5s ease-out;
 }
 
+/* Section Buttons */
+.section-button {
+  text-align: left;
+  padding: 0.75rem 1rem;
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.5rem;
+  font-weight: 500;
+  color: #374151;
+  transition: all 0.3s ease;
+}
+
+.section-button:hover {
+  background: #d1fae5;
+  border-color: #34d399;
+  transform: scale(1.02);
+}
+
+/* Section Content */
+.section-content {
+  padding: 1rem;
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.5rem;
+}
+
+/* Expand Animation */
+.expand-enter-active,
+.expand-leave-active {
+  transition: all 0.5s ease;
+}
+
+.expand-enter-from,
+.expand-leave-to {
+  opacity: 0;
+  max-height: 0;
+  transform: translateY(-10px);
+}
+
+.expand-enter-to,
+.expand-leave-from {
+  opacity: 1;
+  max-height: 1000px; /* Adjust based on content size */
+  transform: translateY(0);
+}
+
+/* Input Fields */
+.input-field {
+  padding: 0.5rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.5rem;
+  transition: all 0.3s ease;
+}
+
+.input-field:focus {
+  border-color: #34d399;
+  box-shadow: 0 0 0 2px rgba(52, 211, 153, 0.2);
+  outline: none;
+}
+
+/* Label */
 .text-sm {
   font-size: 0.875rem;
   font-weight: 500;
   transition: color 0.3s ease;
+  white-space: normal;
+  word-break: break-word;
 }
 
+.text-green-600 {
+  text-shadow: 0 1px 2px rgba(52, 211, 153, 0.2);
+}
+
+/* Upload Button */
 .upload-button {
   display: inline-block;
   padding: 0.5rem 1rem;
@@ -549,14 +705,43 @@ const truncateFileName = (name) => {
   font-weight: 500;
   cursor: pointer;
   transition: all 0.3s ease;
+  min-width: 100px;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .upload-button:hover {
   background: #d1fae5;
   border-color: #2d6a4f;
   color: #1f4d36;
+  transform: scale(1.05);
 }
 
+/* View File Button */
+.view-file-button {
+  display: inline-block;
+  padding: 0.5rem 1rem;
+  background: #e0f2fe;
+  border: 2px solid #3b82f6;
+  border-radius: 0.5rem;
+  color: #1e3a8a;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.view-file-button:hover {
+  background: #bfdbfe;
+  border-color: #1e40af;
+  color: #1e3a8a;
+  transform: scale(1.05);
+}
+
+/* Uniform Button Styling */
 .uniform-button {
   padding: 0.5rem 1rem;
   border-radius: 9999px;
@@ -565,6 +750,57 @@ const truncateFileName = (name) => {
   text-transform: uppercase;
   letter-spacing: 0.05em;
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+  width: 100px;
+  text-align: center;
+}
+
+.uniform-button.bg-green-600 {
+  background: linear-gradient(135deg, #2d6a4f, #34d399);
+}
+
+.uniform-button.bg-red-600 {
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+}
+
+.uniform-button.bg-blue-600 {
+  background: linear-gradient(135deg, #1e3a8a, #3b82f6);
+}
+
+.uniform-button.bg-gray-500 {
+  background: linear-gradient(135deg, #6b7280, #4b5563);
+}
+
+.uniform-button.bg-green-600:hover:not(:disabled) {
+  background: linear-gradient(135deg, #1f4d36, #22c55e);
+}
+
+.uniform-button.bg-red-600:hover:not(:disabled) {
+  background: linear-gradient(135deg, #dc2626, #b91c1c);
+}
+
+.uniform-button.bg-blue-600:hover {
+  background: linear-gradient(135deg, #1e40af, #2563eb);
+}
+
+.uniform-button.bg-gray-500:hover {
+  background: linear-gradient(135deg, #4b5563, #374151);
+}
+
+.uniform-button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(120deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+  transition: all 0.6s ease;
+}
+
+.uniform-button:hover::before {
+  left: 100%;
 }
 
 .uniform-button:disabled {
@@ -572,6 +808,7 @@ const truncateFileName = (name) => {
   cursor: not-allowed;
 }
 
+/* Spinners */
 .spinner {
   border: 2px solid #f3f3f3;
   border-top: 2px solid #34d399;
@@ -580,6 +817,50 @@ const truncateFileName = (name) => {
   height: 16px;
   animation: spin 1s linear infinite;
   display: inline-block;
+}
+
+/* Navigation Bar */
+.border-t {
+  border-color: rgba(45, 106, 79, 0.2);
+}
+
+.text-lg.font-medium {
+  color: #2d6a4f;
+  animation: fadeInUp 0.5s ease-out 0.2s both;
+}
+
+.flex.flex-wrap {
+  gap: 0.75rem;
+}
+
+/* Navigation Buttons */
+.w-10.h-10 {
+  background: #f0fdf4;
+  color: #4a4a4a;
+  font-weight: 600;
+  border-radius: 0.75rem;
+  transition: all 0.3s ease;
+}
+
+.bg-green-600.text-white {
+  background: linear-gradient(135deg, #2d6a4f, #34d399);
+}
+
+.w-10.h-10:hover:not(.bg-green-600) {
+  background: #34d399;
+  color: white;
+  transform: scale(1.1);
+}
+
+/* Animations */
+@keyframes fadeInDown {
+  from { opacity: 0; transform: translateY(-20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 @keyframes spin {

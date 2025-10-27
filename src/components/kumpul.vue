@@ -19,14 +19,23 @@
           <router-link
             v-for="(data, key) in overview"
             :key="key"
-            :to="`/soal-${key.replace('Data', '')}`"
+            :to="`/soal-${getSoalNumber(key)}`"
             class="relative group p-6 rounded-xl bg-gradient-to-br transition-all duration-300 transform hover:scale-105 hover:shadow-xl"
-            :class="data.completed ? 'from-green-100 to-green-200 border-green-400' : 'from-red-100 to-red-200 border-red-400'"
+            :class="{
+              'from-green-100 to-green-200 border-green-400': data.completed,
+              'from-red-100 to-red-200 border-red-400': !data.completed
+            }"
           >
             <div class="absolute inset-0 bg-white/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-xl"></div>
             <div class="relative font-semibold text-lg text-gray-800">{{ data.title }}</div>
             <div class="relative flex justify-between mt-3 text-sm">
-              <span :class="data.completed ? 'text-green-700' : 'text-red-700'" class="font-medium animate-fade-in-up">
+              <span 
+                :class="{
+                  'text-green-700': data.completed,
+                  'text-red-700': !data.completed
+                }" 
+                class="font-medium animate-fade-in-up"
+              >
                 {{ data.completed ? 'Sudah Dikerjakan' : 'Belum Dikerjakan' }}
               </span>
               <span class="text-gray-700 font-medium">Nilai: {{ data.nilai ?? 'N/A' }}</span>
@@ -40,11 +49,11 @@
 
         <!-- Daftar Soal yang Kosong -->
         <div class="space-y-4 animate-slide-in-up">
-          <h2 class="text-xl sm:text-2xl font-bold text-gray-800">Data yang Belum Dijawab</h2>
+          <h2 class="text-xl sm:text-2xl font-bold text-gray-800">Data yang Belum Dijawab Sama Sekali</h2>
           <ul v-if="emptySoals.length > 0" class="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <li v-for="soal in emptySoals" :key="soal" class="p-3 bg-red-50 rounded-lg text-gray-700 font-medium transform transition-all duration-300 hover:bg-red-100 hover:scale-102">
               <router-link :to="`/soal-${soal}`" class="block w-full h-full">
-                Data {{ soal }}
+                Soal {{ soal }}
               </router-link>
             </li>
           </ul>
@@ -82,7 +91,8 @@
       <div class="bg-white rounded-2xl p-6 sm:p-8 max-w-md w-full shadow-2xl transform transition-all duration-300 scale-95 hover:scale-100">
         <h3 class="text-lg sm:text-xl font-bold text-gray-800 mb-4 animate-slide-in-down">Konfirmasi Pengumpulan</h3>
         <p class="text-gray-700 leading-relaxed animate-fade-in-up">
-          Apakah Anda yakin? Jika Anda sudah mengumpulkan, Anda tidak bisa mengedit atau kembali ke Pemetaan Data yang telah Anda kumpul!
+          Apakah Anda yakin? Jika anda mengumpulkan maka anda siap untuk diperiksa datanya. Apabila jawaban anda sudah diverfikasi oleh pihak IPBI anda tidak akan bisa mengakses Pemetaan Data ini lagi. Silahkan periksa ulang jawaban anda sehingga proses pemeriksaan berjalan dengan lancar!
+          
         </p>
         <div class="flex justify-end space-x-4 mt-6">
           <button
@@ -133,7 +143,7 @@ const overview = ref(null);
 const emptySoals = ref([]);
 const totalNilai = ref(0);
 const showPopup = ref(false);
-const showSuccess = ref(false); // State baru untuk popup sukses
+const showSuccess = ref(false);
 
 onMounted(async () => {
   await fetchSoalStatus();
@@ -147,15 +157,24 @@ const fetchSoalStatus = async () => {
 
     overview.value = response.data.data || {};
     totalNilai.value = response.data.total_nilai || 0;
+    
     emptySoals.value = Object.keys(overview.value)
       .filter(key => !overview.value[key].completed)
-      .map(key => parseInt(key.replace('soal', '')));
+      .map(key => getSoalNumber(key));
   } catch (error) {
     console.error('Error fetching soal status:', error.response ? error.response.data : error.message);
     overview.value = {};
     totalNilai.value = 0;
     emptySoals.value = [];
   }
+};
+
+// Fungsi untuk mendapatkan nomor soal dari kunci
+const getSoalNumber = (key) => {
+  if (key.includes('-')) {
+    return parseInt(key.split('-')[1], 10);
+  }
+  return parseInt(key.replace('soal', ''), 10);
 };
 
 const confirmSubmit = () => {
@@ -177,7 +196,7 @@ const submitFinal = async () => {
     );
 
     showPopup.value = false;
-    showSuccess.value = true; // Tampilkan popup sukses setelah pengumpulan berhasil
+    showSuccess.value = true;
   } catch (error) {
     console.error('Error submitting:', error.response ? error.response.data : error.message);
     showPopup.value = false;
@@ -186,7 +205,7 @@ const submitFinal = async () => {
 
 const closeSuccess = () => {
   showSuccess.value = false;
-  router.push('/'); // Kembali ke halaman utama setelah menutup popup sukses
+  router.push('/');
 };
 </script>
 

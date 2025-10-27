@@ -14,7 +14,7 @@
           {{ errorMessage }}
         </div>
 
-        <form @submit.prevent="submitAnswer" class="space-y-4">
+        <form class="space-y-4">
           <div class="flex flex-col space-y-4">
             <div class="flex flex-col gap-2 p-2 bg-gray-50 rounded-md hover:bg-gray-100 transition-all duration-200">
               <label class="text-sm font-medium text-gray-700">
@@ -38,34 +38,29 @@
 
           <div class="flex flex-col space-y-4 sm:flex-row sm:space-y-0 sm:space-x-4 sm:justify-between items-center mt-6">
             <router-link to="/soal-13" 
+              @click="saveBeforeNavigation"
               class="uniform-button bg-gray-500 text-white hover:bg-gray-600">
-              Sebelumnya
+              Kembali
             </router-link>
             
-            <div class="flex flex-col space-y-4 sm:flex-row sm:space-y-0 sm:space-x-4">
-              <button type="submit"
-                v-if="selectedNgajar && (!savedNgajar || selectedNgajar !== savedNgajar)"
-                :disabled="loading"
-                class="uniform-button bg-green-600 text-white hover:bg-green-700">
-                {{ savedNgajar ? 'Update' : 'Simpan' }}
-                <span v-if="loading" class="spinner ml-2"></span>
-              </button>
-
-              <button type="button" @click="deleteData"
-                v-if="savedNgajar"
-                :disabled="loading"
-                class="uniform-button bg-red-600 text-white hover:bg-red-700">
-                Hapus
-                <span v-if="loading" class="spinner ml-2"></span>
-              </button>
-            </div>
+            <button type="button" @click="deleteData"
+              v-if="savedNgajar"
+              :disabled="loading"
+              class="uniform-button bg-red-600 text-white hover:bg-red-700">
+              Hapus
+              <span v-if="loading" class="spinner ml-2"></span>
+            </button>
 
             <router-link to="/soal-15" 
+              @click="saveBeforeNavigation"
               class="uniform-button bg-blue-600 text-white hover:bg-blue-700">
               Lanjut
             </router-link>
           </div>
         </form>
+        <p class="text-red-500 text-sm text-center mt-4 opacity-50">
+          *Data akan otomatis tersimpan saat berpindah halaman!
+        </p>
 
         <!-- Question Navigation Bar -->
         <div class="mt-8 pt-6 border-t border-gray-200">
@@ -75,6 +70,7 @@
               v-for="n in 17" 
               :key="n"
               :to="`/soal-${n}`"
+              @click="saveBeforeNavigation"
               class="w-10 h-10 flex items-center justify-center rounded-lg text-sm font-medium transition-all duration-200"
               :class="[
                 currentQuestionNumber === n 
@@ -105,7 +101,6 @@ const successMessage = ref('');
 const errorMessage = ref('');
 const loading = ref(false);
 
-// Extract current question number from route
 const currentQuestionNumber = computed(() => {
   const match = route.path.match(/\/soal-(\d+)/);
   return match ? parseInt(match[1]) : 14;
@@ -135,11 +130,8 @@ const fetchAnswer = async () => {
   }
 };
 
-const submitAnswer = async () => {
-  if (!selectedNgajar.value) {
-    errorMessage.value = 'Silakan pilih kemampuan terlebih dahulu';
-    return;
-  }
+const saveBeforeNavigation = async () => {
+  if (!selectedNgajar.value || selectedNgajar.value === savedNgajar.value) return; // Tidak ada perubahan atau belum dipilih
 
   try {
     loading.value = true;
@@ -164,7 +156,7 @@ const submitAnswer = async () => {
 };
 
 const deleteData = async () => {
-  if (!confirm('Apakah Anda yakin ingin menghapus data kemampuan?')) return;
+  if (!confirm('Apakah Anda yakin ingin menghapus data nomor 14?')) return;
 
   try {
     loading.value = true;

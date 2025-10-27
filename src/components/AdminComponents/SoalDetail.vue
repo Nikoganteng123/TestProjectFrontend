@@ -49,7 +49,7 @@
                   class="border-b hover:bg-emerald-50 transition-colors duration-200 text-xs sm:text-sm"
                 >
                   <td class="py-2 px-2 sm:py-3 sm:px-4">{{ index + 1 }}</td>
-                  <td class="py-2 px-2 sm:py-3 sm:px-4 capitalize">{{ key }}</td>
+                  <td class="py-2 px-2 sm:py-3 sm:px-4">{{ getDescriptiveFieldName(key) }}</td>
                   <td class="py-2 px-2 sm:py-3 sm:px-4 text-gray-600">{{ value || 'Tidak ada data' }}</td>
                   <td class="py-2 px-2 sm:py-3 sm:px-4">
                     <div class="flex flex-col sm:flex-row gap-2">
@@ -196,6 +196,179 @@ export default {
         this.isLoading = false;
       }
     },
+    getDescriptiveFieldName(fieldName) {
+      const fieldNameMap = {
+        '1': {
+          'tingkat_pendidikan': 'Tingkat Pendidikan',
+          'tingkat_pendidikan_file': 'Berkas Tingkat Pendidikan',
+        },
+        '2': {
+          'tp3': 'TP3',
+          'lpmp_diknas': 'LPMP Diknas',
+          'guru_lain_ipbi_1': 'Guru Lain IPBI Pertama',
+          'guru_lain_ipbi_2': 'Guru Lain IPBI Kedua',
+          'guru_lain_ipbi_3': 'Guru Lain IPBI Ketiga',
+          'guru_lain_ipbi_4': 'Guru Lain IPBI Keempat',
+          'training_trainer': 'Training Trainer',
+        },
+        '3': {
+          'bahasa_inggris': 'Bahasa Inggris',
+          'bahasa_lain1': 'Bahasa Lain Pertama',
+          'bahasa_lain2': 'Bahasa Lain Kedua',
+          'bahasa_lain3': 'Bahasa Lain Ketiga',
+          'bahasa_lain4': 'Bahasa Lain Keempat',
+        },
+        '4': {
+          'independent_org': 'Organisasi Independen',
+          'foreign_school_degree': 'Gelar Sekolah Luar Negeri',
+          'foreign_school_no_degree_1': 'Sekolah Luar Negeri Tanpa Gelar Pertama',
+          'foreign_school_no_degree_2': 'Sekolah Luar Negeri Tanpa Gelar Kedua',
+          'foreign_school_no_degree_3': 'Sekolah Luar Negeri Tanpa Gelar Ketiga',
+          'foreign_school_no_degree_4': 'Sekolah Luar Negeri Tanpa Gelar Keempat',
+          'foreign_school_no_degree_5': 'Sekolah Luar Negeri Tanpa Gelar Kelima',
+          'domestic_school_no_degree_1': 'Sekolah Dalam Negeri Tanpa Gelar Pertama',
+          'domestic_school_no_degree_2': 'Sekolah Dalam Negeri Tanpa Gelar Kedua',
+          'domestic_school_no_degree_3': 'Sekolah Dalam Negeri Tanpa Gelar Ketiga',
+          'domestic_school_no_degree_4': 'Sekolah Dalam Negeri Tanpa Gelar Keempat',
+          'domestic_school_no_degree_5': 'Sekolah Dalam Negeri Tanpa Gelar Kelima',
+        },
+        '5': {
+          'sertifikat_1': 'Sertifikat Pertama',
+          'sertifikat_2': 'Sertifikat Kedua',
+          'sertifikat_3': 'Sertifikat Ketiga',
+        },
+        '6': {
+          'penghargaan_daerah': 'Penghargaan Daerah',
+          'penghargaan_nasional': 'Penghargaan Nasional',
+          'penghargaan_internasional': 'Penghargaan Internasional',
+        },
+        '7': {
+          'juara_nasional_dpp': 'Juara Nasional DPP',
+          'juara_non_dpp': 'Juara Non DPP',
+          'juara_instansi_lain': 'Juara Instansi Lain',
+          'juara_internasional': 'Juara Internasional',
+          'peserta_lomba_1': 'Peserta Lomba Pertama',
+          'peserta_lomba_2': 'Peserta Lomba Kedua',
+          'peserta_lomba_3': 'Peserta Lomba Ketiga',
+          'peserta_lomba_4': 'Peserta Lomba Keempat',
+          'peserta_lomba_5': 'Peserta Lomba Kelima',
+          'juri_lomba_1': 'Juri Lomba Pertama',
+          'juri_lomba_2': 'Juri Lomba Kedua',
+        },
+        '8': {
+          'demo_dpp_dpd1': 'Demo DPP/DPD Pertama',
+          'demo_dpp_dpd2': 'Demo DPP/DPD Kedua',
+          'demo_dpp_dpd3': 'Demo DPP/DPD Ketiga',
+          'demo_dpp_dpd4': 'Demo DPP/DPD Keempat',
+          'demo_dpp_dpd5': 'Demo DPP/DPD Kelima',
+          'non_ipbi1': 'Demo Non IPBI Pertama',
+          'non_ipbi2': 'Demo Non IPBI Kedua',
+          'non_ipbi3': 'Demo Non IPBI Ketiga',
+          'non_ipbi4': 'Demo Non IPBI Keempat',
+          'non_ipbi5': 'Demo Non IPBI Kelima',
+          'international1': 'Demo Internasional Pertama',
+          'international2': 'Demo Internasional Kedua',
+        },
+        '9': {
+          'pembina_demonstrator': 'Pembina Demonstrator',
+          'panitia': 'Menjadi Panitia',
+          'peserta': 'Menjadi Peserta',
+        },
+        '10': {
+          'ipbi_offline1': 'IPBI Offline Pertama',
+          'ipbi_offline2': 'IPBI Offline Kedua',
+          'ipbi_offline3': 'IPBI Offline Ketiga',
+          'ipbi_online1': 'IPBI Online Pertama',
+          'ipbi_online2': 'IPBI Online Kedua',
+          'ipbi_online3': 'IPBI Online Ketiga',
+          'non_ipbi_offline1': 'Non IPBI Offline Pertama',
+          'non_ipbi_offline2': 'Non IPBI Offline Kedua',
+          'non_ipbi_offline3': 'Non IPBI Offline Ketiga',
+          'non_ipbi_online1': 'Non IPBI Online Pertama',
+          'non_ipbi_online2': 'Non IPBI Online Kedua',
+          'non_ipbi_online3': 'Non IPBI Online Ketiga',
+          'international_offline1': 'Internasional Offline Pertama',
+          'international_offline2': 'Internasional Offline Kedua',
+          'international_online1': 'Internasional Online Pertama',
+          'international_online2': 'Internasional Online Kedua',
+          'host_moderator1': 'Host/Moderator Pertama',
+          'host_moderator2': 'Host/Moderator Kedua',
+          'host_moderator3': 'Host/Moderator Ketiga',
+          'host_moderator4': 'Host/Moderator Keempat',
+          'host_moderator5': 'Host/Moderator Kelima',
+        },
+        '11': {
+          'penguji_sertifikasi1': 'Penguji Sertifikasi Pertama',
+          'penguji_sertifikasi2': 'Penguji Sertifikasi Kedua',
+          'juri_ipbi1': 'Juri IPBI Pertama',
+          'juri_ipbi2': 'Juri IPBI Kedua',
+          'juri_non_ipbi1': 'Juri Non IPBI Pertama',
+          'juri_non_ipbi2': 'Juri Non IPBI Kedua',
+        },
+        '12': {
+          'jabatan': 'Jabatan',
+        },
+        '13': {
+          'guru_tetap': 'Guru Tetap',
+          'asisten_guru': 'Asisten Guru',
+          'owner_sekolah': 'Pemilik Sekolah',
+          'guru_tidak_tetap_offline': 'Guru Tidak Tetap Offline',
+          'guru_tidak_tetap_online': 'Guru Tidak Tetap Online',
+          'guru_luar_negeri1': 'Guru Luar Negeri Pertama',
+          'guru_luar_negeri2': 'Guru Luar Negeri Kedua',
+        },
+        '14': {
+          'ngajar_online': 'Mengajar Online',
+        },
+        '15': {
+          'ikebana_murid': 'Ikebana Murid',
+          'ikebana_guru': 'Ikebana Guru',
+          'rangkaian_tradisional': 'Rangkaian Tradisional',
+          'lainnya': 'Lainnya',
+        },
+        '16': {
+          'nama_florist': 'A. Nama Florist (Florist Staff/Owner)',
+          'd_alamat_florist': 'A. Alamat Florist',
+          'a_foto_lokasi1': 'A. Foto Lokasi 1',
+          'a_foto_lokasi2': 'A. Foto Lokasi 2',
+          'a_foto_lokasi3': 'A. Foto Lokasi 3',
+          'a_foto_kegiatan1': 'A. Foto Kegiatan 1',
+          'a_foto_kegiatan2': 'A. Foto Kegiatan 2',
+          'a_foto_kegiatan3': 'A. Foto Kegiatan 3',
+
+          'c_nama_florist': 'B. Nama Florist (Berbadan Hukum)',
+          'b_alamat_florist': 'B. Alamat Florist',
+          'freelance_designer': 'Desainer Freelance',
+          'b_bukti_akta1' : 'B. Foto Lokasi 1 / Bukti Akta 1',
+          'b_bukti_akta2' : 'B. Foto Lokasi 2 / Bukti Akta 2',
+          'b_bukti_akta3' : 'B. Foto Lokasi 3 / Bukti Akta 3',
+          'b_bukti_akta4' : 'B. Foto Lokasi 4 / Bukti Akta 4',
+          'b_bukti_akta5' : 'B. Foto Lokasi 5 / Bukti Akta 5',
+          'b_bukti_akta6' : 'B. Foto Lokasi 6 / Bukti Akta 6',
+
+          'c2_nama_florist' : "C. Nama Florist (Tidak Berbadan Hukum)",
+          'c2_alamat_florist' : "C. Alamat Florist",
+          'c_foto_lokasi1' : 'C. Foto Lokasi 1',
+          'c_foto_lokasi2' : 'C. Foto Lokasi 2',
+          'c_foto_lokasi3' : 'C. Foto Lokasi 3',
+          'c_foto_lokasi4' : 'C. Foto Lokasi 4',
+          'c_foto_lokasi5' : 'C. Foto Lokasi 5',
+          'c_foto_lokasi6' : 'C. Foto Lokasi 6',
+        
+        },
+        '17': {
+          'media_cetak_nasional': 'Media Cetak Nasional',
+          'media_cetak_internasional': 'Media Cetak Internasional',
+          'buku_merangkai_bunga': 'Buku Merangkai Bunga',
+          'kontributor_buku1': 'Kontributor Buku Pertama',
+          'kontributor_buku2': 'Kontributor Buku Kedua',
+          'kontributor_tv1': 'Kontributor TV Pertama',
+          'kontributor_tv2': 'Kontributor TV Kedua',
+        },
+      };
+
+      return fieldNameMap[this.soalNumber]?.[fieldName] || fieldName.replace(/_/g, ' ').replace(/\b\w/g, char => char.toUpperCase());
+    },
     promptDeleteSoal() {
       this.deleteTarget = 'soal';
       this.comment = '';
@@ -233,7 +406,7 @@ export default {
             `/api/admin/soal/${this.soalNumber}/${this.userId}/field/${this.deleteTarget}`,
             config
           );
-          alert(`Field ${this.deleteTarget} dihapus dengan komentar: ${response.data.comment || this.comment}`);
+          alert(`Field ${this.getDescriptiveFieldName(this.deleteTarget)} dihapus dengan komentar: ${response.data.comment || this.comment}`);
           this.showCommentModal = false;
           await this.fetchSoal(); // Refresh data after field deletion
         }
@@ -249,7 +422,7 @@ export default {
             this.showCommentModal = false;
             this.$router.push({ name: 'user-detail', params: { userId: this.userId } });
           } else {
-            alert(`Field ${this.deleteTarget} dihapus dengan komentar: ${this.comment || 'Dihapus tanpa alasan spesifik'}`);
+            alert(`Field ${this.getDescriptiveFieldName(this.deleteTarget)} dihapus dengan komentar: ${this.comment || 'Dihapus tanpa alasan spesifik'}`);
             this.showCommentModal = false;
             await this.fetchSoal(); // Refresh UI
           }
@@ -301,7 +474,6 @@ export default {
     },
     shouldShowFileButton(key, value) {
       if (!value || !this.isFileField(key)) return false;
-      // Tampilkan tombol "Lihat File" untuk semua soal yang memiliki file field, kecuali jika user sudah verified
       return true;
     },
     getFileFields() {
@@ -330,10 +502,10 @@ export default {
         '10': [
           'ipbi_offline1', 'ipbi_offline2', 'ipbi_offline3',
           'ipbi_online1', 'ipbi_online2', 'ipbi_online3',
-          'non_ipbi_offline1', 'noncrafted_ipbi_offline2', 'non_ipbi_offline3',
+          'non_ipbi_offline1', 'non_ipbi_offline2', 'non_ipbi_offline3',
           'non_ipbi_online1', 'non_ipbi_online2', 'non_ipbi_online3',
           'international_offline1', 'international_offline2',
-          'international_online1', 'international_online2',
+          'international_online-Thu, 18 Jul 2024 08:51:36 GMT1', 'international_online2',
           'host_moderator1', 'host_moderator2', 'host_moderator3', 'host_moderator4', 'host_moderator5'
         ],
         '11': ['penguji_sertifikasi1', 'penguji_sertifikasi2', 'juri_ipbi1', 'juri_ipbi2', 'juri_non_ipbi1', 'juri_non_ipbi2'],

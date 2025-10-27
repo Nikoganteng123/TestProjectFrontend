@@ -6,7 +6,7 @@
           Data 3: Apakah anda memiliki kemampuan mengajar dalam bahasa asing?
         </h1>
 
-        <form @submit.prevent="submitAnswer" class="space-y-6">
+        <div class="space-y-6">
           <!-- Bahasa Inggris Selection -->
           <div class="space-y-4">
             <label class="text-lg font-medium text-gray-900">Pilih kemampuan Bahasa Inggris:</label>
@@ -51,20 +51,26 @@
 
           <!-- Button Section -->
           <div class="flex flex-col space-y-4 sm:flex-row sm:space-y-0 sm:space-x-4 justify-center items-center mt-6">
-            <router-link to="/soal-2" class="uniform-button bg-gray-500 text-white rounded-xl py-3 px-6 hover:bg-gray-600 transition-all duration-300 w-full sm:w-auto">
-              Sebelumnya
+            <router-link to="/soal-2" 
+              class="uniform-button bg-gray-500 text-white rounded-xl py-3 px-6 hover:bg-gray-600 transition-all duration-300 w-full sm:w-auto"
+              @click.prevent="handleNavigation('/soal-2')">
+              Kembali
             </router-link>
-            <button v-if="showSaveButton" type="submit" class="uniform-button bg-green-600 text-white rounded-xl py-3 px-6 hover:bg-green-700 transition-all duration-300 w-full sm:w-auto">
-              {{ hasExistingData ? 'Tambah' : 'Simpan' }}
-            </button>
-            <button v-if="hasExistingData" type="button" @click="deleteAnswer" class="uniform-button bg-red-600 text-white rounded-xl py-3 px-6 hover:bg-red-700 transition-all duration-300 w-full sm:w-auto">
+            <button v-if="hasExistingData" type="button" @click="deleteAnswer" 
+              class="uniform-button bg-red-600 text-white rounded-xl py-3 px-6 hover:bg-red-700 transition-all duration-300 w-full sm:w-auto">
               Hapus
             </button>
-            <router-link to="/soal-4" class="uniform-button bg-blue-600 text-white rounded-xl py-3 px-6 hover:bg-blue-700 transition-all duration-300 w-full sm:w-auto">
+            <router-link to="/soal-4" 
+              class="uniform-button bg-blue-600 text-white rounded-xl py-3 px-6 hover:bg-blue-700 transition-all duration-300 w-full sm:w-auto"
+              @click.prevent="handleNavigation('/soal-4')">
               Lanjut
             </router-link>
           </div>
-        </form>
+        </div>
+
+        <p class="text-red-500 text-sm text-center mt-4 opacity-50">
+          *Data akan otomatis tersimpan saat berpindah halaman!
+        </p>
 
         <!-- Question Navigation Bar -->
         <div class="mt-8 pt-6 border-t border-gray-200">
@@ -86,9 +92,10 @@
 import { ref, computed, onMounted } from 'vue';
 import axios from 'axios';
 import { useAuthStore } from '@/stores/auth';
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 
 const route = useRoute();
+const router = useRouter();
 const authStore = useAuthStore();
 const hasExistingData = ref(false);
 
@@ -111,17 +118,6 @@ const savedData = ref({
 const currentQuestionNumber = computed(() => {
   const match = route.path.match(/\/soal-(\d+)/);
   return match ? parseInt(match[1]) : 1;
-});
-
-const showSaveButton = computed(() => {
-  if (!hasExistingData.value) {
-    return Object.values(inputData.value).some(val => val !== '');
-  }
-  
-  return Object.keys(inputData.value).some(key => 
-    inputData.value[key] !== savedData.value[key] && 
-    inputData.value[key] !== ''
-  );
 });
 
 onMounted(async () => {
@@ -150,17 +146,24 @@ const fetchAnswer = async () => {
   }
 };
 
-const submitAnswer = async () => {
+const saveOrUpdateAnswer = async () => {
   try {
+    // Cek apakah ada data yang diisi
+    const hasInput = Object.values(inputData.value).some(val => val !== '');
+    if (!hasInput) return;
+
     const endpoint = '/api/soal3';
     const method = hasExistingData.value ? 'put' : 'post';
     const response = await axios[method](endpoint, inputData.value, {
       headers: { Authorization: `Bearer ${authStore.accessToken}` }
     });
+    
     savedData.value = { ...inputData.value };
     hasExistingData.value = true;
+    console.log('Data saved/updated successfully:', response.data);
   } catch (error) {
-    console.error('Failed to save answer:', error.response?.data || error.message);
+    console.error('Failed to save/update answer:', error.response?.data || error.message);
+    alert('Gagal menyimpan data: ' + (error.response?.data?.message || error.message));
   }
 };
 
@@ -180,7 +183,13 @@ const deleteAnswer = async () => {
     hasExistingData.value = false;
   } catch (error) {
     console.error('Failed to delete answer:', error.response?.data || error.message);
+    alert('Gagal menghapus data: ' + (error.response?.data?.message || error.message));
   }
+};
+
+const handleNavigation = async (path) => {
+  await saveOrUpdateAnswer();
+  router.push(path);
 };
 </script>
 

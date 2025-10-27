@@ -28,7 +28,7 @@
       <!-- Notifications List -->
       <div v-if="!isLoading && !error" class="space-y-6">
         <div 
-          v-for="notification in filteredNotifications" 
+          v-for="notification in notifications" 
           :key="notification.id" 
           class="bg-white p-6 rounded-2xl shadow-md transition-all duration-300 hover:shadow-xl hover:-translate-y-1 cursor-pointer"
           :class="{ 'bg-emerald-50 border-l-4 border-emerald-500': !notification.read_at }"
@@ -70,18 +70,9 @@
                 <p class="text-sm text-gray-500 italic">
                   {{ formatDate(notification.created_at) }}
                 </p>
-                <div v-if="!notification.read_at">
-                  <button
-                    v-if="!notification.soal_number"
-                    @click="markAsRead(notification.id)"
-                    class="px-4 py-2 bg-emerald-600 text-white rounded-full text-sm font-medium hover:bg-emerald-700 transition-all duration-300"
-                  >
-                    Tandai Dibaca
-                  </button>
+                <div v-if="!notification.read_at && notification.soal_number">
                   <router-link
-                    v-else
                     :to="`/soal-${notification.soal_number}`"
-                    @click="markAsRead(notification.id)"
                     class="px-4 py-2 bg-emerald-600 text-white rounded-full text-sm font-medium hover:bg-emerald-700 transition-all duration-300"
                   >
                     Perbaiki Jawaban
@@ -93,7 +84,7 @@
         </div>
 
         <!-- No Notifications -->
-        <div v-if="filteredNotifications.length === 0" class="text-center py-12 bg-white rounded-2xl shadow-lg transition-all duration-300 hover:shadow-xl">
+        <div v-if="notifications.length === 0" class="text-center py-12 bg-white rounded-2xl shadow-lg transition-all duration-300 hover:shadow-xl">
           <svg class="mx-auto h-16 w-16 text-emerald-400 animate__animated animate__fadeIn" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6 6 0 00-12 0v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>
           </svg>
@@ -107,7 +98,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from 'vue';
+import { ref, onMounted } from 'vue';
 import axios from 'axios';
 import { useAuthStore } from '@/stores/auth';
 
@@ -115,22 +106,6 @@ const authStore = useAuthStore();
 const notifications = ref([]);
 const isLoading = ref(false);
 const error = ref(null);
-
-// Computed property untuk memfilter notifikasi
-const filteredNotifications = computed(() => {
-  // Cari notifikasi verifikasi (soal_number bernilai null)
-  const verificationNotification = notifications.value.find(
-    (notification) => notification.soal_number === null
-  );
-
-  // Jika ada notifikasi verifikasi, hanya tampilkan itu
-  if (verificationNotification) {
-    return [verificationNotification];
-  }
-
-  // Jika tidak ada notifikasi verifikasi, tampilkan semua notifikasi
-  return notifications.value;
-});
 
 const fetchNotifications = async () => {
   isLoading.value = true;
@@ -176,21 +151,6 @@ const uploadFile = async (event, commentId, soalNumber, fieldName) => {
   } catch (err) {
     console.error('Error uploading file:', err.response || err);
     error.value = err.response?.data?.message || 'Gagal mengunggah file.';
-  }
-};
-
-const markAsRead = async (notificationId) => {
-  try {
-    await axios.post(`/api/notifications/${notificationId}/read`, {}, {
-      headers: { Authorization: `Bearer ${authStore.accessToken}` },
-    });
-    const notification = notifications.value.find(n => n.id === notificationId);
-    if (notification) {
-      notification.read_at = new Date().toISOString();
-    }
-  } catch (err) {
-    console.error('Error marking notification as read:', err.response || err);
-    error.value = err.response?.data?.message || 'Gagal menandai notifikasi sebagai dibaca.';
   }
 };
 

@@ -6,11 +6,10 @@
           Data 5: Sertifikasi Kompetensi di Bidang Merangkai Bunga
         </h1>
 
-        <form @submit.prevent="submitAnswer" class="space-y-6 p-6">
+        <div class="space-y-6 p-6">
           <div class="flex flex-col space-y-4">
             <div v-for="(field, index) in certificateFields" :key="index" class="flex flex-col gap-2">
               <div class="flex items-center justify-between gap-4 p-2 bg-gray-50 rounded-md hover:bg-gray-100 transition-all duration-200">
-                <!-- Label -->
                 <label :for="field.key" 
                   :class="[
                     'text-sm font-medium flex-1',
@@ -19,17 +18,18 @@
                   {{ field.label }}
                 </label>
 
-                <!-- Status atau Input File -->
                 <div class="flex items-center gap-2">
-                  <!-- Status ketika file tersimpan -->
-                  <div v-if="savedFiles[field.key]" class="text-green-600 flex items-center gap-1 text-xs">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                    </svg>
-                    <span>Tersimpan</span>
+                  <div v-if="savedFiles[field.key]" class="flex items-center gap-2">
+                    <div class="text-green-600 flex items-center gap-1 text-xs">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                      </svg>
+                      <span>Tersimpan</span>
+                    </div>
+                    <button @click="viewFile(field.key)" class="view-file-button">
+                      Lihat File
+                    </button>
                   </div>
-
-                  <!-- Input File jika belum tersimpan -->
                   <div v-else class="relative">
                     <input type="file" :id="field.key" accept=".pdf,image/*"
                       @change="handleFileUpload($event, field.key)"
@@ -46,30 +46,28 @@
           <!-- Buttons -->
           <div class="flex flex-col space-y-4 sm:flex-row sm:space-y-0 sm:space-x-4 sm:justify-between items-center mt-6">
             <router-link to="/soal-4" 
-              class="uniform-button bg-gray-500 text-white hover:bg-gray-600">
-              Sebelumnya
+              class="uniform-button bg-gray-500 text-white hover:bg-gray-600"
+              @click.prevent="handleNavigation('/soal-4')">
+              Kembali
             </router-link>
             
-            <div class="flex flex-col space-y-4 sm:flex-row sm:space-y-0 sm:space-x-4">
-              <button type="submit"
-                v-if="Object.keys(uploadedFiles).length > 0"
-                class="uniform-button bg-green-600 text-white hover:bg-green-700">
-                {{ Object.keys(savedFiles).length > 0 ? 'Tambah' : 'Simpan' }}
-              </button>
-
-              <button type="button" @click="deleteAllFiles"
-                v-if="Object.keys(savedFiles).length > 0"
-                class="uniform-button bg-red-600 text-white hover:bg-red-700">
-                Hapus
-              </button>
-            </div>
+            <button type="button" @click="deleteAllFiles"
+              v-if="Object.keys(savedFiles).length > 0"
+              class="uniform-button bg-red-600 text-white hover:bg-red-700">
+              Hapus
+            </button>
 
             <router-link to="/soal-6" 
-              class="uniform-button bg-blue-600 text-white hover:bg-blue-700">
+              class="uniform-button bg-blue-600 text-white hover:bg-blue-700"
+              @click.prevent="handleNavigation('/soal-6')">
               Lanjut
             </router-link>
           </div>
-        </form>
+        </div>
+
+        <p class="text-red-500 text-sm text-center mt-4 opacity-50">
+          *Data akan otomatis tersimpan saat berpindah halaman!
+        </p>
 
         <!-- Question Navigation Bar -->
         <div class="mt-8 pt-6 border-t border-gray-200">
@@ -96,12 +94,13 @@
 </template>
 
 <script setup>
-import { ref, onMounted, computed } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import axios from 'axios';
 import { useAuthStore } from '@/stores/auth';
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 
 const route = useRoute();
+const router = useRouter();
 const authStore = useAuthStore();
 const uploadedFiles = ref({});
 const savedFiles = ref({});
@@ -152,36 +151,16 @@ const handleFileUpload = (event, field) => {
   }
 };
 
-const deleteAllFiles = async () => {
+const saveOrUpdateFiles = async () => {
   try {
-    await axios.delete('/api/soal5', {
-      headers: { Authorization: `Bearer ${authStore.accessToken}` }
-    });
+    if (Object.keys(uploadedFiles.value).length === 0) return;
 
-    savedFiles.value = {};
-    uploadedFiles.value = {};
-  } catch (error) {
-    console.error('Failed to delete all files:', error);
-    alert('Gagal menghapus file: ' + (error.response?.data?.message || error.message));
-  }
-};
-
-const submitAnswer = async () => {
-  try {
     const formData = new FormData();
-    let hasFiles = false;
-
     Object.keys(uploadedFiles.value).forEach((key) => {
       if (uploadedFiles.value[key]) {
         formData.append(key, uploadedFiles.value[key]);
-        hasFiles = true;
       }
     });
-
-    if (!hasFiles) {
-      console.warn('No files selected');
-      return;
-    }
 
     const endpoint = Object.keys(savedFiles.value).length > 0 
       ? '/api/update5'
@@ -194,18 +173,71 @@ const submitAnswer = async () => {
       }
     });
 
-    console.log('Answer saved successfully:', response.data);
+    console.log('Files saved/updated successfully:', response.data);
     uploadedFiles.value = {};
     await fetchAnswer();
   } catch (error) {
-    console.error('Failed to save answer:', error);
-    alert('Gagal menyimpan jawaban: ' + (error.response?.data?.message || error.message));
+    console.error('Failed to save/update files:', error);
+    alert('Gagal menyimpan data: ' + (error.response?.data?.message || error.message));
   }
 };
 
-// Fungsi untuk memotong nama file jika terlalu panjang
+const deleteAllFiles = async () => {
+  try {
+    await axios.delete('/api/soal5', {
+      headers: { Authorization: `Bearer ${authStore.accessToken}` }
+    });
+    savedFiles.value = {};
+    uploadedFiles.value = {};
+  } catch (error) {
+    console.error('Failed to delete files:', error);
+    alert('Gagal menghapus file: ' + (error.response?.data?.message || error.message));
+  }
+};
+
+const handleNavigation = async (path) => {
+  await saveOrUpdateFiles();
+  router.push(path);
+};
+
 const truncateFileName = (name) => {
   return name.length > 15 ? `${name.substring(0, 12)}...` : name;
+};
+
+const viewFile = async (fieldName) => {
+  try {
+    const url = `/api/admin/soal/5/${authStore.user.id}/file/${fieldName}`;
+    const response = await axios.get(url, {
+      responseType: 'blob',
+      headers: {
+        Authorization: `Bearer ${authStore.accessToken}`,
+      },
+    });
+
+    const contentType = response.headers['content-type'];
+    const blob = new Blob([response.data], { type: contentType });
+    const blobUrl = window.URL.createObjectURL(blob);
+
+    if (contentType.includes('image')) {
+      const imgWindow = window.open('', '_blank');
+      imgWindow.document.write(`
+        <html>
+          <body style="margin: 0; display: flex; justify-content: center; align-items: center; height: 100vh; background: #f0f0f0;">
+            <img src="${blobUrl}" style="max-width: 100%; max-height: 100%; object-fit: contain;" />
+          </body>
+        </html>
+      `);
+    } else if (contentType.includes('pdf')) {
+      window.open(blobUrl, '_blank');
+    } else {
+      alert('Tipe file tidak didukung untuk ditampilkan.');
+    }
+
+    setTimeout(() => window.URL.revokeObjectURL(blobUrl), 1000);
+  } catch (error) {
+    console.error('Error fetching file:', error.response || error);
+    alert('Gagal membuka file: ' + (error.response?.data?.message || 'File tidak ditemukan'));
+  }
 };
 </script>
 
@@ -300,6 +332,28 @@ const truncateFileName = (name) => {
   background: #d1fae5;
   border-color: #2d6a4f;
   color: #1f4d36;
+  transform: scale(1.05);
+}
+
+/* View File Button */
+.view-file-button {
+  display: inline-block;
+  padding: 0.5rem 1rem;
+  background: #e0f2fe;
+  border: 2px solid #3b82f6;
+  border-radius: 0.5rem;
+  color: #1e3a8a;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.view-file-button:hover {
+  background: #bfdbfe;
+  border-color: #1e40af;
+  color: #1e3a8a;
   transform: scale(1.05);
 }
 

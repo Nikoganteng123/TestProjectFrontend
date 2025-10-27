@@ -14,7 +14,7 @@
           {{ errorMessage }}
         </div>
 
-        <form @submit.prevent="submitAnswer" class="space-y-4">
+        <form class="space-y-4">
           <div class="flex flex-col space-y-4">
             <div v-for="(field, index) in certificateFields" :key="index">
               <hr v-if="['asisten_guru', 'owner_sekolah', 'guru_tidak_tetap_offline', 'guru_tidak_tetap_online', 'guru_luar_negeri1'].includes(field.key)" 
@@ -29,22 +29,27 @@
                   {{ field.label }}
                 </label>
 
-                <!-- Show when file is saved -->
-                <div v-if="savedFiles[field.key]" class="text-green-600 flex items-center gap-2">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                  </svg>
-                  <span>File sudah tersimpan</span>
-                </div>
+                <div class="flex items-center gap-2">
+                  <div v-if="savedFiles[field.key]" class="flex items-center gap-2">
+                    <div class="text-green-600 flex items-center gap-1 text-xs">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                      </svg>
+                      <span>Tersimpan</span>
+                    </div>
+                    <button @click="viewFile(field.key)" class="view-file-button">
+                      Lihat File
+                    </button>
+                  </div>
 
-                <!-- Show file input only when no file is saved -->
-                <div v-else class="relative">
-                  <input type="file" :id="field.key" accept=".pdf,image/*"
-                    @change="handleFileUpload($event, field.key)"
-                    class="hidden-file-input" />
-                  <label :for="field.key" class="upload-button">
-                    {{ uploadedFiles[field.key] ? truncateFileName(uploadedFiles[field.key].name) : 'Upload' }}
-                  </label>
+                  <div v-else class="relative">
+                    <input type="file" :id="field.key" accept=".pdf,image/*"
+                      @change="handleFileUpload($event, field.key)"
+                      class="hidden-file-input" />
+                    <label :for="field.key" class="upload-button">
+                      {{ uploadedFiles[field.key] ? truncateFileName(uploadedFiles[field.key].name) : 'Upload' }}
+                    </label>
+                  </div>
                 </div>
               </div>
             </div>
@@ -52,34 +57,29 @@
 
           <div class="flex flex-col space-y-4 sm:flex-row sm:space-y-0 sm:space-x-4 sm:justify-between items-center mt-6">
             <router-link to="/soal-12" 
+              @click="saveBeforeNavigation"
               class="uniform-button bg-gray-500 text-white hover:bg-gray-600">
-              Sebelumnya
+              Kembali
             </router-link>
             
-            <div class="flex flex-col space-y-4 sm:flex-row sm:space-y-0 sm:space-x-4">
-              <button type="submit"
-                v-if="Object.keys(uploadedFiles).length > 0"
-                :disabled="loading"
-                class="uniform-button bg-green-600 text-white hover:bg-green-700">
-                {{ Object.keys(savedFiles).length > 0 ? 'Tambah' : 'Simpan' }}
-                <span v-if="loading" class="spinner ml-2"></span>
-              </button>
-
-              <button type="button" @click="deleteAllFiles"
-                v-if="Object.keys(savedFiles).length > 0"
-                :disabled="loading"
-                class="uniform-button bg-red-600 text-white hover:bg-red-700">
-                Hapus
-                <span v-if="loading" class="spinner ml-2"></span>
-              </button>
-            </div>
+            <button type="button" @click="deleteAllFiles"
+              v-if="Object.keys(savedFiles).length > 0"
+              :disabled="loading"
+              class="uniform-button bg-red-600 text-white hover:bg-red-700">
+              Hapus
+              <span v-if="loading" class="spinner ml-2"></span>
+            </button>
 
             <router-link to="/soal-14" 
+              @click="saveBeforeNavigation"
               class="uniform-button bg-blue-600 text-white hover:bg-blue-700">
               Lanjut
             </router-link>
           </div>
         </form>
+        <p class="text-red-500 text-sm text-center mt-4 opacity-50">
+          *Data akan otomatis tersimpan saat berpindah halaman!
+        </p>
 
         <!-- Question Navigation Bar -->
         <div class="mt-8 pt-6 border-t border-gray-200">
@@ -89,6 +89,7 @@
               v-for="n in 17" 
               :key="n"
               :to="`/soal-${n}`"
+              @click="saveBeforeNavigation"
               class="w-10 h-10 flex items-center justify-center rounded-lg text-sm font-medium transition-all duration-200"
               :class="[
                 currentQuestionNumber === n 
@@ -129,7 +130,6 @@ const certificateFields = [
   { key: 'guru_luar_negeri2', label: 'Mengajar merangkai bunga di luar negeri per session 2' }
 ];
 
-// Extract current question number from route
 const currentQuestionNumber = computed(() => {
   const match = route.path.match(/\/soal-(\d+)/);
   return match ? parseInt(match[1]) : 13;
@@ -145,7 +145,6 @@ const fetchAnswer = async () => {
     const response = await axios.get('/api/soal13', {
       headers: { Authorization: `Bearer ${authStore.accessToken}` }
     });
-    
     savedFiles.value = response.data.data || {};
   } catch (error) {
     errorMessage.value = 'Gagal memuat data: ' + (error.response?.data?.message || error.message);
@@ -170,14 +169,13 @@ const handleFileUpload = (event, field) => {
 };
 
 const deleteAllFiles = async () => {
-  if (!confirm('Apakah Anda yakin ingin menghapus semua file?')) return;
+  if (!confirm('Apakah Anda yakin ingin menghapus semua file nomor 13?')) return;
   
   try {
     loading.value = true;
     await axios.delete('/api/soal13', {
       headers: { Authorization: `Bearer ${authStore.accessToken}` }
     });
-    
     savedFiles.value = {};
     uploadedFiles.value = {};
     successMessage.value = 'Semua file berhasil dihapus';
@@ -189,26 +187,17 @@ const deleteAllFiles = async () => {
   }
 };
 
-const submitAnswer = async () => {
+const saveBeforeNavigation = async () => {
+  if (Object.keys(uploadedFiles.value).length === 0) return; // Tidak ada file baru untuk disimpan
+
   try {
     loading.value = true;
-    successMessage.value = '';
-    errorMessage.value = '';
-    
     const formData = new FormData();
-    let hasFiles = false;
-
     Object.keys(uploadedFiles.value).forEach((key) => {
       if (uploadedFiles.value[key]) {
         formData.append(key, uploadedFiles.value[key]);
-        hasFiles = true;
       }
     });
-
-    if (!hasFiles) {
-      errorMessage.value = 'Silakan pilih setidaknya satu file untuk diunggah';
-      return;
-    }
 
     const endpoint = Object.keys(savedFiles.value).length > 0 
       ? '/api/update13'
@@ -232,9 +221,44 @@ const submitAnswer = async () => {
   }
 };
 
-// Truncate file name if too long
 const truncateFileName = (name) => {
   return name.length > 15 ? `${name.substring(0, 12)}...` : name;
+};
+
+const viewFile = async (fieldName) => {
+  try {
+    const url = `/api/admin/soal/13/${authStore.user.id}/file/${fieldName}`;
+    const response = await axios.get(url, {
+      responseType: 'blob',
+      headers: {
+        Authorization: `Bearer ${authStore.accessToken}`,
+      },
+    });
+
+    const contentType = response.headers['content-type'];
+    const blob = new Blob([response.data], { type: contentType });
+    const blobUrl = window.URL.createObjectURL(blob);
+
+    if (contentType.includes('image')) {
+      const imgWindow = window.open('', '_blank');
+      imgWindow.document.write(`
+        <html>
+          <body style="margin: 0; display: flex; justify-content: center; align-items: center; height: 100vh; background: #f0f0f0;">
+            <img src="${blobUrl}" style="max-width: 100%; max-height: 100%; object-fit: contain;" />
+          </body>
+        </html>
+      `);
+    } else if (contentType.includes('pdf')) {
+      window.open(blobUrl, '_blank');
+    } else {
+      alert('Tipe file tidak didukung untuk ditampilkan.');
+    }
+
+    setTimeout(() => window.URL.revokeObjectURL(blobUrl), 1000);
+  } catch (error) {
+    console.error('Error fetching file:', error.response || error);
+    alert('Gagal membuka file: ' + (error.response?.data?.message || 'File tidak ditemukan'));
+  }
 };
 </script>
 
@@ -331,6 +355,28 @@ const truncateFileName = (name) => {
   background: #d1fae5;
   border-color: #2d6a4f;
   color: #1f4d36;
+  transform: scale(1.05);
+}
+
+/* View File Button */
+.view-file-button {
+  display: inline-block;
+  padding: 0.5rem 1rem;
+  background: #e0f2fe;
+  border: 2px solid #3b82f6;
+  border-radius: 0.5rem;
+  color: #1e3a8a;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.view-file-button:hover {
+  background: #bfdbfe;
+  border-color: #1e40af;
+  color: #1e3a8a;
   transform: scale(1.05);
 }
 

@@ -14,14 +14,13 @@
           {{ errorMessage }}
         </div>
 
-        <form @submit.prevent="submitAnswer" class="space-y-6 p-6">
+        <div class="space-y-6 p-6">
           <div class="flex flex-col space-y-4">
             <div v-for="(field, index) in certificateFields" :key="index" class="flex flex-col gap-2">
               <hr v-if="['panitia', 'peserta'].includes(field.key)" 
                 class="border-t border-gray-300 my-4">
               
               <div class="flex items-center justify-between gap-4 p-2 bg-gray-50 rounded-md hover:bg-gray-100 transition-all duration-200">
-                <!-- Label -->
                 <label :for="field.key" 
                   :class="[
                     'text-sm font-medium flex-1',
@@ -30,17 +29,19 @@
                   {{ field.label }}
                 </label>
 
-                <!-- Status atau Input File -->
                 <div class="flex items-center gap-2">
-                  <!-- Status ketika file tersimpan -->
-                  <div v-if="savedFiles[field.key]" class="text-green-600 flex items-center gap-1 text-xs">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                    </svg>
-                    <span>Tersimpan</span>
+                  <div v-if="savedFiles[field.key]" class="flex items-center gap-2">
+                    <div class="text-green-600 flex items-center gap-1 text-xs">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                      </svg>
+                      <span>Tersimpan</span>
+                    </div>
+                    <button @click="viewFile(field.key)" class="view-file-button">
+                      Lihat File
+                    </button>
                   </div>
 
-                  <!-- Input File jika belum tersimpan -->
                   <div v-else class="relative">
                     <input type="file" :id="field.key" accept=".pdf,image/*"
                       @change="handleFileUpload($event, field.key)"
@@ -57,34 +58,30 @@
           <!-- Buttons -->
           <div class="flex flex-col space-y-4 sm:flex-row sm:space-y-0 sm:space-x-4 sm:justify-between items-center mt-6">
             <router-link to="/soal-8" 
-              class="uniform-button bg-gray-500 text-white hover:bg-gray-600">
-              Sebelumnya
+              class="uniform-button bg-gray-500 text-white hover:bg-gray-600"
+              @click.prevent="handleNavigation('/soal-8')">
+              Kembali
             </router-link>
+
+            <button type="button" @click="deleteAllFiles"
+              v-if="Object.keys(savedFiles).length > 0"
+              :disabled="loading"
+              class="uniform-button bg-red-600 text-white hover:bg-red-700">
+              Hapus
+              <span v-if="loading" class="spinner ml-2"></span>
+            </button>
             
-            <div class="flex flex-col space-y-4 sm:flex-row sm:space-y-0 sm:space-x-4">
-              <button type="submit"
-                v-if="Object.keys(uploadedFiles).length > 0"
-                :disabled="loading"
-                class="uniform-button bg-green-600 text-white hover:bg-green-700">
-                {{ Object.keys(savedFiles).length > 0 ? 'Tambah' : 'Simpan' }}
-                <span v-if="loading" class="spinner ml-2"></span>
-              </button>
-
-              <button type="button" @click="deleteAllFiles"
-                v-if="Object.keys(savedFiles).length > 0"
-                :disabled="loading"
-                class="uniform-button bg-red-600 text-white hover:bg-red-700">
-                Hapus
-                <span v-if="loading" class="spinner ml-2"></span>
-              </button>
-            </div>
-
             <router-link to="/soal-10" 
-              class="uniform-button bg-blue-600 text-white hover:bg-blue-700">
+              class="uniform-button bg-blue-600 text-white hover:bg-blue-700"
+              @click.prevent="handleNavigation('/soal-10')">
               Lanjut
             </router-link>
           </div>
-        </form>
+        </div>
+
+        <p class="text-red-500 text-sm text-center mt-4 opacity-50">
+          *Data akan otomatis tersimpan saat berpindah halaman!
+        </p>
 
         <!-- Question Navigation Bar -->
         <div class="mt-8 pt-6 border-t border-gray-200">
@@ -114,9 +111,10 @@
 import { ref, onMounted, computed } from 'vue';
 import axios from 'axios';
 import { useAuthStore } from '@/stores/auth';
-import { useRoute } from 'vue-router';
+import { useRoute, useRouter } from 'vue-router';
 
 const route = useRoute();
+const router = useRouter();
 const authStore = useAuthStore();
 const uploadedFiles = ref({});
 const savedFiles = ref({});
@@ -168,46 +166,20 @@ const handleFileUpload = (event, field) => {
   }
 };
 
-const deleteAllFiles = async () => {
-  if (!confirm('Apakah Anda yakin ingin menghapus semua file?')) return;
-  
+const saveOrUpdateFiles = async () => {
   try {
-    loading.value = true;
-    await axios.delete('/api/soal9', {
-      headers: { Authorization: `Bearer ${authStore.accessToken}` }
-    });
-    
-    savedFiles.value = {};
-    uploadedFiles.value = {};
-    successMessage.value = 'Semua file berhasil dihapus';
-    setTimeout(() => successMessage.value = '', 3000);
-  } catch (error) {
-    errorMessage.value = 'Gagal menghapus semua file: ' + (error.response?.data?.message || error.message);
-  } finally {
-    loading.value = false;
-  }
-};
+    if (Object.keys(uploadedFiles.value).length === 0) return;
 
-const submitAnswer = async () => {
-  try {
     loading.value = true;
     successMessage.value = '';
     errorMessage.value = '';
-    
-    const formData = new FormData();
-    let hasFiles = false;
 
+    const formData = new FormData();
     Object.keys(uploadedFiles.value).forEach((key) => {
       if (uploadedFiles.value[key]) {
         formData.append(key, uploadedFiles.value[key]);
-        hasFiles = true;
       }
     });
-
-    if (!hasFiles) {
-      errorMessage.value = 'Silakan pilih setidaknya satu file untuk diunggah';
-      return;
-    }
 
     const endpoint = Object.keys(savedFiles.value).length > 0 
       ? '/api/update9'
@@ -220,20 +192,80 @@ const submitAnswer = async () => {
       }
     });
 
-    successMessage.value = response.data.message || 'Jawaban berhasil disimpan';
+    successMessage.value = response.data.message;
     uploadedFiles.value = {};
     await fetchAnswer();
     setTimeout(() => successMessage.value = '', 3000);
   } catch (error) {
-    errorMessage.value = 'Gagal menyimpan: ' + (error.response?.data?.message || error.message);
+    errorMessage.value = 'Gagal menyimpan data: ' + (error.response?.data?.message || error.message);
   } finally {
     loading.value = false;
   }
 };
 
-// Fungsi untuk memotong nama file jika terlalu panjang
+const deleteAllFiles = async () => {
+  if (!confirm('Apakah Anda yakin ingin menghapus semua file nomor 9?')) return;
+  
+  try {
+    loading.value = true;
+    await axios.delete('/api/soal9', {
+      headers: { Authorization: `Bearer ${authStore.accessToken}` }
+    });
+    
+    savedFiles.value = {};
+    uploadedFiles.value = {};
+    successMessage.value = 'Semua file berhasil dihapus';
+    setTimeout(() => successMessage.value = '', 3000);
+  } catch (error) {
+    errorMessage.value = 'Gagal menghapus file: ' + (error.response?.data?.message || error.message);
+  } finally {
+    loading.value = false;
+  }
+};
+
+const handleNavigation = async (path) => {
+  await saveOrUpdateFiles();
+  router.push(path);
+};
+
 const truncateFileName = (name) => {
   return name.length > 15 ? `${name.substring(0, 12)}...` : name;
+};
+
+const viewFile = async (fieldName) => {
+  try {
+    const url = `/api/admin/soal/9/${authStore.user.id}/file/${fieldName}`;
+    const response = await axios.get(url, {
+      responseType: 'blob',
+      headers: {
+        Authorization: `Bearer ${authStore.accessToken}`,
+      },
+    });
+
+    const contentType = response.headers['content-type'];
+    const blob = new Blob([response.data], { type: contentType });
+    const blobUrl = window.URL.createObjectURL(blob);
+
+    if (contentType.includes('image')) {
+      const imgWindow = window.open('', '_blank');
+      imgWindow.document.write(`
+        <html>
+          <body style="margin: 0; display: flex; justify-content: center; align-items: center; height: 100vh; background: #f0f0f0;">
+            <img src="${blobUrl}" style="max-width: 100%; max-height: 100%; object-fit: contain;" />
+          </body>
+        </html>
+      `);
+    } else if (contentType.includes('pdf')) {
+      window.open(blobUrl, '_blank');
+    } else {
+      alert('Tipe file tidak didukung untuk ditampilkan.');
+    }
+
+    setTimeout(() => window.URL.revokeObjectURL(blobUrl), 1000);
+  } catch (error) {
+    console.error('Error fetching file:', error.response || error);
+    alert('Gagal membuka file: ' + (error.response?.data?.message || 'File tidak ditemukan'));
+  }
 };
 </script>
 
@@ -293,8 +325,8 @@ const truncateFileName = (name) => {
   font-size: 0.875rem;
   font-weight: 500;
   transition: color 0.3s ease;
-  white-space: normal; /* Memungkinkan teks membungkus */
-  word-break: break-word; /* Memastikan kata panjang terpecah jika perlu */
+  white-space: normal;
+  word-break: break-word;
 }
 
 .text-green-600 {
@@ -333,6 +365,28 @@ const truncateFileName = (name) => {
   transform: scale(1.05);
 }
 
+/* View File Button */
+.view-file-button {
+  display: inline-block;
+  padding: 0.5rem 1rem;
+  background: #e0f2fe;
+  border: 2px solid #3b82f6;
+  border-radius: 0.5rem;
+  color: #1e3a8a;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.view-file-button:hover {
+  background: #bfdbfe;
+  border-color: #1e40af;
+  color: #1e3a8a;
+  transform: scale(1.05);
+}
+
 /* Uniform Button Styling */
 .uniform-button {
   padding: 0.5rem 1rem;
@@ -348,10 +402,6 @@ const truncateFileName = (name) => {
   text-align: center;
 }
 
-.uniform-button.bg-green-600 {
-  background: linear-gradient(135deg, #2d6a4f, #34d399);
-}
-
 .uniform-button.bg-red-600 {
   background: linear-gradient(135deg, #ef4444, #dc2626);
 }
@@ -364,11 +414,7 @@ const truncateFileName = (name) => {
   background: linear-gradient(135deg, #6b7280, #4b5563);
 }
 
-.uniform-button.bg-green-600:hover:not(:disabled) {
-  background: linear-gradient(135deg, #1f4d36, #22c55e);
-}
-
-.uniform-button.bg-red-600:hover:not(:disabled) {
+.uniform-button.bg-red-600:hover {
   background: linear-gradient(135deg, #dc2626, #b91c1c);
 }
 
@@ -398,6 +444,17 @@ const truncateFileName = (name) => {
 .uniform-button:disabled {
   opacity: 0.6;
   cursor: not-allowed;
+}
+
+/* Spinner */
+.spinner {
+  border: 2px solid #f3f3f3;
+  border-top: 2px solid #34d399;
+  border-radius: 50%;
+  width: 16px;
+  height: 16px;
+  animation: spin 1s linear infinite;
+  display: inline-block;
 }
 
 /* Question Navigation */
@@ -431,17 +488,6 @@ const truncateFileName = (name) => {
   background: #34d399;
   color: white;
   transform: scale(1.1);
-}
-
-/* Spinner */
-.spinner {
-  border: 2px solid #f3f3f3;
-  border-top: 2px solid #34d399;
-  border-radius: 50%;
-  width: 16px;
-  height: 16px;
-  animation: spin 1s linear infinite;
-  display: inline-block;
 }
 
 /* Animations */
