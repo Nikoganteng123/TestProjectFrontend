@@ -425,9 +425,13 @@ export default {
         // Load Leaflet Maps library
         await this.loadLeafletScript();
         
-        // Fetch data guru dari API public
+        // Fetch data guru dari API public endpoint
         try {
-          const response = await axios.get('/api/public/teachers');
+          const response = await axios.get('/api/public/teachers', { 
+            useAuthInRequest: false,
+            withCredentials: false 
+          });
+          // Data sudah filtered oleh backend (admin tidak ditampilkan)
           this.teachers = response.data?.data || [];
           console.log('Data guru loaded:', this.teachers.length, 'guru');
         } catch (apiError) {

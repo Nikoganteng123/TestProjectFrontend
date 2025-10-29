@@ -106,6 +106,14 @@
       <RouterView />
     </div>
 
+    <!-- Dialog Popup for Messages -->
+    <DialogPopup 
+      v-model:visible="showDialog" 
+      :title="dialogTitle" 
+      :message="dialogMessage"
+      @confirm="showDialog = false"
+    />
+
     <!-- Footer -->
     <footer 
       v-if="!hideNavAndFooter" 
@@ -128,12 +136,17 @@
 <script setup>
 import { useAuthStore } from "@/stores/auth";
 import { useRouter, useRoute } from "vue-router";
-import { computed, ref, onMounted, onUnmounted } from "vue";
+import { computed, ref, onMounted, onUnmounted, watch } from "vue";
 import axios from 'axios';
+import DialogPopup from '@/components/DialogPopup.vue';
 
 const authStore = useAuthStore();
 const router = useRouter();
 const route = useRoute();
+
+const showDialog = ref(false);
+const dialogTitle = ref('Pemberitahuan');
+const dialogMessage = ref('');
 
 const hideNavAndFooter = computed(() => {
   const authRoutes = ["/login", "/register", "/forgot-password", "/reset-password"];
@@ -178,9 +191,29 @@ const fetchNotifications = async () => {
   }
 };
 
+// Watch route query untuk menampilkan dialog
+watch(() => route.query.message, (message) => {
+  if (message) {
+    dialogTitle.value = route.name === 'login' ? 'Login Required' : 'Akses Ditolak';
+    dialogMessage.value = message;
+    showDialog.value = true;
+    // Hapus query parameter setelah ditampilkan
+    const newQuery = { ...route.query };
+    delete newQuery.message;
+    router.replace({ query: newQuery });
+  }
+});
+
 onMounted(() => {
   document.addEventListener("click", closeMenu);
   fetchNotifications();
+  
+  // Check for message in query on mount
+  if (route.query.message) {
+    dialogTitle.value = route.name === 'login' ? 'Login Required' : 'Akses Ditolak';
+    dialogMessage.value = route.query.message;
+    showDialog.value = true;
+  }
 });
 
 onUnmounted(() => {
