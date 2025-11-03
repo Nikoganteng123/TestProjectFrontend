@@ -71,7 +71,6 @@ const router = createRouter({
       beforeEnter: (to, from, next) => {
         const email = to.query.email;
         if (!email) {
-          alert("You must come from the Forgot Password page to reset your password.");
           next({ name: "forgot-password" });
         } else {
           next();
@@ -102,7 +101,7 @@ const router = createRouter({
   ],
 });
 
-router.beforeEach((to, from, next) => {
+router.beforeEach(async (to, from, next) => {
   const authStore = useAuthStore();
   const publicPages = ["login", "register", "home", "forgot-password", "reset-password"];
   const authRequired = !publicPages.includes(to.name);
@@ -116,13 +115,19 @@ router.beforeEach((to, from, next) => {
   });
 
   if (authRequired && !authStore.isLoggedIn) {
-    alert("Please log in to access the page.");
-    return next({ name: "login" });
+    // Set message di query untuk ditampilkan di login page
+    return next({ 
+      name: "login", 
+      query: { redirect: to.path, message: 'Silakan login untuk mengakses halaman ini' }
+    });
   }
 
   if (requiresAdmin && !authStore.isAdmin) {
-    alert("You do not have permission to access the admin page.");
-    return next({ name: "home" });
+    // Set message untuk ditampilkan di home page
+    return next({ 
+      name: "home", 
+      query: { message: 'Anda tidak memiliki izin untuk mengakses halaman admin' }
+    });
   }
 
   next();
