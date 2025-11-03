@@ -1,5 +1,11 @@
 <template>
   <div class="min-h-screen bg-gradient-to-t from-green-400 to-white py-12 px-6 sm:px-8 lg:px-12">
+    <!-- Indikator Total Poin Maksimal -->
+    <div class="fixed bottom-6 right-6 bg-green-600 text-white px-4 py-3 rounded-lg shadow-lg z-40">
+      <div class="text-sm font-medium">Maksimal Poin</div>
+      <div class="text-2xl font-bold">40</div>
+    </div>
+    
     <div class="max-w-2xl mx-auto bg-white rounded-xl shadow-lg overflow-hidden mt-20">
       <div class="p-8 space-y-6">
         <h1 class="text-3xl font-bold text-gray-900 mb-6">
@@ -122,27 +128,27 @@ const errorMessage = ref('');
 const loading = ref(false);
 
 const certificateFields = [
-  { key: 'ipbi_offline1', label: 'a. Dalam acara IPBI Offline (1)' },
-  { key: 'ipbi_offline2', label: 'Dalam acara IPBI Offline (2)' },
-  { key: 'ipbi_offline3', label: 'Dalam acara IPBI Offline (3)' },
-  { key: 'ipbi_online1', label: 'b. Dalam acara IPBI Online (1)' },
-  { key: 'ipbi_online2', label: 'Dalam acara IPBI Online (2)' },
-  { key: 'ipbi_online3', label: 'Dalam acara IPBI Online (3)' },
-  { key: 'non_ipbi_offline1', label: 'c. Dalam Acara non IPBI (floristry) offline (1)' },
-  { key: 'non_ipbi_offline2', label: 'Dalam Acara non IPBI (floristry) offline (2)' },
-  { key: 'non_ipbi_offline3', label: 'Dalam Acara non IPBI (floristry) offline (3)' },
-  { key: 'non_ipbi_online1', label: 'd. Dalam Acara non IPBI (floristry) online (1)' },
-  { key: 'non_ipbi_online2', label: 'Dalam Acara non IPBI (floristry) online (2)' },
-  { key: 'non_ipbi_online3', label: 'Dalam Acara non IPBI (floristry) online (3)' },
-  { key: 'international_offline1', label: 'e. Dalam acara Internasional offline (berbahasa asing) (1)' },
-  { key: 'international_offline2', label: 'Dalam acara Internasional offline (berbahasa asing) (2)' },
-  { key: 'international_online1', label: 'f. Dalam acara Internasional online (berbahasa asing) (1)' },
-  { key: 'international_online2', label: 'Dalam acara Internasional online (berbahasa asing) (2)' },
-  { key: 'host_moderator1', label: 'g. Host/Moderator Acara online/offline (1)' },
-  { key: 'host_moderator2', label: 'Host/Moderator Acara online/offline (2)' },
-  { key: 'host_moderator3', label: 'Host/Moderator Acara online/offline (3)' },
-  { key: 'host_moderator4', label: 'Host/Moderator Acara online/offline (4)' },
-  { key: 'host_moderator5', label: 'Host/Moderator Acara online/offline (5)' },
+  { key: 'ipbi_offline1', label: 'a. Dalam acara IPBI Offline (1) (5 poin)' },
+  { key: 'ipbi_offline2', label: 'Dalam acara IPBI Offline (2) (5 poin)' },
+  { key: 'ipbi_offline3', label: 'Dalam acara IPBI Offline (3) (5 poin)' },
+  { key: 'ipbi_online1', label: 'b. Dalam acara IPBI Online (1) (3 poin)' },
+  { key: 'ipbi_online2', label: 'Dalam acara IPBI Online (2) (3 poin)' },
+  { key: 'ipbi_online3', label: 'Dalam acara IPBI Online (3) (3 poin)' },
+  { key: 'non_ipbi_offline1', label: 'c. Dalam Acara non IPBI (floristry) offline (1) (5 poin)' },
+  { key: 'non_ipbi_offline2', label: 'Dalam Acara non IPBI (floristry) offline (2) (5 poin)' },
+  { key: 'non_ipbi_offline3', label: 'Dalam Acara non IPBI (floristry) offline (3) (5 poin)' },
+  { key: 'non_ipbi_online1', label: 'd. Dalam Acara non IPBI (floristry) online (1) (3 poin)' },
+  { key: 'non_ipbi_online2', label: 'Dalam Acara non IPBI (floristry) online (2) (3 poin)' },
+  { key: 'non_ipbi_online3', label: 'Dalam Acara non IPBI (floristry) online (3) (3 poin)' },
+  { key: 'international_offline1', label: 'e. Dalam acara Internasional offline (berbahasa asing) (1) (10 poin)' },
+  { key: 'international_offline2', label: 'Dalam acara Internasional offline (berbahasa asing) (2) (10 poin)' },
+  { key: 'international_online1', label: 'f. Dalam acara Internasional online (berbahasa asing) (1) (5 poin)' },
+  { key: 'international_online2', label: 'Dalam acara Internasional online (berbahasa asing) (2) (5 poin)' },
+  { key: 'host_moderator1', label: 'g. Host/Moderator Acara online/offline (1) (1 poin)' },
+  { key: 'host_moderator2', label: 'Host/Moderator Acara online/offline (2) (1 poin)' },
+  { key: 'host_moderator3', label: 'Host/Moderator Acara online/offline (3) (1 poin)' },
+  { key: 'host_moderator4', label: 'Host/Moderator Acara online/offline (4) (1 poin)' },
+  { key: 'host_moderator5', label: 'Host/Moderator Acara online/offline (5) (1 poin)' },
 ];
 
 // Extract current question number from route

@@ -1,5 +1,11 @@
 <template>
   <div class="min-h-screen bg-gradient-to-t from-green-400 to-white py-12 px-6 sm:px-8 lg:px-12">
+    <!-- Indikator Total Poin Maksimal -->
+    <div class="fixed bottom-6 right-6 bg-green-600 text-white px-4 py-3 rounded-lg shadow-lg z-40">
+      <div class="text-sm font-medium">Maksimal Poin</div>
+      <div class="text-2xl font-bold">10</div>
+    </div>
+    
     <div class="max-w-2xl mx-auto bg-white rounded-xl shadow-lg overflow-hidden mt-20">
       <div class="p-8 space-y-6">
         <h1 class="text-3xl font-bold text-gray-900 mb-6">

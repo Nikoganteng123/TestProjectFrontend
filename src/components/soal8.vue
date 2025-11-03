@@ -1,5 +1,11 @@
 <template>
   <div class="min-h-screen bg-gradient-to-t from-green-400 to-white py-12 px-6 sm:px-8 lg:px-12">
+    <!-- Indikator Total Poin Maksimal -->
+    <div class="fixed bottom-6 right-6 bg-green-600 text-white px-4 py-3 rounded-lg shadow-lg z-40">
+      <div class="text-sm font-medium">Maksimal Poin</div>
+      <div class="text-2xl font-bold">15</div>
+    </div>
+    
     <div class="max-w-2xl mx-auto bg-white rounded-xl shadow-lg overflow-hidden mt-20">
       <div class="p-8 space-y-6">
         <h1 class="text-3xl font-bold text-gray-900 mb-6">
@@ -122,18 +128,18 @@ const errorMessage = ref('');
 const loading = ref(false);
 
 const certificateFields = [
-  { key: 'demo_dpp_dpd1', label: 'a. Keikutsertaan acara demo merangkai bunga DPP/DPD/DPC IPBI (1)' },
-  { key: 'demo_dpp_dpd2', label: 'Keikutsertaan acara demo merangkai bunga DPP/DPD/DPC IPBI (2)' },
-  { key: 'demo_dpp_dpd3', label: 'Keikutsertaan acara demo merangkai bunga DPP/DPD/DPC IPBI (3)' },
-  { key: 'demo_dpp_dpd4', label: 'Keikutsertaan acara demo merangkai bunga DPP/DPD/DPC IPBI (4)' },
-  { key: 'demo_dpp_dpd5', label: 'Keikutsertaan acara demo merangkai bunga DPP/DPD/DPC IPBI (5)' },
-  { key: 'non_ipbi1', label: 'b. Keikutsertaan acara merangkai bunga di luar IPBI (1)' },
-  { key: 'non_ipbi2', label: 'Keikutsertaan acara merangkai bunga di luar IPBI (2)' },
-  { key: 'non_ipbi3', label: 'Keikutsertaan acara merangkai bunga di luar IPBI (3)' },
-  { key: 'non_ipbi4', label: 'Keikutsertaan acara merangkai bunga di luar IPBI (4)' },
-  { key: 'non_ipbi5', label: 'Keikutsertaan acara merangkai bunga di luar IPBI (5)' },
-  { key: 'international1', label: 'c. Keikutsertaan dalam acara merangkai bunga internasional (1)' },
-  { key: 'international2', label: 'Keikutsertaan dalam acara merangkai bunga internasional (2)' },
+  { key: 'demo_dpp_dpd1', label: 'a. Keikutsertaan acara demo merangkai bunga DPP/DPD/DPC IPBI (1) (2 poin)' },
+  { key: 'demo_dpp_dpd2', label: 'Keikutsertaan acara demo merangkai bunga DPP/DPD/DPC IPBI (2) (2 poin)' },
+  { key: 'demo_dpp_dpd3', label: 'Keikutsertaan acara demo merangkai bunga DPP/DPD/DPC IPBI (3) (2 poin)' },
+  { key: 'demo_dpp_dpd4', label: 'Keikutsertaan acara demo merangkai bunga DPP/DPD/DPC IPBI (4) (2 poin)' },
+  { key: 'demo_dpp_dpd5', label: 'Keikutsertaan acara demo merangkai bunga DPP/DPD/DPC IPBI (5) (2 poin)' },
+  { key: 'non_ipbi1', label: 'b. Keikutsertaan acara merangkai bunga di luar IPBI (1) (1 poin)' },
+  { key: 'non_ipbi2', label: 'Keikutsertaan acara merangkai bunga di luar IPBI (2) (1 poin)' },
+  { key: 'non_ipbi3', label: 'Keikutsertaan acara merangkai bunga di luar IPBI (3) (1 poin)' },
+  { key: 'non_ipbi4', label: 'Keikutsertaan acara merangkai bunga di luar IPBI (4) (1 poin)' },
+  { key: 'non_ipbi5', label: 'Keikutsertaan acara merangkai bunga di luar IPBI (5) (1 poin)' },
+  { key: 'international1', label: 'c. Keikutsertaan dalam acara merangkai bunga internasional (1) (2 poin)' },
+  { key: 'international2', label: 'Keikutsertaan dalam acara merangkai bunga internasional (2) (2 poin)' },
 ];
 
 // Extract current question number from route

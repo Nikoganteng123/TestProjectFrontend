@@ -1,5 +1,11 @@
 <template>
   <div class="min-h-screen bg-gradient-to-t from-green-400 to-white py-12 px-6 sm:px-8 lg:px-12">
+    <!-- Indikator Total Poin Maksimal -->
+    <div class="fixed bottom-6 right-6 bg-green-600 text-white px-4 py-3 rounded-lg shadow-lg z-40">
+      <div class="text-sm font-medium">Maksimal Poin</div>
+      <div class="text-2xl font-bold">50</div>
+    </div>
+    
     <div class="max-w-2xl mx-auto bg-white rounded-xl shadow-lg overflow-hidden mt-20">
       <div class="p-8 space-y-6">
         <h1 class="text-3xl font-bold text-gray-900 mb-6">
@@ -122,17 +128,17 @@ const errorMessage = ref('');
 const loading = ref(false);
 
 const certificateFields = [
-  { key: 'juara_nasional_dpp', label: 'a. Juara tingkat Nasional yang diselenggarakan oleh DPP IPBI' },
-  { key: 'juara_non_dpp', label: 'b. Juara lomba yang diselenggarakan oleh IPBI selain DPP' },
-  { key: 'juara_instansi_lain', label: 'c. Juara lomba yang diselenggarakan oleh instansi lain' },
-  { key: 'juara_internasional', label: 'd. Juara lomba merangkai bunga tingkat internasional' },
-  { key: 'peserta_lomba_1', label: 'e. Menjadi Peserta Lomba Merangkai Bunga (1)' },
-  { key: 'peserta_lomba_2', label: 'Menjadi Peserta Lomba Merangkai Bunga (2)' },
-  { key: 'peserta_lomba_3', label: 'Menjadi Peserta Lomba Merangkai Bunga (3)' },
-  { key: 'peserta_lomba_4', label: 'Menjadi Peserta Lomba Merangkai Bunga (4)' },
-  { key: 'peserta_lomba_5', label: 'Menjadi Peserta Lomba Merangkai Bunga (5)' },
-  { key: 'juri_lomba_1', label: 'f. Menjadi Juri Lomba Merangkai Bunga (1)' },
-  { key: 'juri_lomba_2', label: 'Menjadi Juri Lomba Merangkai Bunga (2)' },
+  { key: 'juara_nasional_dpp', label: 'a. Juara tingkat Nasional yang diselenggarakan oleh DPP IPBI (15 poin)' },
+  { key: 'juara_non_dpp', label: 'b. Juara lomba yang diselenggarakan oleh IPBI selain DPP (10 poin)' },
+  { key: 'juara_instansi_lain', label: 'c. Juara lomba yang diselenggarakan oleh instansi lain (5 poin)' },
+  { key: 'juara_internasional', label: 'd. Juara lomba merangkai bunga tingkat internasional (15 poin)' },
+  { key: 'peserta_lomba_1', label: 'e. Menjadi Peserta Lomba Merangkai Bunga (1) (1 poin)' },
+  { key: 'peserta_lomba_2', label: 'Menjadi Peserta Lomba Merangkai Bunga (2) (1 poin)' },
+  { key: 'peserta_lomba_3', label: 'Menjadi Peserta Lomba Merangkai Bunga (3) (1 poin)' },
+  { key: 'peserta_lomba_4', label: 'Menjadi Peserta Lomba Merangkai Bunga (4) (1 poin)' },
+  { key: 'peserta_lomba_5', label: 'Menjadi Peserta Lomba Merangkai Bunga (5) (1 poin)' },
+  { key: 'juri_lomba_1', label: 'f. Menjadi Juri Lomba Merangkai Bunga (1) (3 poin)' },
+  { key: 'juri_lomba_2', label: 'Menjadi Juri Lomba Merangkai Bunga (2) (3 poin)' },
 ];
 
 // Extract current question number from route

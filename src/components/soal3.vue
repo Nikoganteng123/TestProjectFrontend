@@ -1,5 +1,11 @@
 <template>
   <div class="min-h-screen bg-gradient-to-t from-green-400 to-white py-12 px-6 sm:px-8 lg:px-12">
+    <!-- Indikator Total Poin Maksimal -->
+    <div class="fixed bottom-6 right-6 bg-green-600 text-white px-4 py-3 rounded-lg shadow-lg z-40">
+      <div class="text-sm font-medium">Maksimal Poin</div>
+      <div class="text-2xl font-bold">25</div>
+    </div>
+    
     <div class="max-w-2xl mx-auto bg-white rounded-xl shadow-lg overflow-hidden mt-20">
       <div class="p-8 space-y-6">
         <h1 class="text-3xl font-bold text-gray-900 mb-6">
@@ -14,13 +20,13 @@
               <div class="flex items-center">
                 <input type="radio" id="dasar" value="Dasar" v-model="inputData.bahasa_inggris" class="form-radio h-4 w-4 text-green-600">
                 <label for="dasar" :class="['ml-2 text-sm font-medium', savedData.bahasa_inggris === 'Dasar' ? 'text-green-600' : 'text-gray-700']">
-                  a. Bahasa Inggris Dasar
+                  a. Bahasa Inggris Dasar (3 poin)
                 </label>
               </div>
               <div class="flex items-center">
                 <input type="radio" id="fasih" value="Fasih" v-model="inputData.bahasa_inggris" class="form-radio h-4 w-4 text-green-600">
                 <label for="fasih" :class="['ml-2 text-sm font-medium', savedData.bahasa_inggris === 'Fasih' ? 'text-green-600' : 'text-gray-700']">
-                  b. Bahasa Inggris Fasih
+                  b. Bahasa Inggris Fasih (5 poin)
                 </label>
               </div>
             </div>
@@ -34,10 +40,10 @@
 
           <!-- Bahasa Asing Lain -->
           <div class="space-y-4">
-            <label class="text-lg font-medium text-gray-900">c. Bahasa Asing lain (maksimal 4 bahasa):</label>
+            <label class="text-lg font-medium text-gray-900">c. Bahasa Asing lain (maksimal 4 bahasa, 5 poin per bahasa):</label>
             <div class="space-y-3">
               <div v-for="n in 4" :key="n" class="flex flex-col gap-2">
-                <input type="text" :placeholder="`Masukkan bahasa asing ${n}`" v-model="inputData[`bahasa_lain${n}`]"
+                <input type="text" :placeholder="`Masukkan bahasa asing ${n} (5 poin)`" v-model="inputData[`bahasa_lain${n}`]"
                   :class="['border rounded-md p-2 w-full focus:ring-2 focus:ring-green-500 focus:border-transparent', savedData[`bahasa_lain${n}`] ? 'border-green-500' : 'border-gray-300']">
                 <div v-if="savedData[`bahasa_lain${n}`]" class="text-green-600 text-sm mt-1 flex items-center gap-2">
                   <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">

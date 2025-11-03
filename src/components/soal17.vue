@@ -1,5 +1,11 @@
 <template>
   <div class="min-h-screen bg-gradient-to-t from-green-400 to-white py-12 px-6 sm:px-8 lg:px-12">
+    <!-- Indikator Total Poin Maksimal -->
+    <div class="fixed bottom-6 right-6 bg-green-600 text-white px-4 py-3 rounded-lg shadow-lg z-40">
+      <div class="text-sm font-medium">Maksimal Poin</div>
+      <div class="text-2xl font-bold">45</div>
+    </div>
+    
     <div class="max-w-2xl mx-auto bg-white rounded-xl shadow-lg overflow-hidden mt-20">
       <div class="p-8 space-y-6">
         <h1 class="text-3xl font-bold text-gray-900 mb-6">
@@ -149,13 +155,13 @@ const popupMessage = ref('');
 const nextRoute = ref('');
 
 const certificateFields = [
-  { key: 'media_cetak_nasional', label: 'a. Kontributor media cetak nasional' },
-  { key: 'media_cetak_internasional', label: 'b. Kontributor media cetak internasional' },
-  { key: 'buku_merangkai_bunga', label: 'c. Pengarang buku merangkai bunga' },
-  { key: 'kontributor_buku1', label: 'd. Kontributor pada buku merangkai flora 1' },
-  { key: 'kontributor_buku2', label: 'Kontributor pada buku merangkai flora 2' },
-  { key: 'kontributor_tv1', label: 'e. Kontributor pada media televisi 1' },
-  { key: 'kontributor_tv2', label: 'Kontributor pada media televisi 2' }
+  { key: 'media_cetak_nasional', label: 'a. Kontributor media cetak nasional (5 poin)' },
+  { key: 'media_cetak_internasional', label: 'b. Kontributor media cetak internasional (10 poin)' },
+  { key: 'buku_merangkai_bunga', label: 'c. Pengarang buku merangkai bunga (20 poin)' },
+  { key: 'kontributor_buku1', label: 'd. Kontributor pada buku merangkai flora 1 (10 poin)' },
+  { key: 'kontributor_buku2', label: 'Kontributor pada buku merangkai flora 2 (10 poin)' },
+  { key: 'kontributor_tv1', label: 'e. Kontributor pada media televisi 1 (5 poin)' },
+  { key: 'kontributor_tv2', label: 'Kontributor pada media televisi 2 (5 poin)' }
 ];
 
 const currentQuestionNumber = computed(() => {

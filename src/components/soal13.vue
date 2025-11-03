@@ -1,5 +1,11 @@
 <template>
   <div class="min-h-screen bg-gradient-to-t from-green-400 to-white py-12 px-6 sm:px-8 lg:px-12">
+    <!-- Indikator Total Poin Maksimal -->
+    <div class="fixed bottom-6 right-6 bg-green-600 text-white px-4 py-3 rounded-lg shadow-lg z-40">
+      <div class="text-sm font-medium">Maksimal Poin</div>
+      <div class="text-2xl font-bold">40</div>
+    </div>
+    
     <div class="max-w-2xl mx-auto bg-white rounded-xl shadow-lg overflow-hidden mt-20">
       <div class="p-8 space-y-6">
         <h1 class="text-3xl font-bold text-gray-900 mb-6">
@@ -121,13 +127,13 @@ const errorMessage = ref('');
 const loading = ref(false);
 
 const certificateFields = [
-  { key: 'guru_tetap', label: 'a. Guru tetap dan rutin mengajar secara offline' },
-  { key: 'asisten_guru', label: 'b. Menjadi asisten atau staf guru secara offline' },
-  { key: 'owner_sekolah', label: 'c. Owner sekolah merangkai bunga (tidak terlibat sebagai guru)' },
-  { key: 'guru_tidak_tetap_offline', label: 'd. Guru tidak tetap/per session offline' },
-  { key: 'guru_tidak_tetap_online', label: 'e. Guru tidak tetap/per session online' },
-  { key: 'guru_luar_negeri1', label: 'f. Mengajar merangkai bunga di luar negeri per session 1' },
-  { key: 'guru_luar_negeri2', label: 'Mengajar merangkai bunga di luar negeri per session 2' }
+  { key: 'guru_tetap', label: 'a. Guru tetap dan rutin mengajar secara offline (15 poin)' },
+  { key: 'asisten_guru', label: 'b. Menjadi asisten atau staf guru secara offline (8 poin)' },
+  { key: 'owner_sekolah', label: 'c. Owner sekolah merangkai bunga (tidak terlibat sebagai guru) (8 poin)' },
+  { key: 'guru_tidak_tetap_offline', label: 'd. Guru tidak tetap/per session offline (10 poin)' },
+  { key: 'guru_tidak_tetap_online', label: 'e. Guru tidak tetap/per session online (10 poin)' },
+  { key: 'guru_luar_negeri1', label: 'f. Mengajar merangkai bunga di luar negeri per session 1 (10 poin)' },
+  { key: 'guru_luar_negeri2', label: 'Mengajar merangkai bunga di luar negeri per session 2 (10 poin)' }
 ];
 
 const currentQuestionNumber = computed(() => {

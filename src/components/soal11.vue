@@ -1,5 +1,11 @@
 <template>
   <div class="min-h-screen bg-gradient-to-t from-green-400 to-white py-12 px-6 sm:px-8 lg:px-12">
+    <!-- Indikator Total Poin Maksimal -->
+    <div class="fixed bottom-6 right-6 bg-green-600 text-white px-4 py-3 rounded-lg shadow-lg z-40">
+      <div class="text-sm font-medium">Maksimal Poin</div>
+      <div class="text-2xl font-bold">30</div>
+    </div>
+    
     <div class="max-w-2xl mx-auto bg-white rounded-xl shadow-lg overflow-hidden mt-20">
       <div class="p-8 space-y-6">
         <h1 class="text-3xl font-bold text-gray-900 mb-6">
@@ -122,12 +128,12 @@ const errorMessage = ref('');
 const loading = ref(false);
 
 const certificateFields = [
-  { key: 'penguji_sertifikasi1', label: 'a. Sebagai penguji ujian Sertifikasi Kompetensi 1' },
-  { key: 'penguji_sertifikasi2', label: 'Sebagai penguji ujian Sertifikasi Kompetensi 2' },
-  { key: 'juri_ipbi1', label: 'b. Sebagai juri lomba merangkai bunga yang diadakan oleh IPBI 1' },
-  { key: 'juri_ipbi2', label: 'Sebagai juri lomba merangkai bunga yang diadakan oleh IPBI 2' },
-  { key: 'juri_non_ipbi1', label: 'c. Sebagai juri lomba merangkai bunga yang diadakan oleh non IPBI 1' },
-  { key: 'juri_non_ipbi2', label: 'Sebagai juri lomba merangkai bunga yang diadakan oleh non IPBI 2' }
+  { key: 'penguji_sertifikasi1', label: 'a. Sebagai penguji ujian Sertifikasi Kompetensi 1 (10 poin)' },
+  { key: 'penguji_sertifikasi2', label: 'Sebagai penguji ujian Sertifikasi Kompetensi 2 (10 poin)' },
+  { key: 'juri_ipbi1', label: 'b. Sebagai juri lomba merangkai bunga yang diadakan oleh IPBI 1 (10 poin)' },
+  { key: 'juri_ipbi2', label: 'Sebagai juri lomba merangkai bunga yang diadakan oleh IPBI 2 (10 poin)' },
+  { key: 'juri_non_ipbi1', label: 'c. Sebagai juri lomba merangkai bunga yang diadakan oleh non IPBI 1 (5 poin)' },
+  { key: 'juri_non_ipbi2', label: 'Sebagai juri lomba merangkai bunga yang diadakan oleh non IPBI 2 (5 poin)' }
 ];
 
 // Extract current question number from route

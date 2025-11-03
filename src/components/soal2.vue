@@ -1,5 +1,11 @@
 <template>
   <div class="min-h-screen bg-gradient-to-t from-green-400 to-white py-12 px-6 sm:px-8 lg:px-12">
+    <!-- Indikator Total Poin Maksimal -->
+    <div class="fixed bottom-6 right-6 bg-green-600 text-white px-4 py-3 rounded-lg shadow-lg z-40">
+      <div class="text-sm font-medium">Maksimal Poin</div>
+      <div class="text-2xl font-bold">70</div>
+    </div>
+    
     <div class="max-w-2xl mx-auto bg-white rounded-xl shadow-lg overflow-hidden mt-20">
       <div class="p-8 space-y-6">
         <h1 class="text-3xl font-bold text-gray-900 mb-6">
@@ -109,13 +115,13 @@ const uploadedFiles = ref({});
 const savedFiles = ref({});
 
 const certificateFields = [
-  { key: 'tp3', label: 'a. Sertifikat TP3' },
-  { key: 'lpmp_diknas', label: 'b. Sertifikat Pelatihan LPMP/Diknas' },
-  { key: 'guru_lain_ipbi_1', label: 'c. Sertifikat Guru selain dari IPBI 1' },
-  { key: 'guru_lain_ipbi_2', label: '2' },
-  { key: 'guru_lain_ipbi_3', label: '3' },
-  { key: 'guru_lain_ipbi_4', label: '4' },
-  { key: 'training_trainer', label: 'd. Sertifikat Training to Trainer' }
+  { key: 'tp3', label: 'a. Sertifikat TP3 (20 poin)' },
+  { key: 'lpmp_diknas', label: 'b. Sertifikat Pelatihan LPMP/Diknas (30 poin)' },
+  { key: 'guru_lain_ipbi_1', label: 'c. Sertifikat Guru selain dari IPBI 1 (5 poin)' },
+  { key: 'guru_lain_ipbi_2', label: '2 (5 poin)' },
+  { key: 'guru_lain_ipbi_3', label: '3 (5 poin)' },
+  { key: 'guru_lain_ipbi_4', label: '4 (5 poin)' },
+  { key: 'training_trainer', label: 'd. Sertifikat Training to Trainer (10 poin)' }
 ];
 
 const currentQuestionNumber = computed(() => {

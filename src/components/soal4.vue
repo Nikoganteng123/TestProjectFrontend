@@ -1,5 +1,11 @@
 <template>
   <div class="min-h-screen bg-gradient-to-t from-green-400 to-white py-12 px-6 sm:px-8 lg:px-12">
+    <!-- Indikator Total Poin Maksimal -->
+    <div class="fixed bottom-6 right-6 bg-green-600 text-white px-4 py-3 rounded-lg shadow-lg z-40">
+      <div class="text-sm font-medium">Maksimal Poin</div>
+      <div class="text-2xl font-bold">30</div>
+    </div>
+    
     <div class="max-w-2xl mx-auto bg-white rounded-xl shadow-lg overflow-hidden mt-20">
       <div class="p-8 space-y-6">
         <h1 class="text-3xl font-bold text-gray-900 mb-6">
@@ -16,7 +22,7 @@
                     'text-sm font-medium flex-1',
                     savedFiles.independent_org ? 'text-green-600' : 'text-gray-700'
                   ]">
-                  a. Dari organisasi Independent (AIFD, CFD, dll)
+                  a. Dari organisasi Independent (AIFD, CFD, dll) (8 poin)
                 </label>
                 <div class="flex items-center gap-2">
                   <div v-if="savedFiles.independent_org" class="flex items-center gap-2">
@@ -51,7 +57,7 @@
                     'text-sm font-medium flex-1',
                     savedFiles.foreign_school_degree ? 'text-green-600' : 'text-gray-700'
                   ]">
-                  b. Dari sekolah merangkai bunga luar negeri (mendapat gelar-gelar)
+                  b. Dari sekolah merangkai bunga luar negeri (mendapat gelar-gelar) (7 poin)
                 </label>
                 <div class="flex items-center gap-2">
                   <div v-if="savedFiles.foreign_school_degree" class="flex items-center gap-2">
@@ -81,7 +87,7 @@
             <hr class="border-t border-gray-300 my-4">
             <div class="flex flex-col gap-2">
               <label class="text-sm font-medium text-gray-700">
-                c. Dari sekolah merangkai bunga luar negeri (tidak mendapatkan gelar)
+                c. Dari sekolah merangkai bunga luar negeri (tidak mendapatkan gelar) - maksimal 5 file, 3 poin per file
               </label>
               <div class="space-y-3">
                 <div v-for="i in 5" :key="`foreign_no_degree_${i}`" 
@@ -91,7 +97,7 @@
                       'text-sm font-medium flex-1',
                       savedFiles[`foreign_school_no_degree_${i}`] ? 'text-green-600' : 'text-gray-700'
                     ]">
-                    File {{ i }}
+                    File {{ i }} (3 poin)
                   </label>
                   <div class="flex items-center gap-2">
                     <div v-if="savedFiles[`foreign_school_no_degree_${i}`]" class="flex items-center gap-2">
@@ -122,7 +128,7 @@
             <hr class="border-t border-gray-300 my-4">
             <div class="flex flex-col gap-2">
               <label class="text-sm font-medium text-gray-700">
-                d. Dari sekolah merangkai bunga dalam negeri (tidak mendapatkan gelar)
+                d. Dari sekolah merangkai bunga dalam negeri (tidak mendapatkan gelar) - maksimal 5 file, 3 poin per file
               </label>
               <div class="space-y-3">
                 <div v-for="i in 5" :key="`domestic_no_degree_${i}`" 
@@ -132,7 +138,7 @@
                       'text-sm font-medium flex-1',
                       savedFiles[`domestic_school_no_degree_${i}`] ? 'text-green-600' : 'text-gray-700'
                     ]">
-                    File {{ i }}
+                    File {{ i }} (3 poin)
                   </label>
                   <div class="flex items-center gap-2">
                     <div v-if="savedFiles[`domestic_school_no_degree_${i}`]" class="flex items-center gap-2">

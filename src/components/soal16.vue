@@ -1,5 +1,11 @@
 <template>
   <div class="min-h-screen bg-gradient-to-t from-green-400 to-white py-12 px-6 sm:px-8 lg:px-12">
+    <!-- Indikator Total Poin Maksimal -->
+    <div class="fixed bottom-6 right-6 bg-green-600 text-white px-4 py-3 rounded-lg shadow-lg z-40">
+      <div class="text-sm font-medium">Maksimal Poin</div>
+      <div class="text-2xl font-bold">20</div>
+    </div>
+    
     <div class="max-w-2xl mx-auto bg-white rounded-xl shadow-lg overflow-hidden mt-20">
       <div class="p-8 space-y-6">
         <h1 class="text-3xl font-bold text-gray-900 mb-6">
@@ -20,7 +26,7 @@
             <h2 class="text-xl font-semibold text-gray-800">Pilih Kategori:</h2>
             <div class="flex flex-col gap-2">
               <button type="button" @click="toggleSection('A')" class="section-button">
-                A. Aktif Merangkai Bunga di Florist (Staff/Owner)
+                A. Aktif Merangkai Bunga di Florist (Staff/Owner) (10 poin)
               </button>
               <transition name="expand">
                 <div v-if="activeSection === 'A'" class="section-content">
@@ -60,7 +66,7 @@
               </transition>
 
               <button type="button" @click="toggleSection('B')" class="section-button">
-                B. Owner Florist Berbadan Hukum
+                B. Owner Florist Berbadan Hukum (10 poin)
               </button>
               <transition name="expand">
                 <div v-if="activeSection === 'B'" class="section-content">
@@ -100,7 +106,7 @@
               </transition>
 
               <button type="button" @click="toggleSection('C')" class="section-button">
-                C. Owner Florist Tidak Berbadan Hukum
+                C. Owner Florist Tidak Berbadan Hukum (5 poin)
               </button>
               <transition name="expand">
                 <div v-if="activeSection === 'C'" class="section-content">
@@ -140,7 +146,7 @@
               </transition>
 
               <button type="button" @click="toggleSection('D')" class="section-button">
-                D. Freelance Designer
+                D. Freelance Designer (5 poin)
               </button>
               <transition name="expand">
                 <div v-if="activeSection === 'D'" class="section-content">
