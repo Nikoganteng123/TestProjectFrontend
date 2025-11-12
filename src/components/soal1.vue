@@ -306,7 +306,15 @@ const saveAnswer = async () => {
       formData.append('tingkat_pendidikan_file', selectedFile.value);
     }
 
+    // Log data yang akan dikirim untuk debugging
+    console.log('📤 Data yang akan dikirim:');
+    console.log('  - tingkat_pendidikan:', selectedAnswer.value);
+    console.log('  - tingkat_pendidikan_file:', selectedFile.value ? selectedFile.value.name : 'tidak ada');
+    console.log('  - isAnswerSaved:', isAnswerSaved.value);
+
     const endpoint = isAnswerSaved.value ? '/api/update1' : '/api/soal1';
+    console.log('📡 Endpoint:', endpoint);
+
     const response = await axios.post(endpoint, formData, {
       headers: {
         Authorization: `Bearer ${authStore.accessToken}`,
@@ -319,10 +327,44 @@ const saveAnswer = async () => {
     selectedFile.value = null;
     await fetchAnswer();
     setTimeout(() => successMessage.value = '', 3000);
-    console.log('Save successful:', response.data);
+    console.log('✅ Save successful:', response.data);
     return true;
   } catch (error) {
-    console.error('Save error:', error);
+    console.error('❌ Save error:', error);
+    console.error('❌ Error response:', error.response?.data);
+    console.error('❌ Error status:', error.response?.status);
+    
+    // Tampilkan error yang lebih informatif
+    let errorMessage = 'Gagal menyimpan data.';
+    
+    if (error.response?.status === 422) {
+      // Validation error
+      const errors = error.response.data?.errors || {};
+      const errorMessages = [];
+      
+      // Extract validation errors
+      Object.keys(errors).forEach(field => {
+        if (Array.isArray(errors[field])) {
+          errorMessages.push(`${field}: ${errors[field].join(', ')}`);
+        } else {
+          errorMessages.push(`${field}: ${errors[field]}`);
+        }
+      });
+      
+      if (errorMessages.length > 0) {
+        errorMessage = 'Validasi gagal:\n' + errorMessages.join('\n');
+      } else if (error.response.data?.message) {
+        errorMessage = error.response.data.message;
+      } else {
+        errorMessage = 'Data yang dikirim tidak valid. Pastikan semua field diisi dengan benar.';
+      }
+    } else if (error.response?.data?.message) {
+      errorMessage = error.response.data.message;
+    } else if (error.message) {
+      errorMessage = error.message;
+    }
+    
+    await showAlert(errorMessage, 'Error Menyimpan Data');
     return false;
   } finally {
     loading.value = false;
