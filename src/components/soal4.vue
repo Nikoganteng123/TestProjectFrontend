@@ -221,10 +221,12 @@ import { ref, computed, onMounted } from 'vue';
 import axios from 'axios';
 import { useAuthStore } from '@/stores/auth';
 import { useRoute, useRouter } from 'vue-router';
+import { useDialog } from '@/composables/useDialog';
 
 const route = useRoute();
 const router = useRouter();
 const authStore = useAuthStore();
+const { showAlert } = useDialog();
 const uploadedFiles = ref({});
 const savedFiles = ref({});
 const totalNilai = ref(0);
@@ -301,14 +303,14 @@ const calculateNilai = () => {
   return nilai;
 };
 
-const handleFileUpload = (event, field) => {
+const handleFileUpload = async (event, field) => {
   const file = event.target.files[0];
   if (file) {
     const allowedTypes = ['application/pdf', 'image/jpeg', 'image/png', 'image/gif', 'image/bmp', 'image/webp'];
     if (allowedTypes.includes(file.type) && file.size <= 2 * 1024 * 1024) {
       uploadedFiles.value[field] = file;
     } else {
-      alert('File harus berupa PDF atau gambar (JPG, PNG, GIF, BMP, WEBP) dan maksimum 2MB');
+      await showAlert('File harus berupa PDF atau gambar (JPG, PNG, GIF, BMP, WEBP) dan maksimum 2MB', 'Format File Tidak Valid');
       event.target.value = ''; // Reset input
     }
   }
@@ -343,7 +345,7 @@ const saveOrUpdateFiles = async () => {
     await fetchAnswer();
   } catch (error) {
     console.error('Failed to save/update files:', error);
-    alert('Gagal menyimpan data: ' + (error.response?.data?.message || error.message));
+    await showAlert('Gagal menyimpan data: ' + (error.response?.data?.message || error.message), 'Error');
   }
 };
 
@@ -357,7 +359,7 @@ const deleteAllFiles = async () => {
     totalNilai.value = 0;
   } catch (error) {
     console.error('Failed to delete files:', error);
-    alert('Gagal menghapus file: ' + (error.response?.data?.message || error.message));
+    await showAlert('Gagal menghapus file: ' + (error.response?.data?.message || error.message), 'Error');
   }
 };
 
@@ -396,13 +398,13 @@ const viewFile = async (fieldName) => {
     } else if (contentType.includes('pdf')) {
       window.open(blobUrl, '_blank');
     } else {
-      alert('Tipe file tidak didukung untuk ditampilkan.');
+      await showAlert('Tipe file tidak didukung untuk ditampilkan.', 'Format Tidak Didukung');
     }
 
     setTimeout(() => window.URL.revokeObjectURL(blobUrl), 1000);
   } catch (error) {
     console.error('Error fetching file:', error.response || error);
-    alert('Gagal membuka file: ' + (error.response?.data?.message || 'File tidak ditemukan'));
+    await showAlert('Gagal membuka file: ' + (error.response?.data?.message || 'File tidak ditemukan'), 'Error');
   }
 };
 </script>

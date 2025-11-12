@@ -126,9 +126,14 @@
 <script>
 import axios from 'axios';
 import { useAuthStore } from '@/stores/auth';
+import { useDialog } from '@/composables/useDialog';
 import 'animate.css';
 
 export default {
+  setup() {
+    const { showAlert } = useDialog();
+    return { showAlert };
+  },
   data() {
     return {
       soal: null,
@@ -398,7 +403,7 @@ export default {
             `/api/admin/soal/${this.soalNumber}/${this.userId}`,
             config
           );
-          alert(`Soal dihapus dengan komentar: ${response.data.comment || this.comment}`);
+          await this.showAlert(`Soal dihapus dengan komentar: ${response.data.comment || this.comment}`, 'Berhasil');
           this.showCommentModal = false;
           this.$router.push({ name: 'user-detail', params: { userId: this.userId } });
         } else {
@@ -406,7 +411,7 @@ export default {
             `/api/admin/soal/${this.soalNumber}/${this.userId}/field/${this.deleteTarget}`,
             config
           );
-          alert(`Field ${this.getDescriptiveFieldName(this.deleteTarget)} dihapus dengan komentar: ${response.data.comment || this.comment}`);
+          await this.showAlert(`Field ${this.getDescriptiveFieldName(this.deleteTarget)} dihapus dengan komentar: ${response.data.comment || this.comment}`, 'Berhasil');
           this.showCommentModal = false;
           await this.fetchSoal(); // Refresh data after field deletion
         }
@@ -418,17 +423,17 @@ export default {
           console.warn('Validation errors ignored:', errorMessages);
 
           if (this.deleteTarget === 'soal' || this.soalNumber === '1') {
-            alert(`Soal dihapus dengan komentar: ${this.comment || 'Dihapus tanpa alasan spesifik'}`);
+            await this.showAlert(`Soal dihapus dengan komentar: ${this.comment || 'Dihapus tanpa alasan spesifik'}`, 'Berhasil');
             this.showCommentModal = false;
             this.$router.push({ name: 'user-detail', params: { userId: this.userId } });
           } else {
-            alert(`Field ${this.getDescriptiveFieldName(this.deleteTarget)} dihapus dengan komentar: ${this.comment || 'Dihapus tanpa alasan spesifik'}`);
+            await this.showAlert(`Field ${this.getDescriptiveFieldName(this.deleteTarget)} dihapus dengan komentar: ${this.comment || 'Dihapus tanpa alasan spesifik'}`, 'Berhasil');
             this.showCommentModal = false;
             await this.fetchSoal(); // Refresh UI
           }
         } else {
           this.error = error.response?.data?.message || 'Gagal menghapus.';
-          alert(`Gagal menghapus: ${this.error}`);
+          await this.showAlert(`Gagal menghapus: ${this.error}`, 'Error');
           this.showCommentModal = true; // Keep modal open for real errors
         }
       }
@@ -460,13 +465,13 @@ export default {
         } else if (contentType.includes('pdf')) {
           window.open(blobUrl, '_blank');
         } else {
-          alert('Tipe file tidak didukung untuk ditampilkan.');
+          await this.showAlert('Tipe file tidak didukung untuk ditampilkan.', 'Format Tidak Didukung');
         }
 
         setTimeout(() => window.URL.revokeObjectURL(blobUrl), 1000);
       } catch (error) {
         console.error('Error fetching file:', error.response || error);
-        alert('Gagal membuka file: ' + (error.response?.data?.message || 'File tidak ditemukan'));
+        await this.showAlert('Gagal membuka file: ' + (error.response?.data?.message || 'File tidak ditemukan'), 'Error');
       }
     },
     isFileField(fieldName) {

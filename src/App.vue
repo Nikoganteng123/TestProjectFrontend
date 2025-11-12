@@ -114,6 +114,16 @@
       @confirm="showDialog = false"
     />
 
+    <!-- Global Dialog Popup -->
+    <DialogPopup 
+      v-model:visible="globalDialogState.visible" 
+      :title="globalDialogState.title" 
+      :message="globalDialogState.message"
+      :show-cancel="globalDialogState.showCancel"
+      @confirm="handleGlobalDialogConfirm"
+      @cancel="handleGlobalDialogCancel"
+    />
+
     <!-- Footer -->
     <footer 
       v-if="!hideNavAndFooter" 
@@ -139,6 +149,7 @@ import { useRouter, useRoute } from "vue-router";
 import { computed, ref, onMounted, onUnmounted, watch } from "vue";
 import axios from 'axios';
 import DialogPopup from '@/components/DialogPopup.vue';
+import { dialogState as globalDialogState } from '@/composables/useDialog';
 
 const authStore = useAuthStore();
 const router = useRouter();
@@ -147,6 +158,20 @@ const route = useRoute();
 const showDialog = ref(false);
 const dialogTitle = ref('Pemberitahuan');
 const dialogMessage = ref('');
+
+const handleGlobalDialogConfirm = () => {
+  if (globalDialogState.value.onConfirm) {
+    globalDialogState.value.onConfirm();
+  }
+  globalDialogState.value.visible = false;
+};
+
+const handleGlobalDialogCancel = () => {
+  if (globalDialogState.value.onCancel) {
+    globalDialogState.value.onCancel();
+  }
+  globalDialogState.value.visible = false;
+};
 
 const hideNavAndFooter = computed(() => {
   const authRoutes = ["/login", "/register", "/forgot-password", "/reset-password"];

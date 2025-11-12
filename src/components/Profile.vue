@@ -12,8 +12,37 @@
         <div class="bg-gradient-to-r from-emerald-600 to-teal-500 px-8 py-6">
           <div class="flex items-center justify-between">
             <div class="flex items-center space-x-4">
-              <div class="bg-white/20 p-3 rounded-full transition-all duration-300 hover:bg-white/30">
-                <span class="text-2xl text-white">👤</span>
+              <!-- Profile Picture -->
+              <div class="relative">
+                <img 
+                  v-if="profilePictureUrl" 
+                  :src="profilePictureUrl" 
+                  alt="Profile" 
+                  class="w-16 h-16 rounded-full object-cover border-4 border-white/30 shadow-lg"
+                />
+                <div 
+                  v-else 
+                  class="w-16 h-16 rounded-full bg-white/20 flex items-center justify-center border-4 border-white/30"
+                >
+                  <span class="text-2xl text-white">👤</span>
+                </div>
+                <!-- Upload Button Overlay -->
+                <button
+                  v-if="isEditing"
+                  @click="triggerFileInput"
+                  class="absolute bottom-0 right-0 bg-emerald-500 hover:bg-emerald-600 text-white rounded-full p-2 shadow-lg transition-all duration-300"
+                  title="Upload Foto"
+                >
+                  <i class="fas fa-camera text-sm"></i>
+                </button>
+                <!-- Hidden File Input -->
+                <input
+                  ref="fileInput"
+                  type="file"
+                  accept="image/jpeg,image/png,image/jpg,image/gif"
+                  @change="handleFileSelect"
+                  class="hidden"
+                />
               </div>
               <h1 class="text-3xl font-bold text-white tracking-tight">Profile Settings</h1>
             </div>
@@ -65,7 +94,18 @@
               </div>
             </div>
 
-            <div class="pt-6 border-t border-emerald-100">
+            <div class="pt-6 border-t border-emerald-100 space-y-4">
+              <!-- Delete Profile Picture Button -->
+              <button
+                v-if="user?.profile_picture"
+                @click="showDeletePictureConfirm = true"
+                class="text-orange-600 font-semibold hover:text-orange-700 transition-all duration-300 hover:underline flex items-center space-x-2"
+              >
+                <i class="fas fa-trash"></i>
+                <span>Hapus Foto Profil</span>
+              </button>
+              
+              <!-- Delete Account Button -->
               <button
                 @click="showDeleteConfirm = true"
                 class="text-red-600 font-semibold hover:text-red-700 transition-all duration-300 hover:underline"
@@ -123,6 +163,38 @@
       </div>
     </div>
 
+    <!-- Delete Picture Confirmation Modal -->
+    <div v-if="showDeletePictureConfirm" class="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
+      <div class="bg-white rounded-3xl max-w-md mx-4 p-8 shadow-2xl">
+        <div class="flex items-center justify-between mb-6">
+          <h3 class="text-2xl font-bold text-gray-900">Hapus Foto Profil</h3>
+          <button
+            @click="showDeletePictureConfirm = false"
+            class="text-gray-500 hover:text-gray-700 transition-all duration-300"
+          >
+            ❌
+          </button>
+        </div>
+        <p class="text-gray-600 mb-8 leading-relaxed">
+          Apakah Anda yakin ingin menghapus foto profil? Tindakan ini tidak dapat dibatalkan.
+        </p>
+        <div class="flex space-x-4">
+          <button
+            @click="deleteProfilePicture"
+            class="flex-1 bg-orange-600 text-white px-6 py-3 rounded-full hover:bg-orange-700 transition-all duration-300"
+          >
+            Hapus Foto
+          </button>
+          <button
+            @click="showDeletePictureConfirm = false"
+            class="flex-1 bg-gray-100 text-gray-700 px-6 py-3 rounded-full hover:bg-gray-200 transition-all duration-300"
+          >
+            Batal
+          </button>
+        </div>
+      </div>
+    </div>
+
     <!-- Delete Confirmation Modal -->
     <div v-if="showDeleteConfirm" class="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
       <div class="bg-white rounded-3xl max-w-md mx-4 p-8 shadow-2xl">
@@ -168,8 +240,12 @@ const authStore = useAuthStore();
 const user = ref(null);
 const isEditing = ref(false);
 const showDeleteConfirm = ref(false);
+const showDeletePictureConfirm = ref(false);
 const errorMessage = ref('');
 const isLoading = ref(true);
+const profilePictureUrl = ref(null);
+const fileInput = ref(null);
+const isUploading = ref(false);
 
 const editForm = ref({
   name: '',
@@ -177,6 +253,10 @@ const editForm = ref({
 });
 
 onMounted(async () => {
+  await loadProfile();
+});
+
+const loadProfile = async () => {
   isLoading.value = true;
   try {
     const response = await axios.get('/api/profile', {
@@ -185,19 +265,42 @@ onMounted(async () => {
       }
     });
     console.log('Data dari API:', response.data);
+    console.log('Profile picture field:', response.data?.profile_picture);
+    console.log('All fields in response:', Object.keys(response.data));
     user.value = response.data;
     authStore.setUser(response.data);
     editForm.value = {
       name: user.value?.name || '',
       email: user.value?.email || ''
     };
+    
+    // Load profile picture
+    console.log('Checking profile_picture:', user.value?.profile_picture);
+    if (user.value?.profile_picture) {
+      // Check if profile_picture already contains full URL or just path
+      if (user.value.profile_picture.startsWith('http')) {
+        profilePictureUrl.value = user.value.profile_picture;
+      } else {
+        // Use baseURL from axios config (remove /api if present)
+        let baseURL = axios.defaults.baseURL || 'https://api.ipbipendataanguru.org';
+        // If baseURL ends with /api, remove it for storage URLs
+        if (baseURL.endsWith('/api')) {
+          baseURL = baseURL.replace('/api', '');
+        }
+        profilePictureUrl.value = `${baseURL}/storage/${user.value.profile_picture}`;
+      }
+    } else {
+      profilePictureUrl.value = null;
+      console.log('No profile picture found');
+    }
+    console.log('Profile picture URL set to:', profilePictureUrl.value);
   } catch (error) {
     errorMessage.value = error.response?.data?.message || 'Failed to load profile';
     console.error('Error fetching profile:', error);
   } finally {
     isLoading.value = false;
   }
-});
+};
 
 const startEditing = () => {
   isEditing.value = true;
@@ -207,9 +310,11 @@ const startEditing = () => {
   };
 };
 
-const cancelEditing = () => {
+const cancelEditing = async () => {
   isEditing.value = false;
   errorMessage.value = '';
+  // Reload profile to ensure we have the latest data
+  await loadProfile();
 };
 
 const updateProfile = async () => {
@@ -224,13 +329,88 @@ const updateProfile = async () => {
       }
     );
 
-    authStore.setUser(response.data);
-    user.value = response.data;
+    // Reload profile to get updated data including profile picture
+    await loadProfile();
+    
+    authStore.setUser(user.value);
     isEditing.value = false;
     errorMessage.value = '';
   } catch (error) {
     errorMessage.value = error.response?.data?.message || 'Failed to update profile';
     console.error('Error updating profile:', error);
+  }
+};
+
+const triggerFileInput = () => {
+  fileInput.value?.click();
+};
+
+const handleFileSelect = async (event) => {
+  const file = event.target.files[0];
+  if (!file) return;
+
+  // Validate file type
+  const allowedTypes = ['image/jpeg', 'image/png', 'image/jpg', 'image/gif'];
+  if (!allowedTypes.includes(file.type)) {
+    errorMessage.value = 'Format file tidak valid. Hanya JPEG, PNG, atau GIF yang diizinkan.';
+    return;
+  }
+
+  // Validate file size (5MB max)
+  if (file.size > 5 * 1024 * 1024) {
+    errorMessage.value = 'File terlalu besar. Maksimal 5MB.';
+    return;
+  }
+
+  try {
+    isUploading.value = true;
+    errorMessage.value = '';
+
+    const formData = new FormData();
+    formData.append('profile_picture', file);
+
+    const response = await axios.post('/api/users/profile/upload-picture', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+        Authorization: `Bearer ${authStore.accessToken}`
+      }
+    });
+
+    if (response.data.success) {
+      // Reload profile to get updated data
+      await loadProfile();
+      
+      // Update auth store with new profile data
+      authStore.setUser(user.value);
+      
+      errorMessage.value = '';
+    }
+  } catch (error) {
+    errorMessage.value = error.response?.data?.message || 'Gagal upload foto profil';
+    console.error('Error uploading profile picture:', error);
+  } finally {
+    isUploading.value = false;
+  }
+};
+
+const deleteProfilePicture = async () => {
+  try {
+    const response = await axios.delete('/api/users/profile/delete-picture', {
+      headers: {
+        Authorization: `Bearer ${authStore.accessToken}`
+      }
+    });
+
+    if (response.data.success) {
+      profilePictureUrl.value = null;
+      user.value.profile_picture = null;
+      showDeletePictureConfirm.value = false;
+      errorMessage.value = '';
+    }
+  } catch (error) {
+    errorMessage.value = error.response?.data?.message || 'Gagal menghapus foto profil';
+    showDeletePictureConfirm.value = false;
+    console.error('Error deleting profile picture:', error);
   }
 };
 

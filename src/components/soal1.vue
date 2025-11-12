@@ -210,12 +210,14 @@ import { ref, onMounted, computed } from 'vue';
 import axios from 'axios';
 import { useAuthStore } from '@/stores/auth';
 import { useRoute, useRouter } from 'vue-router';
+import { useDialog } from '@/composables/useDialog';
 import 'animate.css';
 import '@fortawesome/fontawesome-free/css/all.min.css';
 
 const route = useRoute();
 const router = useRouter();
 const authStore = useAuthStore();
+const { showAlert, showConfirm } = useDialog();
 
 const selectedAnswer = ref('');
 const selectedFile = ref(null);
@@ -267,7 +269,7 @@ const handleDrop = (event) => {
   validateAndSetFile(file);
 };
 
-const validateAndSetFile = (file) => {
+const validateAndSetFile = async (file) => {
   const allowedTypes = ['application/pdf', 'image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/bmp', 'image/webp'];
   const maxSize = 2 * 1024 * 1024; // 2MB
   if (file && allowedTypes.includes(file.type) && file.size <= maxSize) {
@@ -275,7 +277,7 @@ const validateAndSetFile = (file) => {
     console.log('File selected:', file.name);
   } else {
     selectedFile.value = null;
-    alert('File harus berupa PDF atau gambar (JPG, PNG, dll.) dan maksimum 2MB');
+    await showAlert('File harus berupa PDF atau gambar (JPG, PNG, dll.) dan maksimum 2MB', 'Format File Tidak Valid');
   }
 };
 
@@ -286,11 +288,11 @@ const clearFile = () => {
 
 const saveAnswer = async () => {
   if (!selectedAnswer.value) {
-    alert('Pilih tingkat pendidikan terlebih dahulu!');
+    await showAlert('Pilih tingkat pendidikan terlebih dahulu!', 'Peringatan');
     return false;
   }
   if (!selectedFile.value && !isAnswerSaved.value) {
-    alert('Unggah bukti pendidikan terlebih dahulu!');
+    await showAlert('Unggah bukti pendidikan terlebih dahulu!', 'Peringatan');
     return false;
   }
 
@@ -328,7 +330,8 @@ const saveAnswer = async () => {
 };
 
 const deleteAnswer = async () => {
-  if (!confirm('Apakah Anda yakin ingin menghapus jawaban?')) return;
+  const confirmed = await showConfirm('Apakah Anda yakin ingin menghapus jawaban?', 'Konfirmasi Hapus');
+  if (!confirmed) return;
 
   try {
     loading.value = true;
@@ -479,7 +482,7 @@ const viewFile = async (fieldName) => {
       setTimeout(() => window.URL.revokeObjectURL(blobUrl), 1000);
     } else {
       console.warn('Unsupported file type:', contentType);
-      alert('Tipe file tidak didukung untuk ditampilkan.');
+      await showAlert('Tipe file tidak didukung untuk ditampilkan.', 'Format Tidak Didukung');
       window.URL.revokeObjectURL(blobUrl);
     }
 
@@ -491,7 +494,7 @@ const viewFile = async (fieldName) => {
       response: error.response,
       status: error.response?.status,
     });
-    alert('Gagal membuka file: ' + (error.message || 'Terjadi kesalahan'));
+    await showAlert('Gagal membuka file: ' + (error.message || 'Terjadi kesalahan'), 'Error');
   }
 };
 </script>

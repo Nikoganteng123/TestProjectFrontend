@@ -1,6 +1,6 @@
 import { ref } from 'vue';
 
-const dialogState = ref({
+export const dialogState = ref({
   visible: false,
   title: 'Pemberitahuan',
   message: '',

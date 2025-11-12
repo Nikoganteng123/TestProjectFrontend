@@ -181,8 +181,10 @@
 import { ref } from "vue";
 import axios from "axios";
 import { useRouter } from "vue-router";
+import { useDialog } from "@/composables/useDialog";
 
 const router = useRouter();
+const { showAlert } = useDialog();
 
 // Data untuk OTP
 const nomor = ref("");
@@ -227,7 +229,7 @@ async function requestOtp() {
     const response = await axios.post("/api/otp/send", {
       nomor: nomor.value,
     });
-    alert(response.data.message);
+    await showAlert(response.data.message || 'OTP telah dikirim ke nomor Anda', 'OTP Terkirim');
     isOtpRequested.value = true;
     errorMessage.value = null;
   } catch (error) {
@@ -241,7 +243,7 @@ async function verifyOtp() {
       nomor: nomor.value,
       otp: kodeOtp.value,
     });
-    alert(response.data.message);
+    await showAlert(response.data.message || 'OTP berhasil diverifikasi', 'Verifikasi Berhasil');
     isVerified.value = true;
     errorMessage.value = null;
   } catch (error) {
@@ -268,7 +270,7 @@ async function registerAccount() {
       can_take_test: true, // Default true
       status: "active", // Default active
     });
-    alert(response.data.message);
+    await showAlert(response.data.message || 'Akun berhasil didaftarkan', 'Registrasi Berhasil');
     router.push({ name: "login" });
   } catch (error) {
     errorMessage.value = error.response?.data?.message || "Gagal mendaftarkan akun";

@@ -50,6 +50,7 @@
 
 <script>
 import axios from 'axios';
+import { useDialog } from '@/composables/useDialog';
 
 export default {
   data() {
@@ -60,12 +61,18 @@ export default {
       status: false
     }
   },
+  setup() {
+    const { showAlert } = useDialog();
+    return { showAlert };
+  },
   methods: {
     async handleSubmit() {
       this.loading = true;
       this.message = '';
       try {
         const response = await axios.post('/api/forgot-password', { email: this.email });
+        // Show OTP sent alert
+        await this.showAlert(response.data.message || 'OTP telah dikirim ke email Anda', 'OTP Terkirim');
         this.message = response.data.message;
         this.status = true;
 
@@ -77,8 +84,10 @@ export default {
           });
         }, 2000);
       } catch (error) {
-        this.message = error.response?.data?.message || 'An error occurred';
+        const errorMsg = error.response?.data?.message || 'An error occurred';
+        this.message = errorMsg;
         this.status = false;
+        await this.showAlert(errorMsg, 'Error');
       } finally {
         this.loading = false;
       }

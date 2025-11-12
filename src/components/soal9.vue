@@ -118,10 +118,12 @@ import { ref, onMounted, computed } from 'vue';
 import axios from 'axios';
 import { useAuthStore } from '@/stores/auth';
 import { useRoute, useRouter } from 'vue-router';
+import { useDialog } from '@/composables/useDialog';
 
 const route = useRoute();
 const router = useRouter();
 const authStore = useAuthStore();
+const { showAlert } = useDialog();
 const uploadedFiles = ref({});
 const savedFiles = ref({});
 const successMessage = ref('');
@@ -264,13 +266,13 @@ const viewFile = async (fieldName) => {
     } else if (contentType.includes('pdf')) {
       window.open(blobUrl, '_blank');
     } else {
-      alert('Tipe file tidak didukung untuk ditampilkan.');
+      await showAlert('Tipe file tidak didukung untuk ditampilkan.', 'Format Tidak Didukung');
     }
 
     setTimeout(() => window.URL.revokeObjectURL(blobUrl), 1000);
   } catch (error) {
     console.error('Error fetching file:', error.response || error);
-    alert('Gagal membuka file: ' + (error.response?.data?.message || 'File tidak ditemukan'));
+    await showAlert('Gagal membuka file: ' + (error.response?.data?.message || 'File tidak ditemukan'), 'Error');
   }
 };
 </script>

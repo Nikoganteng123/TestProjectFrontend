@@ -99,10 +99,12 @@ import { ref, computed, onMounted } from 'vue';
 import axios from 'axios';
 import { useAuthStore } from '@/stores/auth';
 import { useRoute, useRouter } from 'vue-router';
+import { useDialog } from '@/composables/useDialog';
 
 const route = useRoute();
 const router = useRouter();
 const authStore = useAuthStore();
+const { showAlert } = useDialog();
 const hasExistingData = ref(false);
 
 const inputData = ref({
@@ -169,7 +171,7 @@ const saveOrUpdateAnswer = async () => {
     console.log('Data saved/updated successfully:', response.data);
   } catch (error) {
     console.error('Failed to save/update answer:', error.response?.data || error.message);
-    alert('Gagal menyimpan data: ' + (error.response?.data?.message || error.message));
+    await showAlert('Gagal menyimpan data: ' + (error.response?.data?.message || error.message), 'Error');
   }
 };
 
@@ -189,7 +191,7 @@ const deleteAnswer = async () => {
     hasExistingData.value = false;
   } catch (error) {
     console.error('Failed to delete answer:', error.response?.data || error.message);
-    alert('Gagal menghapus data: ' + (error.response?.data?.message || error.message));
+    await showAlert('Gagal menghapus data: ' + (error.response?.data?.message || error.message), 'Error');
   }
 };
 

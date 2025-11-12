@@ -101,8 +101,10 @@
 import { ref, onMounted } from 'vue';
 import axios from 'axios';
 import { useAuthStore } from '@/stores/auth';
+import { useDialog } from '@/composables/useDialog';
 
 const authStore = useAuthStore();
+const { showAlert } = useDialog();
 const notifications = ref([]);
 const isLoading = ref(false);
 const error = ref(null);
@@ -147,7 +149,7 @@ const uploadFile = async (event, commentId, soalNumber, fieldName) => {
       },
     });
     await fetchNotifications();
-    alert('File berhasil diunggah!');
+    await showAlert('File berhasil diunggah!', 'Berhasil');
   } catch (err) {
     console.error('Error uploading file:', err.response || err);
     error.value = err.response?.data?.message || 'Gagal mengunggah file.';
