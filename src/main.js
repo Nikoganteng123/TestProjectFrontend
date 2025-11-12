@@ -6,15 +6,19 @@ import App from './App.vue'
 import router from './router'
 import { useDialog } from './composables/useDialog'
 
-axios.defaults.baseURL = 'https://api.ipbipendataanguru.org';
+// Development: gunakan localhost backend
+// Production: gunakan https://api.ipbipendataanguru.org
+axios.defaults.baseURL = 'http://127.0.0.1:8000';
 
-// Add interceptor untuk request tanpa credentials jika diperlukan
+// Tidak perlu withCredentials karena menggunakan token authentication (bukan session)
+// withCredentials hanya diperlukan jika menggunakan session-based auth dengan Sanctum
+axios.defaults.withCredentials = false;
+
+// Add interceptor untuk request
 axios.interceptors.request.use(config => {
-  // Jangan attach token jika useAuthInRequest di-set false
-  if (!config.useAuthInRequest) {
-    config.withCredentials = false;
-    return config;
-  }
+  // Jangan gunakan credentials untuk menghindari CORS issue
+  // Karena kita menggunakan token authentication, tidak perlu credentials
+  config.withCredentials = false;
   return config;
 }, error => Promise.reject(error));
 

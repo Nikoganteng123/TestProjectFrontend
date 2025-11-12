@@ -16,7 +16,7 @@ Membuat peta di HomePage bisa dilihat oleh semua orang (public) tanpa harus logi
 Route::post('/admin/login', [AdminController::class, 'login']);
 
 // ⬇️ TAMBAHKAN BARIS INI ⬇️
-Route::get('/public/teachers', [UserController::class, 'publicTeachers']);
+Route::get('/public/users', [UserController::class, 'publicUsers']);
 
 // Rute yang dilindungi autentikasi
 Route::middleware('auth:sanctum')->group(function () {
@@ -33,10 +33,10 @@ Route::middleware('auth:sanctum')->group(function () {
 
 ```php
 /**
- * Method untuk menampilkan data guru publik (tanpa autentikasi)
+ * Method untuk menampilkan data user/guru publik (tanpa autentikasi)
  * Digunakan untuk menampilkan peta di homepage
  */
-public function publicTeachers()
+public function publicUsers()
 {
     try {
         // Ambil semua user yang bukan admin
@@ -66,7 +66,7 @@ public function publicTeachers()
 1. Buka file `routes/api.php`
 2. Tambahkan route publik seperti contoh di atas
 3. Buka file `app/Http/Controllers/UserController.php`
-4. Tambahkan method `publicTeachers()` di akhir class
+4. Tambahkan method `publicUsers()` di akhir class
 
 ### Step 2: Clear Cache
 Jalankan di terminal backend:
@@ -80,14 +80,9 @@ php artisan serve
 ### Step 3: Update Frontend
 Buka file `src/components/HomePage.vue`
 
-**Baris ~431**, ganti dari:
+**Baris ~439**, sudah menggunakan:
 ```javascript
-const response = await axios.get('/api/users', {
-```
-
-**Menjadi**:
-```javascript
-const response = await axios.get('/api/public/teachers', {
+const response = await axios.get('/api/public/users', {
 ```
 
 ---
@@ -103,7 +98,7 @@ const response = await axios.get('/api/public/teachers', {
 
 ## 📌 Catatan Penting
 
-- ✅ Endpoint `/api/public/teachers` **TIDAK memerlukan login**
+- ✅ Endpoint `/api/public/users` **TIDAK memerlukan login**
 - ✅ Hanya menampilkan: `id`, `name`, `email`, `domisili`
 - ✅ Data admin **TIDAK ditampilkan**
 - ✅ Jika API gagal, akan fallback ke sample data
@@ -118,13 +113,13 @@ const response = await axios.get('/api/public/teachers', {
 - Restart server: `php artisan serve`
 
 ### Error: Method not found
-- Pastikan method `publicTeachers()` sudah ditambahkan di `UserController.php`
+- Pastikan method `publicUsers()` sudah ditambahkan di `UserController.php`
 - Check penulisan nama method (case sensitive)
 
 ### Peta tidak muncul
 - Check console browser untuk error
-- Pastikan endpoint `/api/public/teachers` mengembalikan data JSON
-- Test endpoint manual di: `http://127.0.0.1:8000/api/public/teachers`
+- Pastikan endpoint `/api/public/users` mengembalikan data JSON
+- Test endpoint manual di: `http://127.0.0.1:8000/api/public/users`
 
 ---
 

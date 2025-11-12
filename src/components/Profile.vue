@@ -19,6 +19,7 @@
                   :src="profilePictureUrl" 
                   alt="Profile" 
                   class="w-16 h-16 rounded-full object-cover border-4 border-white/30 shadow-lg"
+                  @error="handleImageError"
                 />
                 <div 
                   v-else 
@@ -30,10 +31,12 @@
                 <button
                   v-if="isEditing"
                   @click="triggerFileInput"
-                  class="absolute bottom-0 right-0 bg-emerald-500 hover:bg-emerald-600 text-white rounded-full p-2 shadow-lg transition-all duration-300"
+                  :disabled="isUploading"
+                  class="absolute bottom-0 right-0 bg-emerald-500 hover:bg-emerald-600 text-white rounded-full p-2 shadow-lg transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
                   title="Upload Foto"
                 >
-                  <i class="fas fa-camera text-sm"></i>
+                  <i v-if="!isUploading" class="fas fa-camera text-sm"></i>
+                  <i v-else class="fas fa-spinner fa-spin text-sm"></i>
                 </button>
                 <!-- Hidden File Input -->
                 <input
@@ -97,7 +100,7 @@
             <div class="pt-6 border-t border-emerald-100 space-y-4">
               <!-- Delete Profile Picture Button -->
               <button
-                v-if="user?.profile_picture"
+                v-if="profilePictureUrl"
                 @click="showDeletePictureConfirm = true"
                 class="text-orange-600 font-semibold hover:text-orange-700 transition-all duration-300 hover:underline flex items-center space-x-2"
               >
@@ -233,10 +236,12 @@
 import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { useAuthStore } from '@/stores/auth';
+import { useDialog } from '@/composables/useDialog';
 import axios from 'axios';
 
 const router = useRouter();
 const authStore = useAuthStore();
+const { showAlert } = useDialog();
 const user = ref(null);
 const isEditing = ref(false);
 const showDeleteConfirm = ref(false);
@@ -258,45 +263,50 @@ onMounted(async () => {
 
 const loadProfile = async () => {
   isLoading.value = true;
+  errorMessage.value = '';
+  
   try {
     const response = await axios.get('/api/profile', {
       headers: {
         Authorization: `Bearer ${authStore.accessToken}`
       }
     });
-    console.log('Data dari API:', response.data);
-    console.log('Profile picture field:', response.data?.profile_picture);
-    console.log('All fields in response:', Object.keys(response.data));
+    
+    console.log('✅ Data dari API:', response.data);
+    console.log('📸 Profile picture field:', response.data?.profile_picture);
+    console.log('🔗 Profile picture URL field:', response.data?.profile_picture_url);
+    console.log('📋 All fields in response:', Object.keys(response.data));
+    
     user.value = response.data;
     authStore.setUser(response.data);
+    
     editForm.value = {
       name: user.value?.name || '',
       email: user.value?.email || ''
     };
     
-    // Load profile picture
-    console.log('Checking profile_picture:', user.value?.profile_picture);
-    if (user.value?.profile_picture) {
-      // Check if profile_picture already contains full URL or just path
-      if (user.value.profile_picture.startsWith('http')) {
-        profilePictureUrl.value = user.value.profile_picture;
-      } else {
-        // Use baseURL from axios config (remove /api if present)
-        let baseURL = axios.defaults.baseURL || 'https://api.ipbipendataanguru.org';
-        // If baseURL ends with /api, remove it for storage URLs
-        if (baseURL.endsWith('/api')) {
-          baseURL = baseURL.replace('/api', '');
-        }
-        profilePictureUrl.value = `${baseURL}/storage/${user.value.profile_picture}`;
-      }
+    // Set profile picture URL - PRIORITAS: profile_picture_url > construct dari profile_picture
+    if (response.data?.profile_picture_url) {
+      // Gunakan profile_picture_url langsung dari backend (sudah full URL)
+      profilePictureUrl.value = response.data.profile_picture_url;
+      console.log('✅ Menggunakan profile_picture_url dari API:', profilePictureUrl.value);
+    } else if (response.data?.profile_picture) {
+      // Jika profile_picture_url tidak ada, construct dari profile_picture
+      const baseURL = axios.defaults.baseURL || 'http://localhost:8000';
+      // Hapus /api jika ada di baseURL
+      const cleanBaseURL = baseURL.replace(/\/api$/, '');
+      profilePictureUrl.value = `${cleanBaseURL}/storage/${response.data.profile_picture}`;
+      console.log('✅ Construct URL dari profile_picture:', profilePictureUrl.value);
     } else {
       profilePictureUrl.value = null;
-      console.log('No profile picture found');
+      console.log('⚠️ Tidak ada profile picture');
     }
-    console.log('Profile picture URL set to:', profilePictureUrl.value);
+    
+    console.log('🎯 Final profilePictureUrl:', profilePictureUrl.value);
+    
   } catch (error) {
     errorMessage.value = error.response?.data?.message || 'Failed to load profile';
-    console.error('Error fetching profile:', error);
+    console.error('❌ Error fetching profile:', error);
   } finally {
     isLoading.value = false;
   }
@@ -319,6 +329,8 @@ const cancelEditing = async () => {
 
 const updateProfile = async () => {
   try {
+    errorMessage.value = '';
+    
     const response = await axios.post(
       '/api/updateprofile',
       editForm.value,
@@ -329,15 +341,30 @@ const updateProfile = async () => {
       }
     );
 
-    // Reload profile to get updated data including profile picture
-    await loadProfile();
+    console.log('✅ Profile updated:', response.data);
     
+    // Update user data dengan response terbaru (termasuk profile_picture_url)
+    user.value = response.data;
     authStore.setUser(user.value);
+    
+    // Update profile picture URL dari response
+    if (response.data?.profile_picture_url) {
+      profilePictureUrl.value = response.data.profile_picture_url;
+    } else if (response.data?.profile_picture) {
+      const baseURL = axios.defaults.baseURL || 'http://localhost:8000';
+      const cleanBaseURL = baseURL.replace(/\/api$/, '');
+      profilePictureUrl.value = `${cleanBaseURL}/storage/${response.data.profile_picture}`;
+    } else {
+      profilePictureUrl.value = null;
+    }
+    
     isEditing.value = false;
     errorMessage.value = '';
+    
+    await showAlert('Profile berhasil diupdate!', 'Berhasil');
   } catch (error) {
     errorMessage.value = error.response?.data?.message || 'Failed to update profile';
-    console.error('Error updating profile:', error);
+    console.error('❌ Error updating profile:', error);
   }
 };
 
@@ -369,6 +396,8 @@ const handleFileSelect = async (event) => {
     const formData = new FormData();
     formData.append('profile_picture', file);
 
+    console.log('📤 Uploading profile picture...');
+    
     const response = await axios.post('/api/users/profile/upload-picture', formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
@@ -376,41 +405,71 @@ const handleFileSelect = async (event) => {
       }
     });
 
+    console.log('✅ Upload response:', response.data);
+
     if (response.data.success) {
-      // Reload profile to get updated data
+      // Update profile picture URL dari response upload
+      if (response.data.data?.profile_picture_url) {
+        profilePictureUrl.value = response.data.data.profile_picture_url;
+        console.log('✅ Profile picture URL updated:', profilePictureUrl.value);
+      }
+      
+      // Reload profile untuk mendapatkan data terbaru
       await loadProfile();
       
-      // Update auth store with new profile data
+      // Update auth store dengan data terbaru
       authStore.setUser(user.value);
       
       errorMessage.value = '';
+      await showAlert('Foto profil berhasil diupload!', 'Berhasil');
     }
   } catch (error) {
     errorMessage.value = error.response?.data?.message || 'Gagal upload foto profil';
-    console.error('Error uploading profile picture:', error);
+    console.error('❌ Error uploading profile picture:', error);
+    console.error('Error details:', {
+      status: error.response?.status,
+      data: error.response?.data,
+      message: error.message
+    });
   } finally {
     isUploading.value = false;
+    // Reset file input
+    event.target.value = '';
   }
 };
 
 const deleteProfilePicture = async () => {
   try {
+    errorMessage.value = '';
+    
     const response = await axios.delete('/api/users/profile/delete-picture', {
       headers: {
         Authorization: `Bearer ${authStore.accessToken}`
       }
     });
 
+    console.log('✅ Delete response:', response.data);
+
     if (response.data.success) {
+      // Clear profile picture
       profilePictureUrl.value = null;
       user.value.profile_picture = null;
+      user.value.profile_picture_url = null;
+      
+      // Update auth store
+      authStore.setUser(user.value);
+      
+      // Reload profile untuk memastikan data terbaru
+      await loadProfile();
+      
       showDeletePictureConfirm.value = false;
       errorMessage.value = '';
+      await showAlert('Foto profil berhasil dihapus!', 'Berhasil');
     }
   } catch (error) {
     errorMessage.value = error.response?.data?.message || 'Gagal menghapus foto profil';
     showDeletePictureConfirm.value = false;
-    console.error('Error deleting profile picture:', error);
+    console.error('❌ Error deleting profile picture:', error);
   }
 };
 
@@ -427,8 +486,16 @@ const deleteAccount = async () => {
   } catch (error) {
     errorMessage.value = error.response?.data?.message || 'Failed to delete account';
     showDeleteConfirm.value = false;
-    console.error('Error deleting account:', error);
+    console.error('❌ Error deleting account:', error);
   }
+};
+
+const handleImageError = (event) => {
+  console.error('❌ Error loading profile picture image:', event);
+  // Set ke null jika gambar gagal load
+  profilePictureUrl.value = null;
+  user.value.profile_picture = null;
+  user.value.profile_picture_url = null;
 };
 </script>
 

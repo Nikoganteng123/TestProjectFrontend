@@ -114,7 +114,9 @@ async function onSubmit() {
   isLoading.value = true;
 
   try {
-    await axios.get("/sanctum/csrf-cookie");
+    // Skip CSRF cookie karena kita menggunakan token authentication
+    // CSRF cookie hanya diperlukan untuk session-based authentication
+    // Langsung ke login endpoint
     const response = await axios.post("/api/login", {
       email: email.value,
       password: password.value,

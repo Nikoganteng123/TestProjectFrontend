@@ -65,9 +65,11 @@ import { ref, onMounted } from 'vue';
 import axios from 'axios';
 import { useAuthStore } from '@/stores/auth';
 import { useRouter } from 'vue-router';
+import { useDialog } from '@/composables/useDialog';
 
 const authStore = useAuthStore();
 const router = useRouter();
+const { showAlert } = useDialog();
 const isChecking = ref(false);
 const canTakeTest = ref(null);
 const availabilityMessage = ref('');
@@ -94,13 +96,26 @@ const checkAvailabilityAndRedirect = async () => {
     availabilityMessage.value = message;
 
     if (can_take_test) {
+      // User bisa ikut tes, redirect ke soal-1
       setTimeout(() => {
         router.push('/soal-1');
       }, 1500);
+    } else {
+      // User tidak bisa ikut tes lagi, tampilkan popup alert dengan pesan yang jelas
+      const alertMessage = message || 
+        'Anda tidak dapat mengikuti pemetaan data lagi karena nilai Anda sudah diverifikasi dan telah keluar.\n\n' +
+        'Jika Anda sudah terverifikasi, Anda tidak dapat mengulang pemetaan data. Silakan hubungi administrator IPBI jika ada pertanyaan atau ingin melakukan perubahan.';
+      
+      await showAlert(
+        alertMessage,
+        'Tidak Dapat Mengikuti Pemetaan Data'
+      );
     }
   } catch (error) {
     console.error('Gagal memeriksa ketersediaan:', error.response ? error.response.data : error.message);
-    availabilityMessage.value = 'Terjadi kesalahan. Silakan coba lagi nanti.';
+    const errorMessage = error.response?.data?.message || 'Terjadi kesalahan. Silakan coba lagi nanti.';
+    availabilityMessage.value = errorMessage;
+    await showAlert(errorMessage, 'Error');
   } finally {
     isChecking.value = false;
   }

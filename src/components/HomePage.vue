@@ -422,31 +422,35 @@ export default {
       this.mapLoading = true;
       
       try {
-        // Load Leaflet Maps library
-        await this.loadLeafletScript();
+        // Pastikan map container sudah ada dan visible
+        await this.$nextTick();
         
-        // Fetch data guru dari API public endpoint
-        try {
-          const response = await axios.get('/api/public/teachers', { 
-            useAuthInRequest: false,
-            withCredentials: false 
-          });
-          // Data sudah filtered oleh backend (admin tidak ditampilkan)
-          this.teachers = response.data?.data || [];
-          console.log('Data guru loaded:', this.teachers.length, 'guru');
-        } catch (apiError) {
-          console.warn('API endpoint tidak tersedia, menggunakan sample data:', apiError);
-          // Fallback sample data
-          this.teachers = [
-            { name: 'Guru Jakarta', domisili: 'Jakarta, Indonesia' },
-            { name: 'Guru Bandung', domisili: 'Bandung, Jawa Barat' },
-            { name: 'Guru Surabaya', domisili: 'Surabaya, Jawa Timur' },
-            { name: 'Guru Yogyakarta', domisili: 'Yogyakarta, Indonesia' },
-            { name: 'Guru Medan', domisili: 'Medan, Sumatera Utara' }
-          ];
+        if (!this.$refs.mapContainer) {
+          console.error('❌ Map container tidak ditemukan');
+          this.mapLoading = false;
+          return;
         }
         
+        // Pastikan container memiliki dimensi
+        const containerRect = this.$refs.mapContainer.getBoundingClientRect();
+        if (containerRect.width === 0 || containerRect.height === 0) {
+          console.warn('⚠️ Map container belum memiliki dimensi, menunggu...');
+          await new Promise(resolve => setTimeout(resolve, 500));
+        }
+        
+        console.log('🗺️ Map container ready:', {
+          width: containerRect.width,
+          height: containerRect.height,
+          element: this.$refs.mapContainer
+        });
+        
+        // Load Leaflet Maps library
+        console.log('📚 Loading Leaflet library...');
+        await this.loadLeafletScript();
+        console.log('✅ Leaflet library loaded');
+        
         // Initialize Leaflet map centered di Indonesia
+        console.log('🗺️ Initializing map...');
         this.map = L.map(this.$refs.mapContainer).setView([-2.5, 118.0], 5);
         
         // Add OpenStreetMap tiles
@@ -454,40 +458,245 @@ export default {
           attribution: '© OpenStreetMap contributors | © IPBI'
         }).addTo(this.map);
         
-        // Plot markers untuk setiap guru
-        this.plotTeachersOnMap();
+        // Tunggu map selesai render
+        this.map.whenReady(() => {
+          console.log('✅ Map ready');
+        });
+        
+        // Tunggu sedikit untuk memastikan tiles ter-load
+        await new Promise(resolve => setTimeout(resolve, 300));
+        
+        // Fetch data guru dari API public endpoint (tidak perlu authentication)
+        await this.fetchTeachersData();
+        
+        // Plot markers untuk setiap guru (jika ada data)
+        if (this.teachers.length > 0) {
+          console.log('📍 Mulai plotting markers...');
+          await this.plotTeachersOnMap();
+        } else {
+          console.warn('⚠️ Tidak ada data guru untuk diplot');
+          // Tampilkan pesan jika tidak ada data
+          const noDataMessage = document.createElement('div');
+          noDataMessage.className = 'flex items-center justify-center h-full text-gray-500 p-4 text-center';
+          noDataMessage.innerHTML = '<div><p class="mb-2">Tidak ada data guru dengan domisili yang tersedia.</p><p class="text-sm">Silakan hubungi administrator untuk menambahkan data domisili guru.</p></div>';
+          this.$refs.mapContainer.appendChild(noDataMessage);
+        }
         
       } catch (error) {
-        console.error('Error initializing map:', error);
-        this.$refs.mapContainer.innerHTML = '<div class="flex items-center justify-center h-full text-red-600 p-4 text-center">Gagal memuat peta. Silakan refresh halaman.</div>';
+        console.error('❌ Error initializing map:', error);
+        if (this.$refs.mapContainer) {
+          this.$refs.mapContainer.innerHTML = '<div class="flex items-center justify-center h-full text-red-600 p-4 text-center">Gagal memuat peta. Silakan refresh halaman.</div>';
+        }
       } finally {
         this.mapLoading = false;
       }
     },
+    async fetchTeachersData() {
+      try {
+        // Pastikan baseURL benar - gunakan window.axios jika ada, atau set manual
+        const baseURL = window.axios?.defaults?.baseURL || 
+                       axios.defaults.baseURL || 
+                       import.meta.env.VITE_APP_URL || 
+                       'http://localhost:8000';
+        
+        // Pastikan tidak ada double slash
+        const apiUrl = `${baseURL.replace(/\/$/, '')}/api/public/teachers`;
+        console.log('🔍 BaseURL:', baseURL);
+        console.log('🔍 Full API URL:', apiUrl);
+        
+        // Buat axios instance untuk request ini dengan baseURL yang jelas
+        const axiosInstance = axios.create({
+          baseURL: baseURL,
+          withCredentials: false, // Public endpoint tidak perlu credentials
+          headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+          }
+        });
+        
+        console.log('📡 Fetching teachers data...');
+        const response = await axiosInstance.get('/api/public/teachers');
+        
+        console.log('✅ Response dari API:', response.data);
+        console.log('📊 Status:', response.status);
+        
+        // Handle berbagai format response
+        let teachersData = [];
+        if (response.data?.success && Array.isArray(response.data.data)) {
+          // Format: { success: true, data: [...] }
+          teachersData = response.data.data;
+          console.log('✅ Format response: { success: true, data: [...] }');
+        } else if (Array.isArray(response.data)) {
+          // Format: [...]
+          teachersData = response.data;
+          console.log('✅ Format response: Array langsung');
+        } else if (response.data?.data && Array.isArray(response.data.data)) {
+          // Format: { data: [...] }
+          teachersData = response.data.data;
+          console.log('✅ Format response: { data: [...] }');
+        } else {
+          console.warn('⚠️ Format response tidak dikenali:', response.data);
+          teachersData = [];
+        }
+        
+        // Filter hanya guru yang memiliki domisili
+        this.teachers = teachersData.filter(teacher => {
+          // Backend sudah filter is_admin = false, jadi kita hanya perlu cek domisili
+          const hasDomisili = teacher.domisili && 
+                              typeof teacher.domisili === 'string' &&
+                              teacher.domisili.trim() !== '';
+          
+          if (!hasDomisili) {
+            console.warn('⚠️ Guru tanpa domisili:', teacher.name || teacher.email);
+          }
+          
+          return hasDomisili;
+        });
+        
+        console.log('📈 Data guru berhasil dimuat:', this.teachers.length, 'guru dengan domisili');
+        console.log('📊 Total dari backend:', teachersData.length);
+        
+        if (this.teachers.length > 0) {
+          console.log('📋 SEMUA data guru yang akan diplot:', this.teachers.map(t => ({
+            name: t.name,
+            domisili: t.domisili
+          })));
+        }
+        
+        if (this.teachers.length === 0) {
+          console.warn('⚠️ Tidak ada data guru dengan domisili yang ditemukan');
+          if (teachersData.length > 0) {
+            console.warn('ℹ️ Total data dari API:', teachersData.length, 'tetapi tidak ada yang memiliki domisili');
+          }
+        }
+      } catch (apiError) {
+        console.error('❌ Error mengambil data guru dari API:', apiError);
+        
+        // Detail error untuk debugging
+        const baseURL = axios.defaults.baseURL || 'http://localhost:8000';
+        const errorDetails = {
+          message: apiError.message,
+          response: apiError.response?.data,
+          status: apiError.response?.status,
+          statusText: apiError.response?.statusText,
+          url: apiError.config?.url,
+          baseURL: apiError.config?.baseURL || baseURL,
+          fullURL: (apiError.config?.baseURL || baseURL) + (apiError.config?.url || '')
+        };
+        console.error('📋 Error details:', errorDetails);
+        
+        // Tampilkan pesan error yang lebih informatif
+        if (apiError.response) {
+          if (apiError.response.status === 404) {
+            console.error('❌ Endpoint tidak ditemukan (404)');
+            console.error('   URL yang dicoba:', errorDetails.fullURL);
+            console.error('   Pastikan:');
+            console.error('   1. Backend server running di', baseURL);
+            console.error('   2. Route /api/public/teachers terdaftar');
+            console.error('   3. Jalankan: php artisan route:clear');
+          } else if (apiError.response.status === 500) {
+            console.error('❌ Server error. Cek log backend untuk detail.');
+          } else if (apiError.response.status === 403) {
+            console.error('❌ Akses ditolak. Pastikan endpoint adalah public (tidak perlu auth).');
+          }
+        } else if (apiError.request) {
+          console.error('❌ Tidak ada response dari server.');
+          console.error('   Pastikan backend running di:', baseURL);
+          console.error('   Test di browser:', `${baseURL}/api/public/teachers`);
+        } else {
+          console.error('❌ Error saat setup request:', apiError.message);
+        }
+        
+        this.teachers = [];
+      }
+    },
     async plotTeachersOnMap() {
+      // Pastikan ada data teachers
+      if (!this.teachers || this.teachers.length === 0) {
+        console.warn('⚠️ Tidak ada data guru untuk diplot di peta');
+        return;
+      }
+      
+      // Pastikan map sudah terinisialisasi
+      if (!this.map) {
+        console.error('❌ Map belum terinisialisasi');
+        return;
+      }
+      
       // Group teachers by city untuk clustering
       const cityGroups = {};
       
       this.teachers.forEach(teacher => {
-        if (!teacher.domisili) return;
+        if (!teacher || !teacher.domisili) return;
         
-        const city = teacher.domisili.split(',')[0] || teacher.domisili;
+        // Ambil nama kota dari domisili
+        const city = teacher.domisili.split(',')[0]?.trim() || teacher.domisili.trim();
+        if (!city || city === '') return;
+        
         if (!cityGroups[city]) {
           cityGroups[city] = [];
         }
         cityGroups[city].push(teacher);
       });
       
+      console.log('🏙️ Kota yang akan diplot:', Object.keys(cityGroups).length, 'kota');
+      console.log('📍 Daftar kota:', Object.keys(cityGroups));
+      
+      // Log detail setiap kota dan jumlah guru
+      Object.keys(cityGroups).forEach(city => {
+        console.log(`   - ${city}: ${cityGroups[city].length} guru`);
+      });
+      
       // Geocode setiap kota dan tambahkan marker
-      for (const city of Object.keys(cityGroups)) {
+      let geocodedCount = 0;
+      let failedCount = 0;
+      const cities = Object.keys(cityGroups);
+      const failedCities = [];
+      
+      for (let i = 0; i < cities.length; i++) {
+        const city = cities[i];
+        const teachers = cityGroups[city];
+        
         try {
-          const response = await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(city + ', Indonesia')}&format=json&limit=1`);
+          // Tambahkan "Indonesia" untuk hasil geocoding yang lebih akurat
+          const searchQuery = city.includes('Indonesia') ? city : `${city}, Indonesia`;
+          console.log(`🔍 [${i + 1}/${cities.length}] Geocoding: ${searchQuery} (${teachers.length} guru)`);
+          
+          // Delay untuk menghindari rate limit dari Nominatim (1 request per detik)
+          if (i > 0) {
+            await new Promise(resolve => setTimeout(resolve, 1000));
+          }
+          
+          const response = await fetch(
+            `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(searchQuery)}&format=json&limit=1`,
+            {
+              headers: {
+                'User-Agent': 'IPBI-Maps-App/1.0'
+              }
+            }
+          );
+          
+          if (!response.ok) {
+            console.warn(`⚠️ Geocoding failed for ${city}: HTTP ${response.status}`);
+            failedCount++;
+            failedCities.push({ city, teachers, reason: `HTTP ${response.status}` });
+            continue;
+          }
+          
           const data = await response.json();
           
-          if (data && data[0]) {
+          if (data && data.length > 0 && data[0]) {
             const lat = parseFloat(data[0].lat);
             const lon = parseFloat(data[0].lon);
-            const teachers = cityGroups[city];
+            
+            if (isNaN(lat) || isNaN(lon)) {
+              console.warn(`⚠️ Koordinat tidak valid untuk ${city}:`, data[0]);
+              failedCount++;
+              failedCities.push({ city, teachers, reason: 'Koordinat tidak valid' });
+              continue;
+            }
+            
+            console.log(`✅ ${city}: [${lat}, ${lon}] (${teachers.length} guru)`);
             
             // Create custom icon with number
             const customIcon = L.divIcon({
@@ -505,10 +714,116 @@ export default {
             marker.bindPopup(popupContent);
             
             this.markers.push(marker);
+            geocodedCount++;
+            
+            // Fit map bounds setelah beberapa marker ditambahkan
+            if (geocodedCount === 1) {
+              this.map.setView([lat, lon], 5);
+            } else if (geocodedCount > 1) {
+              const group = new L.featureGroup(this.markers);
+              this.map.fitBounds(group.getBounds().pad(0.1));
+            }
+          } else {
+            console.warn(`⚠️ Tidak dapat menemukan koordinat untuk: ${city} (${teachers.length} guru)`);
+            
+            // Retry dengan query yang berbeda
+            console.log(`🔄 Retry geocoding untuk ${city} dengan query alternatif...`);
+            try {
+              const retryQuery = city; // Coba tanpa "Indonesia"
+              const retryResponse = await fetch(
+                `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(retryQuery)}&format=json&limit=1`,
+                {
+                  headers: {
+                    'User-Agent': 'IPBI-Maps-App/1.0'
+                  }
+                }
+              );
+              
+              if (retryResponse.ok) {
+                const retryData = await retryResponse.json();
+                if (retryData && retryData.length > 0 && retryData[0]) {
+                  const lat = parseFloat(retryData[0].lat);
+                  const lon = parseFloat(retryData[0].lon);
+                  
+                  if (!isNaN(lat) && !isNaN(lon)) {
+                    console.log(`✅ Retry berhasil! ${city}: [${lat}, ${lon}] (${teachers.length} guru)`);
+                    
+                    const customIcon = L.divIcon({
+                      className: 'custom-marker',
+                      html: `<div style="background-color: #34d399; border: 2px solid #1f4d2b; border-radius: 50%; width: 35px; height: 35px; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 14px; box-shadow: 0 2px 4px rgba(0,0,0,0.3);">${teachers.length}</div>`,
+                      iconSize: [35, 35],
+                      iconAnchor: [17.5, 17.5]
+                    });
+                    
+                    const marker = L.marker([lat, lon], { icon: customIcon }).addTo(this.map);
+                    const popupContent = this.createPopupContent(city, teachers);
+                    marker.bindPopup(popupContent);
+                    
+                    this.markers.push(marker);
+                    geocodedCount++;
+                    
+                    if (geocodedCount === 1) {
+                      this.map.setView([lat, lon], 5);
+                    } else if (geocodedCount > 1) {
+                      const group = new L.featureGroup(this.markers);
+                      this.map.fitBounds(group.getBounds().pad(0.1));
+                    }
+                    
+                    continue; // Skip ke kota berikutnya
+                  }
+                }
+              }
+            } catch (retryError) {
+              console.error(`❌ Retry juga gagal untuk ${city}:`, retryError);
+            }
+            
+            failedCount++;
+            failedCities.push({ city, teachers, reason: 'Koordinat tidak ditemukan' });
           }
         } catch (error) {
-          console.error(`Error geocoding ${city}:`, error);
+          console.error(`❌ Error geocoding ${city}:`, error);
+          failedCount++;
+          failedCities.push({ city, teachers, reason: error.message });
         }
+      }
+      
+      console.log(`✅ Total ${geocodedCount} dari ${cities.length} kota berhasil diplot`);
+      console.log(`❌ Total ${failedCount} kota gagal diplot`);
+      
+      // Log detail kota yang gagal
+      if (failedCities.length > 0) {
+        console.warn('⚠️ Kota yang gagal diplot:');
+        failedCities.forEach(({ city, teachers, reason }) => {
+          console.warn(`   - ${city}: ${teachers.length} guru (${reason})`);
+          console.warn(`     Guru:`, teachers.map(t => t.name).join(', '));
+        });
+      }
+      
+      // Hitung total guru yang berhasil diplot
+      const totalTeachersPlotted = this.markers.reduce((sum, marker) => {
+        const popup = marker.getPopup();
+        if (popup) {
+          const content = popup.getContent();
+          const match = content.match(/(\d+)\s+Guru/);
+          if (match) {
+            return sum + parseInt(match[1]);
+          }
+        }
+        return sum;
+      }, 0);
+      
+      console.log(`📊 Total ${totalTeachersPlotted} dari ${this.teachers.length} guru berhasil diplot di map`);
+      
+      if (totalTeachersPlotted < this.teachers.length) {
+        const missing = this.teachers.length - totalTeachersPlotted;
+        console.warn(`⚠️ ${missing} guru tidak muncul di map karena geocoding gagal`);
+      }
+      
+      // Final fit bounds
+      if (this.markers.length > 0) {
+        const group = new L.featureGroup(this.markers);
+        this.map.fitBounds(group.getBounds().pad(0.1));
+        console.log('✅ Map bounds adjusted untuk semua marker');
       }
     },
     createPopupContent(city, teachers) {
