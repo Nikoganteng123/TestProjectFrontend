@@ -39,15 +39,26 @@
         <!-- Password Input -->
         <div class="group">
           <label for="password" class="block text-sm font-semibold text-emerald-700 uppercase tracking-wide">Password</label>
-          <input
-            id="password"
-            name="password"
-            type="password"
-            v-model="password"
-            required
-            class="mt-2 block w-full rounded-lg border border-emerald-200 p-3 text-gray-900 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all duration-300 group-hover:border-emerald-300"
-            placeholder="Enter your password"
-          />
+          <div class="relative">
+            <input
+              id="password"
+              name="password"
+              :type="showPassword ? 'text' : 'password'"
+              v-model="password"
+              required
+              class="mt-2 block w-full rounded-lg border border-emerald-200 p-3 pr-10 text-gray-900 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all duration-300 group-hover:border-emerald-300"
+              placeholder="Enter your password"
+            />
+            <button
+              type="button"
+              @click="showPassword = !showPassword"
+              class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-emerald-600 transition-colors focus:outline-none"
+              tabindex="-1"
+            >
+              <i v-if="showPassword" class="fas fa-eye-slash"></i>
+              <i v-else class="fas fa-eye"></i>
+            </button>
+          </div>
         </div>
 
         <!-- Buttons -->
@@ -96,6 +107,7 @@ const email = ref("");
 const password = ref("");
 const errorMessage = ref(null);
 const isLoading = ref(false);
+const showPassword = ref(false);
 
 const goToRegisterPage = () => {
   router.push({ name: "register" });

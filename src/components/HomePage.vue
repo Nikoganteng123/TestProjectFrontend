@@ -551,6 +551,12 @@ export default {
           }
           
           return hasDomisili;
+        }).map(teacher => {
+          // Simplify domisili untuk setiap teacher
+          if (teacher.domisili) {
+            teacher.simplifiedCity = this.simplifyCity(teacher.domisili);
+          }
+          return teacher;
         });
         
         console.log('📈 Data guru berhasil dimuat:', this.teachers.length, 'guru dengan domisili');
@@ -629,8 +635,8 @@ export default {
       this.teachers.forEach(teacher => {
         if (!teacher || !teacher.domisili) return;
         
-        // Ambil nama kota dari domisili
-        const city = teacher.domisili.split(',')[0]?.trim() || teacher.domisili.trim();
+        // Gunakan simplifiedCity jika sudah ada, atau simplify sekarang
+        const city = teacher.simplifiedCity || this.simplifyCity(teacher.domisili);
         if (!city || city === '') return;
         
         if (!cityGroups[city]) {
@@ -826,20 +832,55 @@ export default {
         console.log('✅ Map bounds adjusted untuk semua marker');
       }
     },
+    simplifyCity(domisili) {
+      if (!domisili) return '';
+      
+      // Ambil bagian pertama sebelum koma
+      let city = domisili.split(',')[0]?.trim() || domisili.trim();
+      
+      // Hapus detail wilayah (Barat, Timur, Selatan, Utara, Pusat, dll)
+      const wilayahPatterns = [
+        /\s+(Barat|Timur|Selatan|Utara|Pusat|Tengah|Barat\s+Day|Timur\s+Day|Selatan\s+Day|Utara\s+Day)$/i,
+        /\s+(Kota|Kabupaten|Kab\.|Kec\.|Kecamatan)\s+/i
+      ];
+      
+      wilayahPatterns.forEach(pattern => {
+        city = city.replace(pattern, '');
+      });
+      
+      // Trim lagi setelah menghapus pattern
+      city = city.trim();
+      
+      return city;
+    },
+    getCategory(nilai) {
+      if (!nilai || nilai <= 0) return 'Beginner';
+      if (nilai >= 300) return 'Advanced';
+      if (nilai >= 200) return 'Intermediate';
+      return 'Beginner';
+    },
     createPopupContent(city, teachers) {
-      let html = `<div style="padding: 8px; max-width: 280px;">`;
-      html += `<h3 style="font-weight: bold; margin-bottom: 6px; color: #1f4d2b; font-size: 16px;">${city}</h3>`;
-      html += `<p style="margin-bottom: 8px; color: #34d399; font-size: 14px;">👥 ${teachers.length} Guru</p>`;
-      html += `<ul style="list-style: none; padding: 0; max-height: 150px; overflow-y: auto; margin: 0;">`;
+      let html = `<div style="padding: 12px; max-width: 320px;">`;
+      html += `<h3 style="font-weight: bold; margin-bottom: 8px; color: #1f4d2b; font-size: 18px;">${city}</h3>`;
+      html += `<p style="margin-bottom: 12px; color: #34d399; font-size: 14px; font-weight: 600;">👥 ${teachers.length} Guru</p>`;
+      html += `<ul style="list-style: none; padding: 0; max-height: 200px; overflow-y: auto; margin: 0;">`;
       
       teachers.forEach((teacher, index) => {
-        if (index < 8) {
-          html += `<li style="padding: 3px 0; border-bottom: 1px solid #e5e7eb; font-size: 13px;">📌 ${teacher.name || 'N/A'}</li>`;
+        if (index < 10) {
+          const category = this.getCategory(teacher.nilai);
+          const categoryColor = category === 'Advanced' ? '#9333ea' : category === 'Intermediate' ? '#2563eb' : '#16a34a';
+          html += `<li style="padding: 8px 0; border-bottom: 1px solid #e5e7eb;">`;
+          html += `<div style="font-size: 13px; line-height: 1.6;">`;
+          html += `<div style="font-weight: 600; color: #1f4d2b; margin-bottom: 4px;">👤 ${teacher.name || 'N/A'}</div>`;
+          html += `<div style="color: ${categoryColor}; font-weight: 500; margin-bottom: 4px;">⭐ ${category}</div>`;
+          html += `<div style="color: #6b7280; font-size: 12px;">📞 ${teacher.NoHp || 'Tidak ada kontak'}</div>`;
+          html += `</div>`;
+          html += `</li>`;
         }
       });
       
-      if (teachers.length > 8) {
-        html += `<li style="padding: 3px 0; color: #34d399; font-size: 13px;">... dan ${teachers.length - 8} guru lainnya</li>`;
+      if (teachers.length > 10) {
+        html += `<li style="padding: 8px 0; color: #34d399; font-size: 13px; font-weight: 500;">... dan ${teachers.length - 10} guru lainnya</li>`;
       }
       
       html += `</ul></div>`;

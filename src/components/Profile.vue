@@ -77,6 +77,27 @@
                 <p class="text-sm font-semibold text-emerald-700 uppercase tracking-wide">Email</p>
                 <p class="mt-2 text-xl font-medium text-gray-900">{{ user?.email || 'Not set' }}</p>
               </div>
+              <div class="bg-emerald-50 p-6 rounded-2xl transition-all duration-300 hover:bg-emerald-100 hover:shadow-lg">
+                <p class="text-sm font-semibold text-emerald-700 uppercase tracking-wide">Nomor HP</p>
+                <p class="mt-2 text-xl font-medium text-gray-900">{{ user?.NoHp || 'Not set' }}</p>
+              </div>
+              <div class="bg-emerald-50 p-6 rounded-2xl transition-all duration-300 hover:bg-emerald-100 hover:shadow-lg">
+                <p class="text-sm font-semibold text-emerald-700 uppercase tracking-wide">Pekerjaan</p>
+                <p class="mt-2 text-xl font-medium text-gray-900">{{ user?.pekerjaan || 'Not set' }}</p>
+              </div>
+              <div class="bg-emerald-50 p-6 rounded-2xl transition-all duration-300 hover:bg-emerald-100 hover:shadow-lg">
+                <p class="text-sm font-semibold text-emerald-700 uppercase tracking-wide">Tanggal Lahir</p>
+                <p class="mt-2 text-xl font-medium text-gray-900">{{ user?.tanggal_lahir ? new Date(user.tanggal_lahir).toLocaleDateString('id-ID') : 'Not set' }}</p>
+              </div>
+              <div class="bg-emerald-50 p-6 rounded-2xl transition-all duration-300 hover:bg-emerald-100 hover:shadow-lg">
+                <p class="text-sm font-semibold text-emerald-700 uppercase tracking-wide">Domisili</p>
+                <p class="mt-2 text-xl font-medium text-gray-900">{{ user?.domisili || 'Not set' }}</p>
+              </div>
+            </div>
+
+            <div v-if="user?.informasi_ipbi" class="bg-emerald-50 p-6 rounded-2xl transition-all duration-300 hover:bg-emerald-100 hover:shadow-lg">
+              <p class="text-sm font-semibold text-emerald-700 uppercase tracking-wide mb-2">Pengalaman di IPBI</p>
+              <p class="text-gray-900 whitespace-pre-line">{{ user.informasi_ipbi }}</p>
             </div>
 
             <!-- Uji Kompetensi Section -->
@@ -94,6 +115,25 @@
                     Nilai sudah diverifikasi oleh pihak IPBI
                   </p>
                 </div>
+                <div v-if="user?.nilai > 0">
+                  <p class="text-sm font-semibold text-emerald-700 uppercase tracking-wide">Kategori</p>
+                  <p class="mt-2 text-lg font-medium" :class="getCategoryClass(user.nilai)">
+                    {{ getCategory(user.nilai) }}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <!-- List Sertifikat Section -->
+            <div v-if="certificates.length > 0" class="pt-6 border-t border-emerald-100">
+              <h2 class="text-xl font-semibold text-emerald-700 mb-4">Sertifikat yang Sudah Di-Submit</h2>
+              <div class="bg-emerald-50 p-6 rounded-2xl">
+                <ul class="space-y-3">
+                  <li v-for="(cert, index) in certificates" :key="index" class="flex items-center space-x-3 p-3 bg-white rounded-lg hover:bg-emerald-100 transition-all duration-300">
+                    <span class="text-emerald-600 text-xl">📜</span>
+                    <span class="text-gray-900 font-medium">{{ cert }}</span>
+                  </li>
+                </ul>
               </div>
             </div>
 
@@ -139,6 +179,50 @@
                   required
                 />
               </div>
+              <div>
+                <label class="block text-sm font-semibold text-emerald-700 uppercase tracking-wide">Nomor HP</label>
+                <input
+                  type="text"
+                  v-model="editForm.NoHp"
+                  class="mt-2 block w-full rounded-lg border border-emerald-200 p-3 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all duration-300"
+                  placeholder="Nomor HP"
+                />
+              </div>
+              <div>
+                <label class="block text-sm font-semibold text-emerald-700 uppercase tracking-wide">Pekerjaan</label>
+                <input
+                  type="text"
+                  v-model="editForm.pekerjaan"
+                  class="mt-2 block w-full rounded-lg border border-emerald-200 p-3 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all duration-300"
+                  placeholder="Pekerjaan"
+                />
+              </div>
+              <div>
+                <label class="block text-sm font-semibold text-emerald-700 uppercase tracking-wide">Tanggal Lahir</label>
+                <input
+                  type="date"
+                  v-model="editForm.tanggal_lahir"
+                  class="mt-2 block w-full rounded-lg border border-emerald-200 p-3 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all duration-300"
+                />
+              </div>
+              <div>
+                <label class="block text-sm font-semibold text-emerald-700 uppercase tracking-wide">Domisili</label>
+                <input
+                  type="text"
+                  v-model="editForm.domisili"
+                  class="mt-2 block w-full rounded-lg border border-emerald-200 p-3 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all duration-300"
+                  placeholder="Domisili"
+                />
+              </div>
+            </div>
+            <div>
+              <label class="block text-sm font-semibold text-emerald-700 uppercase tracking-wide">Pengalaman di IPBI</label>
+              <textarea
+                v-model="editForm.informasi_ipbi"
+                class="mt-2 block w-full rounded-lg border border-emerald-200 p-3 focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-all duration-300"
+                placeholder="Apa pengalaman anda di IPBI?"
+                rows="3"
+              ></textarea>
             </div>
 
             <div class="flex space-x-4">
@@ -254,8 +338,15 @@ const isUploading = ref(false);
 
 const editForm = ref({
   name: '',
-  email: ''
+  email: '',
+  NoHp: '',
+  pekerjaan: '',
+  tanggal_lahir: '',
+  domisili: '',
+  informasi_ipbi: ''
 });
+
+const certificates = ref([]);
 
 onMounted(async () => {
   await loadProfile();
@@ -282,8 +373,16 @@ const loadProfile = async () => {
     
     editForm.value = {
       name: user.value?.name || '',
-      email: user.value?.email || ''
+      email: user.value?.email || '',
+      NoHp: user.value?.NoHp || '',
+      pekerjaan: user.value?.pekerjaan || '',
+      tanggal_lahir: user.value?.tanggal_lahir || '',
+      domisili: user.value?.domisili || '',
+      informasi_ipbi: user.value?.informasi_ipbi || ''
     };
+
+    // Load certificates
+    await loadCertificates();
     
     // Set profile picture URL - PRIORITAS: profile_picture_url > construct dari profile_picture
     if (response.data?.profile_picture_url) {
@@ -316,7 +415,12 @@ const startEditing = () => {
   isEditing.value = true;
   editForm.value = {
     name: user.value?.name || '',
-    email: user.value?.email || ''
+    email: user.value?.email || '',
+    NoHp: user.value?.NoHp || '',
+    pekerjaan: user.value?.pekerjaan || '',
+    tanggal_lahir: user.value?.tanggal_lahir || '',
+    domisili: user.value?.domisili || '',
+    informasi_ipbi: user.value?.informasi_ipbi || ''
   };
 };
 
@@ -496,6 +600,71 @@ const handleImageError = (event) => {
   profilePictureUrl.value = null;
   user.value.profile_picture = null;
   user.value.profile_picture_url = null;
+};
+
+const getCategory = (nilai) => {
+  if (nilai >= 300) {
+    return 'Advanced';
+  } else if (nilai >= 200) {
+    return 'Intermediate';
+  } else {
+    return 'Beginner';
+  }
+};
+
+const getCategoryClass = (nilai) => {
+  if (nilai >= 300) {
+    return 'text-purple-600';
+  } else if (nilai >= 200) {
+    return 'text-blue-600';
+  } else {
+    return 'text-green-600';
+  }
+};
+
+const loadCertificates = async () => {
+  try {
+    // Fetch semua soal untuk cek apakah ada file yang sudah di-submit
+    const soalNumbers = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17];
+    const submittedCertificates = [];
+
+    for (const soalNum of soalNumbers) {
+      try {
+        const response = await axios.get(`/api/soal${soalNum}`, {
+          headers: {
+            Authorization: `Bearer ${authStore.accessToken}`
+          }
+        });
+
+        const data = response.data;
+        if (data) {
+          // Check setiap field yang mungkin berisi file sertifikat
+          const fields = Object.keys(data);
+          fields.forEach(field => {
+            if (data[field] && typeof data[field] === 'string' && data[field].trim() !== '') {
+              // Jika field berisi path/file, anggap sebagai sertifikat
+              if (field.includes('file') || field.includes('sertifikat') || field.includes('certificate') || 
+                  field.includes('foto') || field.includes('photo') || field.includes('dokumen') || 
+                  field.includes('document') || field.includes('bukti') || field.includes('proof')) {
+                const certName = `Soal ${soalNum} - ${field.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}`;
+                if (!submittedCertificates.includes(certName)) {
+                  submittedCertificates.push(certName);
+                }
+              }
+            }
+          });
+        }
+      } catch (error) {
+        // Skip jika soal tidak ada atau error
+        continue;
+      }
+    }
+
+    certificates.value = submittedCertificates;
+  } catch (error) {
+    console.error('❌ Error loading certificates:', error);
+    certificates.value = [];
+  }
 };
 </script>
 
